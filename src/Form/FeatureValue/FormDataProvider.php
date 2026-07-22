@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Form\FeatureValue;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\FeatureValue;
 
 use Db;
 
@@ -55,7 +55,7 @@ class FormDataProvider
 
             $result = $this->database->executeS(
                 'SELECT `url_name`, `meta_title`, `id_lang` ' .
-                'FROM ' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value ' .
+                'FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value ' .
                 'WHERE `id_feature_value` = ' . $featureValueId
             );
 

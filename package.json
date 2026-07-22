@@ -1,5 +1,5 @@
 {
-  "name": "ps_facetedsearch",
+  "name": "gc_facetedsearch",
   "description": "Displays a block allowing multiple filters.",
   "private": true,
   "directories": {
@@ -14,20 +14,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PrestaShop/ps_facetedsearch.git"
+    "url": "git+https://github.com/gurkcity/gc_facetedsearch.git"
   },
   "keywords": [],
-  "author": "PrestaShop",
+  "author": "Onlineshopmodule",
   "license": "AFL-3.0",
   "bugs": {
-    "url": "https://github.com/PrestaShop/ps_facetedsearch/issues"
+    "url": "https://github.com/gurkcity/gc_facetedsearch/issues"
   },
   "babel": {
     "presets": [
       "@babel/preset-env"
     ]
   },
-  "homepage": "https://github.com/PrestaShop/ps_facetedsearch#readme",
+  "homepage": "https://github.com/gurkcity/gc_facetedsearch#readme",
   "devDependencies": {
     "@babel/eslint-parser": "^7.25.8",
     "@babel/cli": "^7.26.4",

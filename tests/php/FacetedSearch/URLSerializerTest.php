@@ -18,11 +18,11 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Tests;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Tests;
 
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
-use PrestaShop\Module\FacetedSearch\URLSerializer;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\URLSerializer;
 use PrestaShop\PrestaShop\Core\Product\Search\Facet;
 use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 

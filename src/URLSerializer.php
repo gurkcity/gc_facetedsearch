@@ -18,9 +18,9 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch;
 
-use PrestaShop\Module\FacetedSearch\Filters\Converter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Converter;
 use PrestaShop\PrestaShop\Core\Product\Search\Facet;
 use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 

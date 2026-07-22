@@ -18,16 +18,16 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Filters;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters;
 
 use Category;
 use Configuration;
 use Context;
 use Db;
 use Manufacturer;
-use PrestaShop\Module\FacetedSearch\Definition\Availability;
-use PrestaShop\Module\FacetedSearch\Filters;
-use PrestaShop\Module\FacetedSearch\URLSerializer;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Definition\Availability;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\URLSerializer;
 use PrestaShop\PrestaShop\Core\Product\Search\Facet;
 use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;

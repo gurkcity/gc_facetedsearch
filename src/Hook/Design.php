@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Hook;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Hook;
 
 class Design extends AbstractHook
 {
@@ -35,6 +35,6 @@ class Design extends AbstractHook
      */
     public function displayLeftColumn(array $params)
     {
-        return $this->module->fetch('module:ps_facetedsearch/ps_facetedsearch.tpl');
+        return $this->module->fetch('module:gc_facetedsearch/gc_facetedsearch.tpl');
     }
 }

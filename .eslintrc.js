@@ -17,7 +17,7 @@ module.exports = {
     'prestashop',
   ],
   globals: {
-    PS_LAYERED_INDEXED: true,
+    GC_LAYERED_INDEXED: true,
     filters: true,
     prestashop: true,
     translations: true,

@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Hook;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Hook;
 
 use Configuration;
 use Tools;
@@ -62,7 +62,7 @@ class Category extends AbstractHook
     {
         // Get all filter templates
         $filterTemplates = $this->database->executeS(
-            'SELECT * FROM ' . _DB_PREFIX_ . 'layered_filter'
+            'SELECT * FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter'
         );
 
         $rebuildNeeded = false;
@@ -77,10 +77,10 @@ class Category extends AbstractHook
             unset($filters['categories'][array_search((int) $idCategory, $filters['categories'])]);
             $rebuildNeeded = true;
             $this->database->execute(
-                'UPDATE `' . _DB_PREFIX_ . 'layered_filter` 
+                'UPDATE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter` 
                 SET `filters` = "' . pSQL(serialize($filters)) . '", 
                 n_categories = ' . (int) count($filters['categories']) . ' 
-                WHERE `id_layered_filter` = ' . (int) $template['id_layered_filter']
+                WHERE `id_gc_facetedsearch_filter` = ' . (int) $template['id_gc_facetedsearch_filter']
             );
         }
 
@@ -102,7 +102,7 @@ class Category extends AbstractHook
     public function addCategoryToDefaultFilter(int $idCategory)
     {
         // Get default template
-        $defaultFilterTemplateId = (int) Configuration::get('PS_LAYERED_DEFAULT_CATEGORY_TEMPLATE');
+        $defaultFilterTemplateId = (int) Configuration::get('GC_LAYERED_DEFAULT_CATEGORY_TEMPLATE');
         if (empty($defaultFilterTemplateId)) {
             return;
         }
@@ -119,10 +119,10 @@ class Category extends AbstractHook
 
         // Update it in database
         $this->database->execute(
-            'UPDATE `' . _DB_PREFIX_ . 'layered_filter` 
+            'UPDATE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter` 
             SET `filters` = "' . pSQL(serialize($filters)) . '", 
             n_categories = ' . (int) count($filters['categories']) . ' 
-            WHERE `id_layered_filter` = ' . $defaultFilterTemplateId
+            WHERE `id_gc_facetedsearch_filter` = ' . $defaultFilterTemplateId
         );
 
         $this->module->buildLayeredCategories();

@@ -21,7 +21,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_3_0_3(Ps_Facetedsearch $module)
+function upgrade_module_3_0_3(GC_FacetedSearch $module)
 {
     // Clear legacy hook names
     $oldHooks = [

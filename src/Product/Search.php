@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Product;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product;
 
 use Category;
 use Configuration;
@@ -26,9 +26,9 @@ use Context;
 use FrontController;
 use Group;
 use Hook;
-use PrestaShop\Module\FacetedSearch\Adapter\AbstractAdapter;
-use PrestaShop\Module\FacetedSearch\Adapter\MySQL as MySQLAdapter;
-use PrestaShop\Module\FacetedSearch\Definition\Availability;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Adapter\AbstractAdapter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Adapter\MySQL as MySQLAdapter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Definition\Availability;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 
 class Search
@@ -366,7 +366,7 @@ class Search
 
             // If we want to display only products from this category AND not it's subcategories,
             // we add this one specific category ID, otherwise, we will add everything using nleft and nright
-            if (Configuration::get('PS_LAYERED_FULL_TREE')) {
+            if (Configuration::get('GC_LAYERED_FULL_TREE')) {
                 $this->getSearchAdapter()->addFilter('nleft', [$category->nleft], '>=');
                 $this->getSearchAdapter()->addFilter('nright', [$category->nright], '<=');
             } else {
@@ -374,7 +374,7 @@ class Search
             }
 
             // If we want to display products, which have this category as their default category
-            if (Configuration::get('PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY')) {
+            if (Configuration::get('GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY')) {
                 $this->addFilter('id_category_default', [$idCategory]);
             }
         }

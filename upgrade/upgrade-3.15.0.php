@@ -21,7 +21,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_3_15_0(Ps_Facetedsearch $module)
+function upgrade_module_3_15_0(GC_FacetedSearch $module)
 {
     // New hooks for migrated attribute page
     $newHooks = [

@@ -21,11 +21,11 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_3_14_0(Ps_Facetedsearch $module)
+function upgrade_module_3_14_0(GC_FacetedSearch $module)
 {
     // Add availabilility to allowed types
     Db::getInstance()->execute(
-        'ALTER TABLE `' . _DB_PREFIX_ . 'layered_category`
+        'ALTER TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_category`
         CHANGE `type` `type` ENUM(\'category\',\'id_feature\',\'id_attribute_group\',\'availability\',\'condition\',\'manufacturer\',\'weight\',\'price\',\'extras\') NOT NULL;');
 
     return true;

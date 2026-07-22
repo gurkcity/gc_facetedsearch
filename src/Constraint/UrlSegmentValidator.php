@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Constraint;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Constraint;
 
 use PrestaShop\PrestaShop\Adapter\Tools;
 use Symfony\Component\Validator\Constraint;

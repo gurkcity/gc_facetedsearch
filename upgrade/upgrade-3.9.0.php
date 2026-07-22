@@ -23,7 +23,7 @@ if (!defined('_PS_VERSION_')) {
 
 function upgrade_module_3_9_0($module)
 {
-    Configuration::updateValue('PS_USE_JQUERY_UI_SLIDER', 1);
+    Configuration::updateValue('GC_USE_JQUERY_UI_SLIDER', 1);
 
     return true;
 }

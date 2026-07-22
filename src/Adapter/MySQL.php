@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Adapter;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Adapter;
 
 use Configuration;
 use Context;
@@ -274,28 +274,28 @@ class MySQL extends AbstractAdapter
                 'aggregateFieldName' => 'quantity',
             ],
             'price_min' => [
-                'tableName' => 'layered_price_index',
+                'tableName' => 'gc_facetedsearch_price_index',
                 'tableAlias' => 'psi',
                 'joinCondition' => '(psi.id_product = p.id_product AND psi.id_shop = ' . $this->getContext()->shop->id . ' AND psi.id_currency = ' .
                 $this->getContext()->currency->id . ' AND psi.id_country = ' . $this->getContext()->country->id . ')',
                 'joinType' => self::INNER_JOIN,
             ],
             'price_max' => [
-                'tableName' => 'layered_price_index',
+                'tableName' => 'gc_facetedsearch_price_index',
                 'tableAlias' => 'psi',
                 'joinCondition' => '(psi.id_product = p.id_product AND psi.id_shop = ' . $this->getContext()->shop->id . ' AND psi.id_currency = ' .
                 $this->getContext()->currency->id . ' AND psi.id_country = ' . $this->getContext()->country->id . ')',
                 'joinType' => self::INNER_JOIN,
             ],
             'range_start' => [
-                'tableName' => 'layered_price_index',
+                'tableName' => 'gc_facetedsearch_price_index',
                 'tableAlias' => 'psi',
                 'joinCondition' => '(psi.id_product = p.id_product AND psi.id_shop = ' . $this->getContext()->shop->id . ' AND psi.id_currency = ' .
                 $this->getContext()->currency->id . ' AND psi.id_country = ' . $this->getContext()->country->id . ')',
                 'joinType' => self::INNER_JOIN,
             ],
             'range_end' => [
-                'tableName' => 'layered_price_index',
+                'tableName' => 'gc_facetedsearch_price_index',
                 'tableAlias' => 'psi',
                 'joinCondition' => '(psi.id_product = p.id_product AND psi.id_shop = ' . $this->getContext()->shop->id . ' AND psi.id_currency = ' .
                 $this->getContext()->currency->id . ' AND psi.id_country = ' . $this->getContext()->country->id . ')',
@@ -430,7 +430,7 @@ class MySQL extends AbstractAdapter
     {
         // allow only if feature is enabled & it is main product list query (caller ensures $orderField is non-empty)
         if ($this->getInitialPopulation() === null
-            || !Configuration::get('PS_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST')
+            || !Configuration::get('GC_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST')
         ) {
             return $orderField;
         }

@@ -26,9 +26,9 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\FacetedSearch\Form\AttributeGroup;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\AttributeGroup;
 
-use PrestaShop\Module\FacetedSearch\Constraint\UrlSegment;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Constraint\UrlSegment;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;

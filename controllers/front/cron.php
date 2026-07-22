@@ -26,7 +26,7 @@
 
 declare(strict_types=1);
 
-class Ps_FacetedSearchCronModuleFrontController extends ModuleFrontController
+class Gc_FacetedSearchCronModuleFrontController extends ModuleFrontController
 {
     public function __construct()
     {
@@ -36,7 +36,7 @@ class Ps_FacetedSearchCronModuleFrontController extends ModuleFrontController
 
     public function postProcess()
     {
-        if (substr(Tools::hash('ps_facetedsearch/index'), 0, 10) != Tools::getValue('token')) {
+        if (substr(Tools::hash('gc_facetedsearch/index'), 0, 10) != Tools::getValue('token')) {
             header('HTTP/1.1 403 Forbidden');
             header('Status: 403 Forbidden');
             $this->ajaxRender('Bad token');
@@ -49,7 +49,7 @@ class Ps_FacetedSearchCronModuleFrontController extends ModuleFrontController
             case 'indexAttributes':
                 Shop::setContext(Shop::CONTEXT_ALL);
 
-                $psFacetedsearch = new Ps_Facetedsearch();
+                $psFacetedsearch = new GC_FacetedSearch();
                 $psFacetedsearch->indexAttributes();
                 $psFacetedsearch->indexFeatures();
                 $psFacetedsearch->indexAttributeGroup();
@@ -57,13 +57,13 @@ class Ps_FacetedSearchCronModuleFrontController extends ModuleFrontController
                 $this->ajaxRender('1');
                 break;
             case 'clearCache':
-                $psFacetedsearch = new Ps_Facetedsearch();
+                $psFacetedsearch = new GC_FacetedSearch();
                 $this->ajaxRender($psFacetedsearch->invalidateLayeredFilterBlockCache());
                 break;
             case 'indexPrices':
                 Shop::setContext(Shop::CONTEXT_ALL);
 
-                $module = new Ps_Facetedsearch();
+                $module = new GC_FacetedSearch();
                 if (Tools::getValue('full')) {
                     $this->ajaxRender($module->fullPricesIndexProcess((int) Tools::getValue('cursor'), (bool) Tools::getValue('ajax'), true));
                 } else {

@@ -21,7 +21,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_3_3_0(Ps_Facetedsearch $module)
+function upgrade_module_3_3_0(GC_FacetedSearch $module)
 {
     // These methods have no return value
     // If something failed an exception will be raised and

@@ -18,11 +18,11 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Hook;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Hook;
 
 use Language;
-use PrestaShop\Module\FacetedSearch\Form\Attribute\FormDataProvider;
-use PrestaShop\Module\FacetedSearch\Form\Attribute\FormModifier;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\Attribute\FormDataProvider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\Attribute\FormModifier;
 use Tools;
 
 class Attribute extends AbstractHook
@@ -131,7 +131,7 @@ class Attribute extends AbstractHook
         }
 
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value
             WHERE `id_attribute` = ' . (int) $params['id_attribute']
         );
         $this->module->invalidateLayeredFilterBlockCache();
@@ -158,7 +158,7 @@ class Attribute extends AbstractHook
 
         if ($result = $this->database->executeS(
             'SELECT `url_name`, `meta_title`, `id_lang`
-            FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value
+            FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value
             WHERE `id_attribute` = ' . (int) $params['id_attribute']
         )) {
             foreach ($result as $data) {
@@ -189,7 +189,7 @@ class Attribute extends AbstractHook
 
         $attributeId = (int) $formData['id_attribute'];
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value
             WHERE `id_attribute` = ' . $attributeId
         );
 
@@ -202,7 +202,7 @@ class Attribute extends AbstractHook
             }
 
             $this->database->execute(
-                'INSERT INTO ' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value
+                'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value
                 (`id_attribute`, `id_lang`, `url_name`, `meta_title`)
                 VALUES (
                 ' . $attributeId . ', ' . $langId . ',

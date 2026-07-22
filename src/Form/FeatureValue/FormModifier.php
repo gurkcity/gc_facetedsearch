@@ -18,10 +18,10 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Form\FeatureValue;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\FeatureValue;
 
 use Context;
-use PrestaShop\Module\FacetedSearch\Constraint\UrlSegment;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Constraint\UrlSegment;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use PrestaShopBundle\Translation\DataCollectorTranslator;
 use PrestaShopBundle\Translation\TranslatorComponent;

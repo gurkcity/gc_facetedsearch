@@ -18,26 +18,26 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Tests\Product;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Tests\Product;
 
 use Configuration;
 use Context;
 use Db;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
-use PrestaShop\Module\FacetedSearch\Filters\Converter;
-use PrestaShop\Module\FacetedSearch\Filters\DataAccessor;
-use PrestaShop\Module\FacetedSearch\Filters\Provider;
-use PrestaShop\Module\FacetedSearch\Product\SearchFactory;
-use PrestaShop\Module\FacetedSearch\Product\SearchProvider;
-use PrestaShop\Module\FacetedSearch\URLSerializer;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Converter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\DataAccessor;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Provider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product\SearchFactory;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product\SearchProvider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\URLSerializer;
 use PrestaShop\PrestaShop\Core\Product\Search\Facet;
 use PrestaShop\PrestaShop\Core\Product\Search\FacetCollection;
 use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchContext;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
-use Ps_Facetedsearch;
+use GC_FacetedSearch;
 use Smarty;
 use Tools;
 
@@ -69,7 +69,7 @@ class SearchProviderTest extends MockeryTestCase
     private $facetCollection;
 
     /**
-     * @var Ps_Facetedsearch
+     * @var GC_FacetedSearch
      */
     private $module;
 
@@ -129,7 +129,7 @@ class SearchProviderTest extends MockeryTestCase
         $this->serializer = Mockery::mock(URLSerializer::class);
         $this->facetCollection = Mockery::mock(FacetCollection::class);
 
-        $this->module = Mockery::mock(Ps_Facetedsearch::class);
+        $this->module = Mockery::mock(GC_FacetedSearch::class);
         $this->module->shouldReceive('getDatabase')
             ->andReturn($this->database);
         $this->module->shouldReceive('getContext')
@@ -142,7 +142,7 @@ class SearchProviderTest extends MockeryTestCase
         $mock->shouldReceive('get')
             ->andReturnUsing(function ($arg) {
                 $valueMap = [
-                    'PS_LAYERED_SHOW_QTIES' => true,
+                    'GC_LAYERED_SHOW_QTIES' => true,
                 ];
 
                 return $valueMap[$arg];
@@ -239,7 +239,7 @@ class SearchProviderTest extends MockeryTestCase
         $this->module->shouldReceive('fetch')
             ->once()
             ->with(
-                'module:ps_facetedsearch/views/templates/front/catalog/facets.tpl'
+                'module:gc_facetedsearch/views/templates/front/catalog/facets.tpl'
             )
             ->andReturn('');
 
@@ -431,7 +431,7 @@ class SearchProviderTest extends MockeryTestCase
         $this->module->shouldReceive('fetch')
             ->once()
             ->with(
-                'module:ps_facetedsearch/views/templates/front/catalog/facets.tpl'
+                'module:gc_facetedsearch/views/templates/front/catalog/facets.tpl'
             )
             ->andReturn('');
 

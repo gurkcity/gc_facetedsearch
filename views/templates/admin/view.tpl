@@ -23,7 +23,7 @@
   <h3><i class="icon-cogs"></i> {l s='New filters template' d='Modules.Facetedsearch.Admin'}</h3>
 
   <form action="{$current_url}" method="post" class="form-horizontal" onsubmit="return checkForm();">
-    <input type="hidden" name="id_layered_filter" id="id_layered_filter" value="{$id_layered_filter}" />
+    <input type="hidden" name="id_gc_facetedsearch_filter" id="id_gc_facetedsearch_filter" value="{$id_gc_facetedsearch_filter}" />
 
     {include file='./_partials/header.tpl'}
     {include file='./_partials/controllers.tpl'}
@@ -96,7 +96,7 @@
                   <li class="filter_list_item row" draggable="true">
                     <div class="col-lg-2">
                       <label class="switch-light prestashop-switch fixed-width-lg">
-                        <input name="layered_selection_ag_{(int)$attribute_group['id_attribute_group']}" id="layered_selection_ag_{(int)$attribute_group['id_attribute_group']}" type="checkbox" />
+                        <input name="gc_facetedsearch_selection_ag_{(int)$attribute_group['id_attribute_group']}" id="gc_facetedsearch_selection_ag_{(int)$attribute_group['id_attribute_group']}" type="checkbox" />
                         <span>
                           <span>{l s='Yes' d='Admin.Global'}</span>
                           <span>{l s='No' d='Admin.Global'}</span>
@@ -133,13 +133,13 @@
                     <div class="col-lg-3 pull-right">
                       <label class="control-label col-lg-6">{l s='Filter result limit:' d='Modules.Facetedsearch.Admin'}</label>
                       <div class="col-lg-6">
-                        {call get_limit_select element="layered_selection_ag_{(int)$attribute_group['id_attribute_group']}"}
+                        {call get_limit_select element="gc_facetedsearch_selection_ag_{(int)$attribute_group['id_attribute_group']}"}
                       </div>
                     </div>
                     <div class="col-lg-3 pull-right">
                       <label class="control-label col-lg-6">{l s='Filter style:' d='Modules.Facetedsearch.Admin'}</label>
                       <div class="col-lg-6">
-                        <select name="layered_selection_ag_{(int)$attribute_group['id_attribute_group']}_filter_type">
+                        <select name="gc_facetedsearch_selection_ag_{(int)$attribute_group['id_attribute_group']}_filter_type">
                           <option value="0">{l s='Checkbox' d='Modules.Facetedsearch.Admin'}</option>
                           <option value="1">{l s='Radio button' d='Modules.Facetedsearch.Admin'}</option>
                           <option value="2">{l s='Drop-down list' d='Modules.Facetedsearch.Admin'}</option>
@@ -155,7 +155,7 @@
                   <li class="filter_list_item row" draggable="true">
                     <div class="col-lg-2">
                       <label class="switch-light prestashop-switch fixed-width-lg">
-                        <input name="layered_selection_feat_{(int)$feature['id_feature']}" id="layered_selection_feat_{(int)$feature['id_feature']}" type="checkbox" />
+                        <input name="gc_facetedsearch_selection_feat_{(int)$feature['id_feature']}" id="gc_facetedsearch_selection_feat_{(int)$feature['id_feature']}" type="checkbox" />
                         <span>
                           <span>{l s='Yes' d='Admin.Global'}</span>
                           <span>{l s='No' d='Admin.Global'}</span>
@@ -189,13 +189,13 @@
                     <div class="col-lg-3 pull-right">
                       <label class="control-label col-lg-6">{l s='Filter result limit:' d='Modules.Facetedsearch.Admin'}</label>
                       <div class="col-lg-6">
-                        {call get_limit_select element="layered_selection_feat_{(int)$feature['id_feature']}"}
+                        {call get_limit_select element="gc_facetedsearch_selection_feat_{(int)$feature['id_feature']}"}
                       </div>
                     </div>
                     <div class="col-lg-3 pull-right">
                       <label class="control-label col-lg-6">{l s='Filter style:' d='Modules.Facetedsearch.Admin'}</label>
                       <div class="col-lg-6">
-                        <select name="layered_selection_feat_{(int)$feature['id_feature']}_filter_type">
+                        <select name="gc_facetedsearch_selection_feat_{(int)$feature['id_feature']}_filter_type">
                           <option value="0">{l s='Checkbox' d='Modules.Facetedsearch.Admin'}</option>
                           <option value="1">{l s='Radio button' d='Modules.Facetedsearch.Admin'}</option>
                           <option value="2">{l s='Drop-down list' d='Modules.Facetedsearch.Admin'}</option>

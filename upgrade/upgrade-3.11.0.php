@@ -25,7 +25,7 @@ function upgrade_module_3_11_0($module)
 {
     // Get all filter templates
     $filterTemplates = Db::getInstance()->executeS(
-        'SELECT * FROM ' . _DB_PREFIX_ . 'layered_filter'
+        'SELECT * FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter'
     );
 
     // Add controller info to each of the configuration
@@ -34,16 +34,16 @@ function upgrade_module_3_11_0($module)
             $filters = Tools::unSerialize($template['filters']);
             $filters['controllers'] = ['category'];
             Db::getInstance()->execute(
-                'UPDATE `' . _DB_PREFIX_ . 'layered_filter` 
+                'UPDATE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter` 
                 SET `filters` = "' . pSQL(serialize($filters)) . '"
-                WHERE `id_layered_filter` = ' . (int) $template['id_layered_filter']
+                WHERE `id_gc_facetedsearch_filter` = ' . (int) $template['id_gc_facetedsearch_filter']
             );
         }
     }
 
     // Add new column to generated filters and fill it with a category controller
-    Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'layered_category` ADD `controller` VARCHAR(64) NOT NULL AFTER `id_shop`;');
-    Db::getInstance()->execute('UPDATE `' . _DB_PREFIX_ . "layered_category` SET `controller`= 'category';");
+    Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_category` ADD `controller` VARCHAR(64) NOT NULL AFTER `id_shop`;');
+    Db::getInstance()->execute('UPDATE `' . _DB_PREFIX_ . "gc_facetedsearch_category` SET `controller`= 'category';");
 
     // Flush block cache - the cache key changed a bit with this version anyway
     $module->invalidateLayeredFilterBlockCache();

@@ -23,7 +23,7 @@ if (!defined('_PS_VERSION_')) {
 
 function upgrade_module_3_6_0($module)
 {
-    Configuration::updateValue('PS_LAYERED_CACHE_ENABLED', 1);
+    Configuration::updateValue('GC_LAYERED_CACHE_ENABLED', 1);
 
     return true;
 }

@@ -18,11 +18,11 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Hook;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Hook;
 
 use Language;
-use PrestaShop\Module\FacetedSearch\Form\AttributeGroup\FormDataProvider;
-use PrestaShop\Module\FacetedSearch\Form\AttributeGroup\FormModifier;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\AttributeGroup\FormDataProvider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\AttributeGroup\FormModifier;
 use Tools;
 
 class AttributeGroup extends AbstractHook
@@ -98,13 +98,13 @@ class AttributeGroup extends AbstractHook
      */
     public function actionAttributeGroupSave(array $params)
     {
-        if (empty($params['id_attribute_group']) || Tools::getValue('layered_indexable') === false) {
+        if (empty($params['id_attribute_group']) || Tools::getValue('gc_facetedsearch_indexable') === false) {
             return;
         }
 
         $formData = [
             'id_attribute_group' => (int) $params['id_attribute_group'],
-            'is_indexable' => (int) Tools::getValue('layered_indexable'),
+            'is_indexable' => (int) Tools::getValue('gc_facetedsearch_indexable'),
         ];
 
         foreach (Language::getLanguages(false) as $language) {
@@ -133,11 +133,11 @@ class AttributeGroup extends AbstractHook
         }
 
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_group
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group
             WHERE `id_attribute_group` = ' . (int) $params['id_attribute_group']
         );
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value
             WHERE `id_attribute_group` = ' . (int) $params['id_attribute_group']
         );
         $this->module->invalidateLayeredFilterBlockCache();
@@ -165,12 +165,12 @@ class AttributeGroup extends AbstractHook
         $values = [];
         $isIndexable = $this->database->getValue(
             'SELECT `indexable`
-            FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_group
+            FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group
             WHERE `id_attribute_group` = ' . (int) $params['id_attribute_group']
         );
 
         if ($result = $this->database->executeS(
-            'SELECT `url_name`, `meta_title`, `id_lang` FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value
+            'SELECT `url_name`, `meta_title`, `id_lang` FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value
             WHERE `id_attribute_group` = ' . (int) $params['id_attribute_group']
         )) {
             foreach ($result as $data) {
@@ -204,16 +204,16 @@ class AttributeGroup extends AbstractHook
 
         // First clean all existing data
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_group
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group
             WHERE `id_attribute_group` = ' . $attributeGroupId
         );
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value
             WHERE `id_attribute_group` = ' . $attributeGroupId
         );
 
         $this->database->execute(
-            'INSERT INTO ' . _DB_PREFIX_ . 'layered_indexable_attribute_group (`id_attribute_group`, `indexable`)
+            'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group (`id_attribute_group`, `indexable`)
 VALUES (' . $attributeGroupId . ', ' . (int) $formData['is_indexable'] . ')'
         );
 
@@ -226,7 +226,7 @@ VALUES (' . $attributeGroupId . ', ' . (int) $formData['is_indexable'] . ')'
             }
 
             $this->database->execute(
-                'INSERT INTO ' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value
+                'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value
                 (`id_attribute_group`, `id_lang`, `url_name`, `meta_title`)
                 VALUES (
                 ' . $attributeGroupId . ', ' . $langId . ',

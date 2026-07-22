@@ -23,20 +23,20 @@
  * htaccess file that still allows it to work despite the security policy from the core forbidding this kind
  * of file to be executed.
  */
-@trigger_error('This endpoint has been deprecated and will be removed in the next major version for this module, you should rely on Ps_FacetedSearchCronModuleFrontController instead.', E_USER_DEPRECATED);
+@trigger_error('This endpoint has been deprecated and will be removed in the next major version for this module, you should rely on Gc_FacetedSearchCronModuleFrontController instead.', E_USER_DEPRECATED);
 
 require_once __DIR__ . '/../../config/config.inc.php';
-require_once __DIR__ . '/ps_facetedsearch.php';
+require_once __DIR__ . '/gc_facetedsearch.php';
 
-if (substr(Tools::hash('ps_facetedsearch/index'), 0, 10) != Tools::getValue('token') || !Module::isInstalled('ps_facetedsearch')) {
+if (substr(Tools::hash('gc_facetedsearch/index'), 0, 10) != Tools::getValue('token') || !Module::isInstalled('gc_facetedsearch')) {
     exit('Bad token');
 }
 
 Shop::setContext(Shop::CONTEXT_ALL);
 
-$psFacetedsearch = new Ps_Facetedsearch();
-$psFacetedsearch->indexAttributes();
-$psFacetedsearch->indexFeatures();
-$psFacetedsearch->indexAttributeGroup();
-
-echo 1;
+$module = new GC_FacetedSearch();
+if (Tools::getValue('full')) {
+    echo $module->fullPricesIndexProcess((int) Tools::getValue('cursor'), (bool) Tools::getValue('ajax'), true);
+} else {
+    echo $module->pricesIndexProcess((int) Tools::getValue('cursor'), (bool) Tools::getValue('ajax'));
+}

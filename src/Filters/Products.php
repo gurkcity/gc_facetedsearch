@@ -18,11 +18,11 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Filters;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters;
 
 use Configuration;
-use PrestaShop\Module\FacetedSearch\Adapter\AbstractAdapter;
-use PrestaShop\Module\FacetedSearch\Product\Search;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Adapter\AbstractAdapter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product\Search;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use Product;
 use Validate;
@@ -34,14 +34,14 @@ class Products
      *
      * @var bool
      */
-    private $psLayeredFilterPriceUsetax;
+    private $gcLayeredFilterPriceUsetax;
 
     /**
      * Use price rounding
      *
      * @var bool
      */
-    private $psLayeredFilterPriceRounding;
+    private $gcLayeredFilterPriceRounding;
 
     /**
      * @var AbstractAdapter
@@ -124,19 +124,19 @@ class Products
         $priceFilter['min'] = (float) ($selectedFilters['price'][0]);
         $priceFilter['max'] = (float) ($selectedFilters['price'][1]);
 
-        if ($this->psLayeredFilterPriceUsetax === null) {
-            $this->psLayeredFilterPriceUsetax = (bool) Configuration::get('PS_LAYERED_FILTER_PRICE_USETAX');
+        if ($this->gcLayeredFilterPriceUsetax === null) {
+            $this->gcLayeredFilterPriceUsetax = (bool) Configuration::get('GC_LAYERED_FILTER_PRICE_USETAX');
         }
 
-        if ($this->psLayeredFilterPriceRounding === null) {
-            $this->psLayeredFilterPriceRounding = (bool) Configuration::get('PS_LAYERED_FILTER_PRICE_ROUNDING');
+        if ($this->gcLayeredFilterPriceRounding === null) {
+            $this->gcLayeredFilterPriceRounding = (bool) Configuration::get('GC_LAYERED_FILTER_PRICE_ROUNDING');
         }
 
-        if ($this->psLayeredFilterPriceUsetax || $this->psLayeredFilterPriceRounding) {
+        if ($this->gcLayeredFilterPriceUsetax || $this->gcLayeredFilterPriceRounding) {
             $this->filterPrice(
                 $matchingProductList,
-                $this->psLayeredFilterPriceUsetax,
-                $this->psLayeredFilterPriceRounding,
+                $this->gcLayeredFilterPriceUsetax,
+                $this->gcLayeredFilterPriceRounding,
                 $priceFilter
             );
         }
@@ -146,14 +146,14 @@ class Products
      * Remove products from the product list in case of price postFiltering
      *
      * @param array $matchingProductList
-     * @param bool $psLayeredFilterPriceUsetax
-     * @param bool $psLayeredFilterPriceRounding
+     * @param bool $gcLayeredFilterPriceUsetax
+     * @param bool $gcLayeredFilterPriceRounding
      * @param array $priceFilter
      */
     private function filterPrice(
         &$matchingProductList,
-        $psLayeredFilterPriceUsetax,
-        $psLayeredFilterPriceRounding,
+        $gcLayeredFilterPriceUsetax,
+        $gcLayeredFilterPriceRounding,
         $priceFilter
     ) {
         /* for this case, price could be out of range, so we need to compute the real price */
@@ -161,8 +161,8 @@ class Products
             if (($product['price_min'] < (int) $priceFilter['min'] && $product['price_max'] > (int) $priceFilter['min'])
                 || ($product['price_max'] > (int) $priceFilter['max'] && $product['price_min'] < (int) $priceFilter['max'])
             ) {
-                $price = Product::getPriceStatic($product['id_product'], $psLayeredFilterPriceUsetax);
-                if ($psLayeredFilterPriceRounding) {
+                $price = Product::getPriceStatic($product['id_product'], $gcLayeredFilterPriceUsetax);
+                if ($gcLayeredFilterPriceRounding) {
                     $price = (int) $price;
                 }
 

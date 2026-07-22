@@ -18,11 +18,11 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Hook;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Hook;
 
 use Context;
 use Db;
-use Ps_Facetedsearch;
+use GC_FacetedSearch;
 
 abstract class AbstractHook
 {
@@ -34,7 +34,7 @@ abstract class AbstractHook
     protected $context;
 
     /**
-     * @var Ps_Facetedsearch
+     * @var GC_FacetedSearch
      */
     protected $module;
 
@@ -43,7 +43,7 @@ abstract class AbstractHook
      */
     protected $database;
 
-    public function __construct(Ps_Facetedsearch $module)
+    public function __construct(GC_FacetedSearch $module)
     {
         $this->module = $module;
         $this->context = $module->getContext();

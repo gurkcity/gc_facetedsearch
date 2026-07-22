@@ -26,7 +26,7 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\FacetedSearch\Form\AttributeGroup;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\AttributeGroup;
 
 use Db;
 use PrestaShopDatabaseException;
@@ -65,14 +65,14 @@ class FormDataProvider
             // returns false if request failed.
             $queryIndexable = $this->database->getValue(
                 'SELECT `indexable` ' .
-                'FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_group ' .
+                'FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group ' .
                 'WHERE `id_attribute_group` = ' . $attributeGroupId
             );
 
             $isIndexable = (bool) $queryIndexable;
             $result = $this->database->executeS(
                 'SELECT `url_name`, `meta_title`, `id_lang` ' .
-                'FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value ' .
+                'FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value ' .
                 'WHERE `id_attribute_group` = ' . $attributeGroupId
             );
 

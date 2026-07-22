@@ -19,7 +19,7 @@
 <div class="form-group">
   <label class="control-label col-lg-3">{l s='Template name:' d='Modules.Facetedsearch.Admin'}</label>
   <div class="col-lg-9">
-    <input type="text" id="layered_tpl_name" name="layered_tpl_name" maxlength="64" value="{$template_name}" />
+    <input type="text" id="gc_facetedsearch_tpl_name" name="gc_facetedsearch_tpl_name" maxlength="64" value="{$template_name}" />
     <p class="help-block">{l s='Only as a reminder' d='Modules.Facetedsearch.Admin'}</p>
   </div>
 </div>

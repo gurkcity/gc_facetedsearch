@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Tests\Filters;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Tests\Filters;
 
 use Combination;
 use Configuration;
@@ -28,11 +28,11 @@ use Group;
 use Manufacturer;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
-use PrestaShop\Module\FacetedSearch\Adapter\MySQL;
-use PrestaShop\Module\FacetedSearch\Definition\Availability;
-use PrestaShop\Module\FacetedSearch\Filters\Block;
-use PrestaShop\Module\FacetedSearch\Filters\DataAccessor;
-use PrestaShop\Module\FacetedSearch\Filters\Provider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Adapter\MySQL;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Definition\Availability;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Block;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\DataAccessor;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Provider;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShopBundle\Translation\TranslatorComponent;
@@ -66,7 +66,7 @@ class BlockTest extends MockeryTestCase
                     'PS_STOCK_MANAGEMENT' => '1',
                     'PS_ORDER_OUT_OF_STOCK' => '1',
                     'PS_UNIDENTIFIED_GROUP' => '1',
-                    'PS_LAYERED_FILTER_CATEGORY_DEPTH' => 3,
+                    'GC_LAYERED_FILTER_CATEGORY_DEPTH' => 3,
                 ];
 
                 return $valueMap[$arg];
@@ -731,7 +731,7 @@ class BlockTest extends MockeryTestCase
         ];
         $this->dbMock->shouldReceive('executeS')
             ->with(
-                'SELECT DISTINCT a.`id_attribute`, a.`color`, al.`name`, agl.`id_attribute_group`, IF(lialv.`url_name` IS NULL OR lialv.`url_name` = "", NULL, lialv.`url_name`) AS url_name, IF(lialv.`meta_title` IS NULL OR lialv.`meta_title` = "", NULL, lialv.`meta_title`) AS meta_title FROM `ps_attribute_group` ag INNER JOIN `ps_attribute_group_lang` agl ON (ag.`id_attribute_group` = agl.`id_attribute_group` AND agl.`id_lang` = 2) INNER JOIN `ps_attribute` a ON a.`id_attribute_group` = ag.`id_attribute_group` INNER JOIN `ps_attribute_lang` al ON (a.`id_attribute` = al.`id_attribute` AND al.`id_lang` = 2)INNER JOIN ps_attribute_group_shop attribute_group_shop ON (attribute_group_shop.id_attribute_group = ag.id_attribute_group AND attribute_group_shop.id_shop = 1) INNER JOIN ps_attribute_shop attribute_shop ON (attribute_shop.id_attribute = a.id_attribute AND attribute_shop.id_shop = 1) LEFT JOIN `ps_layered_indexable_attribute_lang_value` lialv ON (a.`id_attribute` = lialv.`id_attribute` AND lialv.`id_lang` = 2) WHERE ag.id_attribute_group = 1 ORDER BY agl.`name` ASC, a.`position` ASC'
+                'SELECT DISTINCT a.`id_attribute`, a.`color`, al.`name`, agl.`id_attribute_group`, IF(lialv.`url_name` IS NULL OR lialv.`url_name` = "", NULL, lialv.`url_name`) AS url_name, IF(lialv.`meta_title` IS NULL OR lialv.`meta_title` = "", NULL, lialv.`meta_title`) AS meta_title FROM `ps_attribute_group` ag INNER JOIN `ps_attribute_group_lang` agl ON (ag.`id_attribute_group` = agl.`id_attribute_group` AND agl.`id_lang` = 2) INNER JOIN `ps_attribute` a ON a.`id_attribute_group` = ag.`id_attribute_group` INNER JOIN `ps_attribute_lang` al ON (a.`id_attribute` = al.`id_attribute` AND al.`id_lang` = 2)INNER JOIN ps_attribute_group_shop attribute_group_shop ON (attribute_group_shop.id_attribute_group = ag.id_attribute_group AND attribute_group_shop.id_shop = 1) INNER JOIN ps_attribute_shop attribute_shop ON (attribute_shop.id_attribute = a.id_attribute AND attribute_shop.id_shop = 1) LEFT JOIN `ps_gc_facetedsearch_indexable_attribute_lang_value` lialv ON (a.`id_attribute` = lialv.`id_attribute` AND lialv.`id_lang` = 2) WHERE ag.id_attribute_group = 1 ORDER BY agl.`name` ASC, a.`position` ASC'
             )
             ->andReturn($attributes);
         $adapterInitialMock = Mockery::mock(MySQL::class)->makePartial();
@@ -763,11 +763,11 @@ class BlockTest extends MockeryTestCase
             ->andReturn($adapterInitialMock);
 
         $this->dbMock->shouldReceive('getRow')
-            ->with('SELECT url_name, meta_title FROM ps_layered_indexable_attribute_group_lang_value WHERE id_attribute_group=2 AND id_lang=2')
+            ->with('SELECT url_name, meta_title FROM ps_gc_facetedsearch_indexable_attribute_group_lang_value WHERE id_attribute_group=2 AND id_lang=2')
             ->andReturn([]);
 
         $this->dbMock->shouldReceive('getRow')
-            ->with('SELECT url_name, meta_title FROM ps_layered_indexable_attribute_lang_value WHERE id_attribute=2 AND id_lang=2')
+            ->with('SELECT url_name, meta_title FROM ps_gc_facetedsearch_indexable_attribute_lang_value WHERE id_attribute=2 AND id_lang=2')
             ->andReturn([]);
 
         $this->assertEquals(
@@ -1082,9 +1082,9 @@ class BlockTest extends MockeryTestCase
                     'ON (attribute_group_shop.id_attribute_group = ag.id_attribute_group AND attribute_group_shop.id_shop = 1) ' .
                     'LEFT JOIN `ps_attribute_group_lang` agl ' .
                     'ON (ag.`id_attribute_group` = agl.`id_attribute_group` AND agl.`id_lang` = 2) ' .
-                    'LEFT JOIN `ps_layered_indexable_attribute_group` liag ' .
+                    'LEFT JOIN `ps_gc_facetedsearch_indexable_attribute_group` liag ' .
                     'ON (ag.`id_attribute_group` = liag.`id_attribute_group`) ' .
-                    'LEFT JOIN `ps_layered_indexable_attribute_group_lang_value` AS liaglv ' .
+                    'LEFT JOIN `ps_gc_facetedsearch_indexable_attribute_group_lang_value` AS liaglv ' .
                     'ON (ag.`id_attribute_group` = liaglv.`id_attribute_group` AND agl.`id_lang` = 2) ' .
                     'GROUP BY ag.id_attribute_group ORDER BY ag.`position` ASC'
                 )
@@ -1114,9 +1114,9 @@ class BlockTest extends MockeryTestCase
                 'INNER JOIN ps_feature_shop feature_shop ON ' .
                 '(feature_shop.id_feature = f.id_feature AND feature_shop.id_shop = 1) ' .
                 'LEFT JOIN `ps_feature_lang` fl ON (f.`id_feature` = fl.`id_feature` AND fl.`id_lang` = 2) ' .
-                'LEFT JOIN `ps_layered_indexable_feature` lif ' .
+                'LEFT JOIN `ps_gc_facetedsearch_indexable_feature` lif ' .
                 'ON (f.`id_feature` = lif.`id_feature`) ' .
-                'LEFT JOIN `ps_layered_indexable_feature_lang_value` liflv ' .
+                'LEFT JOIN `ps_gc_facetedsearch_indexable_feature_lang_value` liflv ' .
                 'ON (f.`id_feature` = liflv.`id_feature` AND liflv.`id_lang` = 2) ' .
                 'ORDER BY f.`position` ASC'
             )
@@ -1135,7 +1135,7 @@ class BlockTest extends MockeryTestCase
                 'FROM `ps_feature_value` v ' .
                 'LEFT JOIN `ps_feature_value_lang` vl ' .
                 'ON (v.`id_feature_value` = vl.`id_feature_value` AND vl.`id_lang` = 2) ' .
-                'LEFT JOIN `ps_layered_indexable_feature_value_lang_value` lifvlv ' .
+                'LEFT JOIN `ps_gc_facetedsearch_indexable_feature_value_lang_value` lifvlv ' .
                 'ON (v.`id_feature_value` = lifvlv.`id_feature_value` AND lifvlv.`id_lang` = 2) ' .
                 'WHERE v.`id_feature` = ' . (int) $idFeature . ' ' .
                 'ORDER BY vl.`value` ASC'
@@ -1181,7 +1181,7 @@ class BlockTest extends MockeryTestCase
     {
         $this->dbMock->shouldReceive('executeS')
             ->once()
-            ->with('SELECT type, id_value, filter_show_limit, filter_type FROM ps_layered_category
+            ->with('SELECT type, id_value, filter_show_limit, filter_type FROM ps_gc_facetedsearch_category
             WHERE controller = \'category\'
             AND id_category = 12
             AND id_shop = 1

@@ -26,7 +26,7 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\FacetedSearch\Form\Attribute;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\Attribute;
 
 use Db;
 use PrestaShopDatabaseException;
@@ -62,7 +62,7 @@ class FormDataProvider
             $attributeId = (int) $params['id'];
             $result = $this->database->executeS(
                 'SELECT `url_name`, `meta_title`, `id_lang` ' .
-                'FROM ' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value ' .
+                'FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value ' .
                 'WHERE `id_attribute` = ' . $attributeId
             );
 

@@ -18,10 +18,10 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Form\Feature;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\Feature;
 
 use Context;
-use PrestaShop\Module\FacetedSearch\Constraint\UrlSegment;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Constraint\UrlSegment;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use PrestaShopBundle\Translation\DataCollectorTranslator;
@@ -99,7 +99,7 @@ class FormModifier
                 ]
             )
             ->add(
-                'layered_indexable',
+                'gc_facetedsearch_indexable',
                 SwitchType::class,
                 [
                     'required' => false,

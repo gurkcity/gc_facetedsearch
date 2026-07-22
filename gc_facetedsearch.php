@@ -26,16 +26,21 @@ if (file_exists($autoloadPath)) {
     require_once $autoloadPath;
 }
 
-use PrestaShop\Module\FacetedSearch\Filters\Converter;
-use PrestaShop\Module\FacetedSearch\HookDispatcher;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Converter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\HookDispatcher;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
-class Ps_Facetedsearch extends Module implements WidgetInterface
+class GC_FacetedSearch extends Module implements WidgetInterface
 {
     /**
      * @var string Name of the module running on PS 1.6.x. Used for data migration.
      */
     const PS_16_EQUIVALENT_MODULE = 'blocklayered';
+
+    /**
+     * @var string Official PrestaShop faceted search module to migrate from.
+     */
+    const PS_FACETEDSEARCH_MODULE = 'ps_facetedsearch';
 
     /**
      * Lock indexation if too many products
@@ -80,7 +85,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
     /**
      * @var int
      */
-    private $psLayeredFullTree;
+    private $gcLayeredFullTree;
 
     /**
      * @var Db
@@ -94,10 +99,10 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
     public function __construct()
     {
-        $this->name = 'ps_facetedsearch';
+        $this->name = 'gc_facetedsearch';
         $this->tab = 'front_office_features';
         $this->version = '5.0.0';
-        $this->author = 'PrestaShop';
+        $this->author = 'Onlineshopmodule';
         $this->need_instance = 0;
         $this->bootstrap = true;
         $this->ajax = (bool) Tools::getValue('ajax');
@@ -106,7 +111,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
         $this->displayName = $this->trans('Faceted search', [], 'Modules.Facetedsearch.Admin');
         $this->description = $this->trans('Filter your catalog to help visitors picture the category tree and browse your store easily.', [], 'Modules.Facetedsearch.Admin');
-        $this->psLayeredFullTree = (int) Configuration::get('PS_LAYERED_FULL_TREE');
+        $this->gcLayeredFullTree = (int) Configuration::get('GC_LAYERED_FULL_TREE');
         $this->ps_versions_compliancy = ['min' => '8.2.0', 'max' => _PS_VERSION_];
 
         $this->hookDispatcher = new HookDispatcher($this);
@@ -152,27 +157,27 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
     protected function getDefaultFilters()
     {
         return [
-            'layered_selection_subcategories' => [
+            'gc_facetedsearch_selection_subcategories' => [
                 'label' => 'Sub-categories filter',
             ],
-            'layered_selection_stock' => [
+            'gc_facetedsearch_selection_stock' => [
                 'label' => 'Product stock filter',
             ],
-            'layered_selection_condition' => [
+            'gc_facetedsearch_selection_condition' => [
                 'label' => 'Product condition filter',
             ],
-            'layered_selection_manufacturer' => [
+            'gc_facetedsearch_selection_manufacturer' => [
                 'label' => 'Product brand filter',
             ],
-            'layered_selection_weight_slider' => [
+            'gc_facetedsearch_selection_weight_slider' => [
                 'label' => 'Product weight filter (slider)',
                 'slider' => true,
             ],
-            'layered_selection_price_slider' => [
+            'gc_facetedsearch_selection_price_slider' => [
                 'label' => 'Product price filter (slider)',
                 'slider' => true,
             ],
-            'layered_selection_extras' => [
+            'gc_facetedsearch_selection_extras' => [
                 'label' => 'Product extras filter',
             ],
         ];
@@ -190,28 +195,39 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
             return false;
         }
 
-        if ($this->uninstallPrestaShop16Module()) {
+        if ($this->migrateFromPsFacetedSearch()) {
+            // Settings, filter templates and indexable data already transferred.
+            // Rebuild price/attribute indexes (medium migration scope).
+            $this->rebuildPriceIndexTable();
+            $this->installProductAttributeTable();
+
+            $productsCount = $this->getDatabase()->getValue('SELECT COUNT(*) FROM `' . _DB_PREFIX_ . 'product`');
+            if ($productsCount < static::LOCK_TOO_MANY_PRODUCTS) {
+                $this->fullPricesIndexProcess();
+                $this->indexAttributes();
+            }
+        } elseif ($this->uninstallPrestaShop16Module()) {
             $this->rebuildLayeredStructure();
             $this->buildLayeredCategories();
 
             $this->rebuildPriceIndexTable();
 
-            $this->getDatabase()->execute('ALTER TABLE ' . _DB_PREFIX_ . 'layered_filter CHANGE `filters` `filters` LONGTEXT NULL');
-            $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_friendly_url');
+            $this->getDatabase()->execute('ALTER TABLE ' . _DB_PREFIX_ . 'gc_facetedsearch_filter CHANGE `filters` `filters` LONGTEXT NULL');
+            $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_friendly_url');
         } else {
-            Configuration::updateValue('PS_LAYERED_CACHE_ENABLED', 1);
-            Configuration::updateValue('PS_LAYERED_SHOW_QTIES', 1);
-            Configuration::updateValue('PS_LAYERED_FULL_TREE', 1);
-            Configuration::updateValue('PS_LAYERED_FILTER_PRICE_USETAX', 1);
-            Configuration::updateValue('PS_LAYERED_FILTER_CATEGORY_DEPTH', 1);
+            Configuration::updateValue('GC_LAYERED_CACHE_ENABLED', 1);
+            Configuration::updateValue('GC_LAYERED_SHOW_QTIES', 1);
+            Configuration::updateValue('GC_LAYERED_FULL_TREE', 1);
+            Configuration::updateValue('GC_LAYERED_FILTER_PRICE_USETAX', 1);
+            Configuration::updateValue('GC_LAYERED_FILTER_CATEGORY_DEPTH', 1);
             Configuration::updateValue('PS_ATTRIBUTE_ANCHOR_SEPARATOR', '-');
-            Configuration::updateValue('PS_LAYERED_FILTER_PRICE_ROUNDING', 1);
-            Configuration::updateValue('PS_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST', 0);
-            Configuration::updateValue('PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY', 0);
-            Configuration::updateValue('PS_USE_JQUERY_UI_SLIDER', 1);
-            Configuration::updateValue('PS_LAYERED_DEFAULT_CATEGORY_TEMPLATE', 0);
+            Configuration::updateValue('GC_LAYERED_FILTER_PRICE_ROUNDING', 1);
+            Configuration::updateValue('GC_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST', 0);
+            Configuration::updateValue('GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY', 0);
+            Configuration::updateValue('GC_USE_JQUERY_UI_SLIDER', 1);
+            Configuration::updateValue('GC_LAYERED_DEFAULT_CATEGORY_TEMPLATE', 0);
 
-            $this->psLayeredFullTree = 1;
+            $this->gcLayeredFullTree = 1;
 
             $this->rebuildLayeredStructure();
             $this->buildLayeredCategories();
@@ -238,28 +254,30 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
     public function uninstall()
     {
         /* Delete all configurations */
-        Configuration::deleteByName('PS_LAYERED_CACHE_ENABLED');
-        Configuration::deleteByName('PS_LAYERED_SHOW_QTIES');
-        Configuration::deleteByName('PS_LAYERED_FULL_TREE');
-        Configuration::deleteByName('PS_LAYERED_INDEXED');
-        Configuration::deleteByName('PS_LAYERED_FILTER_PRICE_USETAX');
-        Configuration::deleteByName('PS_LAYERED_FILTER_CATEGORY_DEPTH');
-        Configuration::deleteByName('PS_LAYERED_FILTER_PRICE_ROUNDING');
-        Configuration::deleteByName('PS_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST');
-        Configuration::deleteByName('PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY');
+        Configuration::deleteByName('GC_LAYERED_CACHE_ENABLED');
+        Configuration::deleteByName('GC_LAYERED_SHOW_QTIES');
+        Configuration::deleteByName('GC_LAYERED_FULL_TREE');
+        Configuration::deleteByName('GC_LAYERED_INDEXED');
+        Configuration::deleteByName('GC_LAYERED_FILTER_PRICE_USETAX');
+        Configuration::deleteByName('GC_LAYERED_FILTER_CATEGORY_DEPTH');
+        Configuration::deleteByName('GC_LAYERED_FILTER_PRICE_ROUNDING');
+        Configuration::deleteByName('GC_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST');
+        Configuration::deleteByName('GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY');
+        Configuration::deleteByName('GC_LAYERED_DEFAULT_CATEGORY_TEMPLATE');
+        Configuration::deleteByName('GC_USE_JQUERY_UI_SLIDER');
 
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_category');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_filter');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_filter_block');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_filter_shop');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_indexable_attribute_group');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_indexable_feature');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_indexable_feature_lang_value');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_price_index');
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_product_attribute');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_category');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_filter');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_lang_value');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_price_index');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute');
 
         return parent::uninstall();
     }
@@ -288,6 +306,249 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
     }
 
     /**
+     * Migrate configuration, filter templates and indexable SEO data from ps_facetedsearch,
+     * then uninstall the original module. Price/attribute indexes are rebuilt by install().
+     *
+     * @return bool true when migration ran
+     */
+    private function migrateFromPsFacetedSearch()
+    {
+        if (!Module::isInstalled(self::PS_FACETEDSEARCH_MODULE)) {
+            return false;
+        }
+
+        if (!$this->databaseTableExists('layered_filter')) {
+            // Module marked installed but tables missing — still try to uninstall it
+            $this->uninstallPsFacetedSearchModule();
+
+            return false;
+        }
+
+        $this->migratePsConfiguration();
+        $this->migratePsFilterTemplates();
+        $this->migratePsIndexableTables();
+
+        // Cache block and price/attribute indexes are not migrated (medium scope)
+        $this->getDatabase()->execute(
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block` (
+            `hash` CHAR(32) NOT NULL DEFAULT "" PRIMARY KEY,
+            `data` LONGTEXT NULL
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
+        );
+
+        $this->uninstallPsFacetedSearchModule();
+
+        $this->gcLayeredFullTree = (int) Configuration::get('GC_LAYERED_FULL_TREE');
+
+        return true;
+    }
+
+    /**
+     * @param string $tableWithoutPrefix
+     *
+     * @return bool
+     */
+    private function databaseTableExists($tableWithoutPrefix)
+    {
+        $result = $this->getDatabase()->executeS(
+            'SHOW TABLES LIKE "' . _DB_PREFIX_ . pSQL($tableWithoutPrefix) . '"'
+        );
+
+        return !empty($result);
+    }
+
+    private function migratePsConfiguration()
+    {
+        $configMap = [
+            'PS_LAYERED_CACHE_ENABLED' => 'GC_LAYERED_CACHE_ENABLED',
+            'PS_LAYERED_SHOW_QTIES' => 'GC_LAYERED_SHOW_QTIES',
+            'PS_LAYERED_FULL_TREE' => 'GC_LAYERED_FULL_TREE',
+            'PS_LAYERED_FILTER_PRICE_USETAX' => 'GC_LAYERED_FILTER_PRICE_USETAX',
+            'PS_LAYERED_FILTER_CATEGORY_DEPTH' => 'GC_LAYERED_FILTER_CATEGORY_DEPTH',
+            'PS_LAYERED_FILTER_PRICE_ROUNDING' => 'GC_LAYERED_FILTER_PRICE_ROUNDING',
+            'PS_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST' => 'GC_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST',
+            'PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY' => 'GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY',
+            'PS_LAYERED_DEFAULT_CATEGORY_TEMPLATE' => 'GC_LAYERED_DEFAULT_CATEGORY_TEMPLATE',
+            'PS_LAYERED_INDEXED' => 'GC_LAYERED_INDEXED',
+            'PS_USE_JQUERY_UI_SLIDER' => 'GC_USE_JQUERY_UI_SLIDER',
+        ];
+
+        foreach ($configMap as $oldKey => $newKey) {
+            $value = Configuration::get($oldKey);
+            if ($value === false) {
+                $value = Configuration::getGlobalValue($oldKey);
+            }
+            if ($value !== false) {
+                Configuration::updateValue($newKey, $value);
+            }
+        }
+    }
+
+    private function migratePsFilterTemplates()
+    {
+        $db = $this->getDatabase();
+
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`');
+        $db->execute(
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter` (
+            `id_gc_facetedsearch_filter` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `name` VARCHAR(64) NOT NULL,
+            `filters` LONGTEXT NULL,
+            `n_categories` INT(10) UNSIGNED NOT NULL,
+            `date_add` DATETIME NOT NULL
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
+        );
+
+        $db->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
+            (`id_gc_facetedsearch_filter`, `name`, `filters`, `n_categories`, `date_add`)
+            SELECT `id_layered_filter`, `name`, `filters`, `n_categories`, `date_add`
+            FROM `' . _DB_PREFIX_ . 'layered_filter`'
+        );
+
+        $templates = $db->executeS('SELECT `id_gc_facetedsearch_filter`, `filters` FROM `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`');
+        if (is_array($templates)) {
+            foreach ($templates as $template) {
+                $filters = @unserialize($template['filters']);
+                if (!is_array($filters)) {
+                    continue;
+                }
+                $remapped = [];
+                foreach ($filters as $key => $value) {
+                    if (strpos($key, 'layered_selection_') === 0) {
+                        $key = 'gc_facetedsearch_selection_' . substr($key, strlen('layered_selection_'));
+                    }
+                    $remapped[$key] = $value;
+                }
+                $db->execute(
+                    'UPDATE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
+                    SET `filters` = "' . pSQL(serialize($remapped)) . '"
+                    WHERE `id_gc_facetedsearch_filter` = ' . (int) $template['id_gc_facetedsearch_filter']
+                );
+            }
+        }
+
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop`');
+        $db->execute(
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop` (
+            `id_gc_facetedsearch_filter` INT(10) UNSIGNED NOT NULL,
+            `id_shop` INT(11) UNSIGNED NOT NULL,
+            PRIMARY KEY (`id_gc_facetedsearch_filter`, `id_shop`),
+            KEY `id_shop` (`id_shop`)
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
+        );
+
+        if ($this->databaseTableExists('layered_filter_shop')) {
+            $db->execute(
+                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop`
+                (`id_gc_facetedsearch_filter`, `id_shop`)
+                SELECT `id_layered_filter`, `id_shop`
+                FROM `' . _DB_PREFIX_ . 'layered_filter_shop`'
+            );
+        }
+
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_category`');
+        $db->execute(
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_category` (
+            `id_gc_facetedsearch_category` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `id_shop` INT(11) UNSIGNED NOT NULL,
+            `controller` VARCHAR(64) NOT NULL,
+            `id_category` INT(10) UNSIGNED NOT NULL,
+            `id_value` INT(10) UNSIGNED NULL DEFAULT \'0\',
+            `type` ENUM(\'category\',\'id_feature\',\'id_attribute_group\',\'availability\',\'condition\',\'manufacturer\',\'weight\',\'price\',\'extras\') NOT NULL,
+            `position` INT(10) UNSIGNED NOT NULL,
+            `filter_type` int(10) UNSIGNED NOT NULL DEFAULT 0,
+            `filter_show_limit` int(10) UNSIGNED NOT NULL DEFAULT 0,
+            KEY `id_category_shop` (`id_category`, `id_shop`, `type`, id_value, `position`),
+            KEY `id_category` (`id_category`,`type`)
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
+        );
+
+        if ($this->databaseTableExists('layered_category')) {
+            // Older schemas may miss controller column
+            $columns = $db->executeS('SHOW COLUMNS FROM `' . _DB_PREFIX_ . 'layered_category`');
+            $columnNames = is_array($columns) ? array_column($columns, 'Field') : [];
+            if (in_array('controller', $columnNames, true)) {
+                $db->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_category`
+                    (`id_gc_facetedsearch_category`, `id_shop`, `controller`, `id_category`, `id_value`, `type`, `position`, `filter_type`, `filter_show_limit`)
+                    SELECT `id_layered_category`, `id_shop`, `controller`, `id_category`, `id_value`, `type`, `position`, `filter_type`, `filter_show_limit`
+                    FROM `' . _DB_PREFIX_ . 'layered_category`'
+                );
+            } else {
+                $db->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_category`
+                    (`id_gc_facetedsearch_category`, `id_shop`, `controller`, `id_category`, `id_value`, `type`, `position`, `filter_type`, `filter_show_limit`)
+                    SELECT `id_layered_category`, `id_shop`, \'category\', `id_category`, `id_value`, `type`, `position`, `filter_type`, `filter_show_limit`
+                    FROM `' . _DB_PREFIX_ . 'layered_category`'
+                );
+            }
+        }
+    }
+
+    private function migratePsIndexableTables()
+    {
+        $db = $this->getDatabase();
+
+        $copies = [
+            'layered_indexable_attribute_group' => [
+                'gc_facetedsearch_indexable_attribute_group',
+                '(`id_attribute_group`, `indexable`) SELECT `id_attribute_group`, `indexable`',
+                '(`id_attribute_group` INT NOT NULL, `indexable` BOOL NOT NULL DEFAULT 0, PRIMARY KEY (`id_attribute_group`))',
+            ],
+            'layered_indexable_attribute_group_lang_value' => [
+                'gc_facetedsearch_indexable_attribute_group_lang_value',
+                '(`id_attribute_group`, `id_lang`, `url_name`, `meta_title`) SELECT `id_attribute_group`, `id_lang`, `url_name`, `meta_title`',
+                '(`id_attribute_group` INT NOT NULL, `id_lang` INT NOT NULL, `url_name` VARCHAR(128), `meta_title` VARCHAR(128), PRIMARY KEY (`id_attribute_group`, `id_lang`))',
+            ],
+            'layered_indexable_attribute_lang_value' => [
+                'gc_facetedsearch_indexable_attribute_lang_value',
+                '(`id_attribute`, `id_lang`, `url_name`, `meta_title`) SELECT `id_attribute`, `id_lang`, `url_name`, `meta_title`',
+                '(`id_attribute` INT NOT NULL, `id_lang` INT NOT NULL, `url_name` VARCHAR(128), `meta_title` VARCHAR(128), PRIMARY KEY (`id_attribute`, `id_lang`))',
+            ],
+            'layered_indexable_feature' => [
+                'gc_facetedsearch_indexable_feature',
+                '(`id_feature`, `indexable`) SELECT `id_feature`, `indexable`',
+                '(`id_feature` INT NOT NULL, `indexable` BOOL NOT NULL DEFAULT 0, PRIMARY KEY (`id_feature`))',
+            ],
+            'layered_indexable_feature_lang_value' => [
+                'gc_facetedsearch_indexable_feature_lang_value',
+                '(`id_feature`, `id_lang`, `url_name`, `meta_title`) SELECT `id_feature`, `id_lang`, `url_name`, `meta_title`',
+                '(`id_feature` INT NOT NULL, `id_lang` INT NOT NULL, `url_name` VARCHAR(128), `meta_title` VARCHAR(128), PRIMARY KEY (`id_feature`, `id_lang`))',
+            ],
+            'layered_indexable_feature_value_lang_value' => [
+                'gc_facetedsearch_indexable_feature_value_lang_value',
+                '(`id_feature_value`, `id_lang`, `url_name`, `meta_title`) SELECT `id_feature_value`, `id_lang`, `url_name`, `meta_title`',
+                '(`id_feature_value` INT NOT NULL, `id_lang` INT NOT NULL, `url_name` VARCHAR(128), `meta_title` VARCHAR(128), PRIMARY KEY (`id_feature_value`, `id_lang`))',
+            ],
+        ];
+
+        foreach ($copies as $oldTable => $spec) {
+            list($newTable, $selectPart, $createCols) = $spec;
+            $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . $newTable . '`');
+            $db->execute(
+                'CREATE TABLE `' . _DB_PREFIX_ . $newTable . '` ' . $createCols .
+                ' ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
+            );
+            if ($this->databaseTableExists($oldTable)) {
+                $db->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . $newTable . '` ' . $selectPart .
+                    ' FROM `' . _DB_PREFIX_ . $oldTable . '`'
+                );
+            }
+        }
+    }
+
+    private function uninstallPsFacetedSearchModule()
+    {
+        /** @var Module|bool $oldModule */
+        $oldModule = Module::getInstanceByName(self::PS_FACETEDSEARCH_MODULE);
+        if ($oldModule) {
+            $oldModule->uninstall();
+        }
+    }
+
+    /**
      * @return HookDispatcher
      */
     public function getHookDispatcher()
@@ -305,16 +566,16 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
     public function indexAttributes($idProduct = null)
     {
         if (null === $idProduct) {
-            $this->getDatabase()->execute('TRUNCATE ' . _DB_PREFIX_ . 'layered_product_attribute');
+            $this->getDatabase()->execute('TRUNCATE ' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute');
         } else {
             $this->getDatabase()->execute(
-                'DELETE FROM ' . _DB_PREFIX_ . 'layered_product_attribute
+                'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute
                 WHERE id_product = ' . (int) $idProduct
             );
         }
 
         return $this->getDatabase()->execute(
-            'INSERT INTO `' . _DB_PREFIX_ . 'layered_product_attribute` (`id_attribute`, `id_product`, `id_attribute_group`, `id_shop`)
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute` (`id_attribute`, `id_product`, `id_attribute_group`, `id_shop`)
             SELECT pac.id_attribute, pa.id_product, ag.id_attribute_group, product_attribute_shop.`id_shop`
             FROM ' . _DB_PREFIX_ . 'product_attribute pa' .
             Shop::addSqlAssociation('product_attribute', 'pa') . '
@@ -334,10 +595,10 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
     public function indexFeatures()
     {
         return $this->getDatabase()->execute(
-            'INSERT INTO `' . _DB_PREFIX_ . 'layered_indexable_feature` ' .
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` ' .
             'SELECT id_feature, 1 FROM `' . _DB_PREFIX_ . 'feature` ' .
             'WHERE id_feature NOT IN (SELECT id_feature FROM ' .
-            '`' . _DB_PREFIX_ . 'layered_indexable_feature`)'
+            '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature`)'
         );
     }
 
@@ -349,10 +610,10 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
     public function indexAttributeGroup()
     {
         return $this->getDatabase()->execute(
-            'INSERT INTO `' . _DB_PREFIX_ . 'layered_indexable_attribute_group` ' .
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` ' .
             'SELECT id_attribute_group, 1 FROM `' . _DB_PREFIX_ . 'attribute_group` ' .
             'WHERE id_attribute_group NOT IN (SELECT id_attribute_group FROM ' .
-            '`' . _DB_PREFIX_ . 'layered_indexable_attribute_group`)'
+            '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`)'
         );
     }
 
@@ -409,7 +670,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
             $maxPrice = [];
 
             if ($smart) {
-                $this->getDatabase()->execute('DELETE FROM `' . _DB_PREFIX_ . 'layered_price_index` WHERE `id_product` = ' . (int) $idProduct . ' AND `id_shop` = ' . (int) $idShop);
+                $this->getDatabase()->execute('DELETE FROM `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` WHERE `id_product` = ' . (int) $idProduct . ' AND `id_shop` = ' . (int) $idShop);
             }
 
             $taxRatesByCountry = $this->getDatabase()->executeS(
@@ -424,7 +685,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
                 'GROUP BY id_product, tr.id_country'
             );
 
-            if (empty($taxRatesByCountry) || !Configuration::get('PS_LAYERED_FILTER_PRICE_USETAX')) {
+            if (empty($taxRatesByCountry) || !Configuration::get('GC_LAYERED_FILTER_PRICE_USETAX')) {
                 $shopCountries = Country::getCountriesByIdShop($idShop, $this->getContext()->language->id);
                 $taxCountries = array_filter($shopCountries, function ($country) {
                     return $country['active'];
@@ -581,7 +842,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
             if (!empty($values)) {
                 $this->getDatabase()->execute(
-                    'INSERT INTO `' . _DB_PREFIX_ . 'layered_price_index` (id_product, id_currency, id_shop, price_min, price_max, id_country)
+                    'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` (id_product, id_currency, id_shop, price_min, price_max, id_country)
                      VALUES ' . implode(',', $values) . '
                      ON DUPLICATE KEY UPDATE id_product = id_product' // Avoid duplicate keys
                 );
@@ -598,7 +859,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
         if (Tools::isSubmit('SubmitFilter')) {
             // Get filter data
-            $templateName = Tools::getValue('layered_tpl_name');
+            $templateName = Tools::getValue('gc_facetedsearch_tpl_name');
             $controllers = Tools::getValue('controllers');
             $categoryBox = Tools::getValue('categoryBox');
 
@@ -617,8 +878,8 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
                 ];
 
                 // Associate shops in case of multistore
-                if (isset($_POST['checkBoxShopAsso_layered_filter'])) {
-                    foreach (array_keys($_POST['checkBoxShopAsso_layered_filter']) as $idShop) {
+                if (isset($_POST['checkBoxShopAsso_gc_facetedsearch_filter'])) {
+                    foreach (array_keys($_POST['checkBoxShopAsso_gc_facetedsearch_filter']) as $idShop) {
                         $filterValues['shop_list'][] = (int) $idShop;
                     }
                 } else {
@@ -639,7 +900,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
                 // Add filters themselves
                 foreach (array_keys($_POST) as $key) {
-                    if (!preg_match('~^(?P<key>layered_selection_.*)(?<!_filter_)(?<!type)(?<!show_limit)$~', $key, $matches)) {
+                    if (!preg_match('~^(?P<key>gc_facetedsearch_selection_.*)(?<!_filter_)(?<!type)(?<!show_limit)$~', $key, $matches)) {
                         continue;
                     }
 
@@ -656,10 +917,10 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
                 ];
 
                 // New filter or editing existing
-                $idLayeredFilter = (int) Tools::getValue('id_layered_filter');
+                $idLayeredFilter = (int) Tools::getValue('id_gc_facetedsearch_filter');
                 if (!$idLayeredFilter) {
-                    $sql = 'INSERT INTO ' . _DB_PREFIX_ . 'layered_filter ' .
-                            '(name, filters, n_categories, date_add, id_layered_filter) ' .
+                    $sql = 'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_filter ' .
+                            '(name, filters, n_categories, date_add, id_gc_facetedsearch_filter) ' .
                             'VALUES (' .
                             '"' . pSQL($filterData['name']) . '", ' .
                             '"' . $filterData['filters'] . '", ' .
@@ -670,13 +931,13 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
                     $idLayeredFilter = (int) $this->getDatabase()->Insert_ID();
                 } else {
                     $this->getDatabase()->execute(
-                        'DELETE FROM ' . _DB_PREFIX_ . 'layered_filter_shop WHERE `id_layered_filter` = ' . (int) $idLayeredFilter
+                        'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop WHERE `id_gc_facetedsearch_filter` = ' . (int) $idLayeredFilter
                     );
-                    $sql = 'UPDATE ' . _DB_PREFIX_ . 'layered_filter ' .
+                    $sql = 'UPDATE ' . _DB_PREFIX_ . 'gc_facetedsearch_filter ' .
                             'SET name = "' . pSQL($filterData['name']) . '", ' .
                             'filters = "' . $filterData['filters'] . '", ' .
                             'n_categories = ' . (int) $filterData['n_categories'] . ' ' .
-                            'WHERE id_layered_filter = ' . $idLayeredFilter;
+                            'WHERE id_gc_facetedsearch_filter = ' . $idLayeredFilter;
                     $this->getDatabase()->execute($sql);
                 }
 
@@ -684,7 +945,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
                 if (!empty($filterValues['shop_list'])) {
                     foreach ($filterValues['shop_list'] as $id_shop) {
                         $this->getDatabase()->execute(
-                            'INSERT INTO ' . _DB_PREFIX_ . 'layered_filter_shop (`id_layered_filter`, `id_shop`)
+                            'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop (`id_gc_facetedsearch_filter`, `id_shop`)
                             VALUES(' . $idLayeredFilter . ', ' . (int) $id_shop . ')'
                         );
                     }
@@ -696,39 +957,39 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
                     $this->trans('Your filter', [], 'Modules.Facetedsearch.Admin') . ' "' .
                     Tools::safeOutput($templateName) . '" ' .
                     (
-                        !empty($_POST['id_layered_filter']) ?
+                        !empty($_POST['id_gc_facetedsearch_filter']) ?
                         $this->trans('was updated successfully.', [], 'Modules.Facetedsearch.Admin') :
                         $this->trans('was added successfully.', [], 'Modules.Facetedsearch.Admin')
                     )
                 );
             }
         } elseif (Tools::isSubmit('submitLayeredSettings')) {
-            Configuration::updateValue('PS_LAYERED_CACHE_ENABLED', (int) Tools::getValue('ps_layered_cache_enabled'));
-            Configuration::updateValue('PS_LAYERED_SHOW_QTIES', (int) Tools::getValue('ps_layered_show_qties'));
-            Configuration::updateValue('PS_LAYERED_FULL_TREE', (int) Tools::getValue('ps_layered_full_tree'));
-            Configuration::updateValue('PS_LAYERED_FILTER_PRICE_USETAX', (int) Tools::getValue('ps_layered_filter_price_usetax'));
-            Configuration::updateValue('PS_LAYERED_FILTER_CATEGORY_DEPTH', (int) Tools::getValue('ps_layered_filter_category_depth'));
-            Configuration::updateValue('PS_LAYERED_FILTER_PRICE_ROUNDING', (int) Tools::getValue('ps_layered_filter_price_rounding'));
-            Configuration::updateValue('PS_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST', (int) Tools::getValue('ps_layered_filter_show_out_of_stock_last'));
-            Configuration::updateValue('PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY', (int) Tools::getValue('ps_layered_filter_by_default_category'));
-            Configuration::updateValue('PS_USE_JQUERY_UI_SLIDER', (int) Tools::getValue('ps_use_jquery_ui_slider'));
-            Configuration::updateValue('PS_LAYERED_DEFAULT_CATEGORY_TEMPLATE', (int) Tools::getValue('ps_layered_default_category_template'));
+            Configuration::updateValue('GC_LAYERED_CACHE_ENABLED', (int) Tools::getValue('gc_layered_cache_enabled'));
+            Configuration::updateValue('GC_LAYERED_SHOW_QTIES', (int) Tools::getValue('gc_layered_show_qties'));
+            Configuration::updateValue('GC_LAYERED_FULL_TREE', (int) Tools::getValue('gc_layered_full_tree'));
+            Configuration::updateValue('GC_LAYERED_FILTER_PRICE_USETAX', (int) Tools::getValue('gc_layered_filter_price_usetax'));
+            Configuration::updateValue('GC_LAYERED_FILTER_CATEGORY_DEPTH', (int) Tools::getValue('gc_layered_filter_category_depth'));
+            Configuration::updateValue('GC_LAYERED_FILTER_PRICE_ROUNDING', (int) Tools::getValue('gc_layered_filter_price_rounding'));
+            Configuration::updateValue('GC_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST', (int) Tools::getValue('gc_layered_filter_show_out_of_stock_last'));
+            Configuration::updateValue('GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY', (int) Tools::getValue('gc_layered_filter_by_default_category'));
+            Configuration::updateValue('GC_USE_JQUERY_UI_SLIDER', (int) Tools::getValue('gc_use_jquery_ui_slider'));
+            Configuration::updateValue('GC_LAYERED_DEFAULT_CATEGORY_TEMPLATE', (int) Tools::getValue('gc_layered_default_category_template'));
 
-            $this->psLayeredFullTree = (int) Tools::getValue('ps_layered_full_tree');
+            $this->gcLayeredFullTree = (int) Tools::getValue('gc_layered_full_tree');
 
             $message = '<div class="alert alert-success">' . $this->trans('Settings saved successfully', [], 'Modules.Facetedsearch.Admin') . '</div>';
             $this->invalidateLayeredFilterBlockCache();
         } elseif (Tools::getValue('deleteFilterTemplate')) {
             $layered_values = $this->getDatabase()->getValue(
                 'SELECT filters
-                FROM ' . _DB_PREFIX_ . 'layered_filter
-                WHERE id_layered_filter = ' . (int) Tools::getValue('id_layered_filter')
+                FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter
+                WHERE id_gc_facetedsearch_filter = ' . (int) Tools::getValue('id_gc_facetedsearch_filter')
             );
 
             if ($layered_values) {
                 $this->getDatabase()->execute(
-                    'DELETE FROM ' . _DB_PREFIX_ . 'layered_filter
-                    WHERE id_layered_filter = ' . (int) Tools::getValue('id_layered_filter') . ' LIMIT 1'
+                    'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter
+                    WHERE id_gc_facetedsearch_filter = ' . (int) Tools::getValue('id_gc_facetedsearch_filter') . ' LIMIT 1'
                 );
                 $this->buildLayeredCategories();
                 $message = $this->displayConfirmation($this->trans('Filter template deleted, categories updated (reverted to default Filter template).', [], 'Modules.Facetedsearch.Admin'));
@@ -760,7 +1021,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
         if (Tools::getValue('edit_filters_template')) {
             // Try to get template to edit from database
-            $idLayeredFilter = (int) Tools::getValue('id_layered_filter');
+            $idLayeredFilter = (int) Tools::getValue('id_gc_facetedsearch_filter');
             $template = $this->getFilterTemplate($idLayeredFilter);
             if (!empty($template)) {
                 return $this->renderAdminTemplateEdit($template);
@@ -784,33 +1045,33 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
         $features = $this->getAvailableFeatures();
         $attributeGroups = $this->getAvailableAttributes();
 
-        $cronToken = substr(Tools::hash('ps_facetedsearch/index'), 0, 10);
+        $cronToken = substr(Tools::hash('gc_facetedsearch/index'), 0, 10);
         $this->context->smarty->assign([
-            'PS_LAYERED_INDEXED' => (int) Configuration::getGlobalValue('PS_LAYERED_INDEXED'),
-            'current_url' => Tools::safeOutput(preg_replace('/&deleteFilterTemplate=[0-9]*&id_layered_filter=[0-9]*/', '', $_SERVER['REQUEST_URI'])),
+            'GC_LAYERED_INDEXED' => (int) Configuration::getGlobalValue('GC_LAYERED_INDEXED'),
+            'current_url' => Tools::safeOutput(preg_replace('/&deleteFilterTemplate=[0-9]*&id_gc_facetedsearch_filter=[0-9]*/', '', $_SERVER['REQUEST_URI'])),
             'id_lang' => $this->getContext()->cookie->id_lang,
             'token' => $cronToken,
             'base_folder' => urlencode(_PS_ADMIN_DIR_),
-            'price_indexer_url' => $this->context->link->getModuleLink('ps_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexPrices', 'token' => $cronToken]),
-            'full_price_indexer_url' => $this->context->link->getModuleLink('ps_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexPrices', 'full' => 1, 'token' => $cronToken]),
-            'attribute_indexer_url' => $this->context->link->getModuleLink('ps_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexAttributes', 'token' => $cronToken]),
-            'clear_cache_url' => $this->context->link->getModuleLink('ps_facetedsearch', 'cron', ['ajax' => true, 'action' => 'clearCache', 'token' => $cronToken]),
-            'price_indexer_url_for_cron' => $this->context->link->getModuleLink('ps_facetedsearch', 'cron', ['action' => 'indexPrices', 'token' => $cronToken]),
-            'full_price_indexer_url_for_cron' => $this->context->link->getModuleLink('ps_facetedsearch', 'cron', ['action' => 'indexPrices', 'full' => 1, 'token' => $cronToken]),
-            'attribute_indexer_url_for_cron' => $this->context->link->getModuleLink('ps_facetedsearch', 'cron', ['action' => 'indexAttributes', 'token' => $cronToken]),
-            'clear_cache_url_for_cron' => $this->context->link->getModuleLink('ps_facetedsearch', 'cron', ['action' => 'clearCache', 'token' => $cronToken]),
+            'price_indexer_url' => $this->context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexPrices', 'token' => $cronToken]),
+            'full_price_indexer_url' => $this->context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexPrices', 'full' => 1, 'token' => $cronToken]),
+            'attribute_indexer_url' => $this->context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexAttributes', 'token' => $cronToken]),
+            'clear_cache_url' => $this->context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'clearCache', 'token' => $cronToken]),
+            'price_indexer_url_for_cron' => $this->context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexPrices', 'token' => $cronToken]),
+            'full_price_indexer_url_for_cron' => $this->context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexPrices', 'full' => 1, 'token' => $cronToken]),
+            'attribute_indexer_url_for_cron' => $this->context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexAttributes', 'token' => $cronToken]),
+            'clear_cache_url_for_cron' => $this->context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'clearCache', 'token' => $cronToken]),
             'filters_templates' => $this->getExistingFiltersOverview(),
-            'show_quantities' => Configuration::get('PS_LAYERED_SHOW_QTIES'),
-            'cache_enabled' => Configuration::get('PS_LAYERED_CACHE_ENABLED'),
-            'full_tree' => $this->psLayeredFullTree,
-            'category_depth' => Configuration::get('PS_LAYERED_FILTER_CATEGORY_DEPTH'),
-            'price_use_tax' => (bool) Configuration::get('PS_LAYERED_FILTER_PRICE_USETAX'),
+            'show_quantities' => Configuration::get('GC_LAYERED_SHOW_QTIES'),
+            'cache_enabled' => Configuration::get('GC_LAYERED_CACHE_ENABLED'),
+            'full_tree' => $this->gcLayeredFullTree,
+            'category_depth' => Configuration::get('GC_LAYERED_FILTER_CATEGORY_DEPTH'),
+            'price_use_tax' => (bool) Configuration::get('GC_LAYERED_FILTER_PRICE_USETAX'),
             'limit_warning' => $this->displayLimitPostWarning(21 + count($attributeGroups) * 3 + count($features) * 3),
-            'price_use_rounding' => (bool) Configuration::get('PS_LAYERED_FILTER_PRICE_ROUNDING'),
-            'show_out_of_stock_last' => (bool) Configuration::get('PS_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST'),
-            'filter_by_default_category' => (bool) Configuration::get('PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY'),
-            'use_jquery_ui_slider' => (bool) Configuration::get('PS_USE_JQUERY_UI_SLIDER'),
-            'default_category_template' => Configuration::get('PS_LAYERED_DEFAULT_CATEGORY_TEMPLATE'),
+            'price_use_rounding' => (bool) Configuration::get('GC_LAYERED_FILTER_PRICE_ROUNDING'),
+            'show_out_of_stock_last' => (bool) Configuration::get('GC_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST'),
+            'filter_by_default_category' => (bool) Configuration::get('GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY'),
+            'use_jquery_ui_slider' => (bool) Configuration::get('GC_USE_JQUERY_UI_SLIDER'),
+            'default_category_template' => Configuration::get('GC_LAYERED_DEFAULT_CATEGORY_TEMPLATE'),
         ]);
 
         return $this->display(__FILE__, 'views/templates/admin/manage.tpl');
@@ -838,7 +1099,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
         // check categories and add selected filters. Otherwise, we prepare empty template.
         if ($template !== null) {
             $filters = Tools::unSerialize($template['filters']);
-            $id_layered_filter = $template['id_layered_filter'];
+            $id_gc_facetedsearch_filter = $template['id_gc_facetedsearch_filter'];
             $template_name = $template['name'];
 
             // Check categories
@@ -858,7 +1119,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
             unset($filters['controllers']);
             unset($filters['shop_list']);
         } else {
-            $id_layered_filter = 0;
+            $id_gc_facetedsearch_filter = 0;
             $filters = [];
             $template_name = sprintf($this->trans('My template - %s', [], 'Modules.Facetedsearch.Admin'), date('Y-m-d'));
         }
@@ -866,15 +1127,15 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
         // Assign multistore related data
         if (Shop::isFeatureActive() && count(Shop::getShops(true, null, true)) > 1) {
             $helper = new HelperForm();
-            $helper->id = Tools::getValue('id_layered_filter', null);
-            $helper->table = 'layered_filter';
-            $helper->identifier = 'id_layered_filter';
+            $helper->id = Tools::getValue('id_gc_facetedsearch_filter', null);
+            $helper->table = 'gc_facetedsearch_filter';
+            $helper->identifier = 'id_gc_facetedsearch_filter';
             $this->context->smarty->assign('asso_shops', $helper->renderAssoShop());
         }
 
         $this->context->smarty->assign([
             'current_url' => $this->context->link->getAdminLink('AdminModules', true, [], ['configure' => $this->name, 'tab_module' => $this->tab, 'module_name' => $this->name]),
-            'id_layered_filter' => $id_layered_filter,
+            'id_gc_facetedsearch_filter' => $id_gc_facetedsearch_filter,
             'template_name' => $template_name,
             'attribute_groups' => $attributeGroups,
             'features' => $features,
@@ -950,7 +1211,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
     private function getExistingFiltersOverview()
     {
         // Get data about current filters in database
-        $filters_templates = $this->getDatabase()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'layered_filter ORDER BY date_add DESC');
+        $filters_templates = $this->getDatabase()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter ORDER BY date_add DESC');
 
         $supportedControllers = $this->getSupportedControllers();
         foreach ($filters_templates as $k => $v) {
@@ -991,11 +1252,11 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
         }
 
         /* Delete and re-create the layered categories table */
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'layered_category');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'gc_facetedsearch_category');
 
         $this->getDatabase()->execute(
-            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'layered_category` (
-            `id_layered_category` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_category` (
+            `id_gc_facetedsearch_category` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `id_shop` INT(11) UNSIGNED NOT NULL,
             `controller` VARCHAR(64) NOT NULL,
             `id_category` INT(10) UNSIGNED NOT NULL,
@@ -1010,8 +1271,8 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
         );
 
         $this->getDatabase()->execute(
-            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'layered_filter` (
-            `id_layered_filter` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_filter` (
+            `id_gc_facetedsearch_filter` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `name` VARCHAR(64) NOT NULL,
             `filters` LONGTEXT NULL,
             `n_categories` INT(10) UNSIGNED NOT NULL,
@@ -1020,17 +1281,17 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
         );
 
         $this->getDatabase()->execute(
-            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'layered_filter_block` (
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block` (
             `hash` CHAR(32) NOT NULL DEFAULT "" PRIMARY KEY,
             `data` LONGTEXT NULL
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
         );
 
         $this->getDatabase()->execute(
-            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'layered_filter_shop` (
-            `id_layered_filter` INT(10) UNSIGNED NOT NULL,
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop` (
+            `id_gc_facetedsearch_filter` INT(10) UNSIGNED NOT NULL,
             `id_shop` INT(11) UNSIGNED NOT NULL,
-            PRIMARY KEY (`id_layered_filter`, `id_shop`),
+            PRIMARY KEY (`id_gc_facetedsearch_filter`, `id_shop`),
             KEY `id_shop` (`id_shop`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
         );
@@ -1157,28 +1418,28 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
                 // Stock filter
                 if (!isset($doneCategories[(int) $idCategory]['q'])) {
-                    $filterData['layered_selection_stock'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                    $filterData['gc_facetedsearch_selection_stock'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                     $doneCategories[(int) $idCategory]['q'] = true;
                     $toInsert = true;
                 }
 
                 // Add extras filter
                 if (!isset($doneCategories[(int) $idCategory]['e'])) {
-                    $filterData['layered_selection_extras'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                    $filterData['gc_facetedsearch_selection_extras'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                     $doneCategories[(int) $idCategory]['e'] = true;
                     $toInsert = true;
                 }
 
                 // Price filter
                 if (!isset($doneCategories[(int) $idCategory]['p'])) {
-                    $filterData['layered_selection_price_slider'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                    $filterData['gc_facetedsearch_selection_price_slider'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                     $doneCategories[(int) $idCategory]['p'] = true;
                     $toInsert = true;
                 }
 
                 // Category filter
                 if (!isset($doneCategories[(int) $idCategory]['cat'])) {
-                    $filterData['layered_selection_subcategories'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                    $filterData['gc_facetedsearch_selection_subcategories'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                     $doneCategories[(int) $idCategory]['cat'] = true;
                     $toInsert = true;
                 }
@@ -1187,7 +1448,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
                 if (is_array($attributeGroupsById) && count($attributeGroupsById) > 0) {
                     foreach (array_keys($a) as $kAttribute) {
                         if (!isset($doneCategories[(int) $idCategory]['a' . (int) $attributeGroupsById[(int) $kAttribute]])) {
-                            $filterData['layered_selection_ag_' . (int) $attributeGroupsById[(int) $kAttribute]] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                            $filterData['gc_facetedsearch_selection_ag_' . (int) $attributeGroupsById[(int) $kAttribute]] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                             $doneCategories[(int) $idCategory]['a' . (int) $attributeGroupsById[(int) $kAttribute]] = true;
                             $toInsert = true;
                         }
@@ -1198,7 +1459,7 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
                 if (is_array($featuresById) && count($featuresById) > 0) {
                     foreach (array_keys($f) as $kFeature) {
                         if (!isset($doneCategories[(int) $idCategory]['f' . (int) $featuresById[(int) $kFeature]])) {
-                            $filterData['layered_selection_feat_' . (int) $featuresById[(int) $kFeature]] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                            $filterData['gc_facetedsearch_selection_feat_' . (int) $featuresById[(int) $kFeature]] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                             $doneCategories[(int) $idCategory]['f' . (int) $featuresById[(int) $kFeature]] = true;
                             $toInsert = true;
                         }
@@ -1207,21 +1468,21 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
                 // Manufacturer filter
                 if (!isset($doneCategories[(int) $idCategory]['m'])) {
-                    $filterData['layered_selection_manufacturer'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                    $filterData['gc_facetedsearch_selection_manufacturer'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                     $doneCategories[(int) $idCategory]['m'] = true;
                     $toInsert = true;
                 }
 
                 // Condition filter
                 if (!isset($doneCategories[(int) $idCategory]['c'])) {
-                    $filterData['layered_selection_condition'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                    $filterData['gc_facetedsearch_selection_condition'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                     $doneCategories[(int) $idCategory]['c'] = true;
                     $toInsert = true;
                 }
 
                 // Weight filter
                 if (!isset($doneCategories[(int) $idCategory]['w'])) {
-                    $filterData['layered_selection_weight_slider'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
+                    $filterData['gc_facetedsearch_selection_weight_slider'] = ['filter_type' => Converter::WIDGET_TYPE_CHECKBOX, 'filter_show_limit' => 0];
                     $doneCategories[(int) $idCategory]['w'] = true;
                     $toInsert = true;
                 }
@@ -1230,29 +1491,29 @@ class Ps_Facetedsearch extends Module implements WidgetInterface
 
         // If there are any filters available to setup, we will create the filter template
         if ($toInsert) {
-            $this->getDatabase()->execute('INSERT INTO ' . _DB_PREFIX_ . 'layered_filter(name, filters, n_categories, date_add)
+            $this->getDatabase()->execute('INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_filter(name, filters, n_categories, date_add)
 VALUES (\'' . sprintf($this->trans('My template %s', [], 'Modules.Facetedsearch.Admin'), date('Y-m-d')) . '\', \'' . pSQL(serialize($filterData)) . '\', ' . count($filterData['categories']) . ', NOW())');
 
             $last_id = $this->getDatabase()->Insert_ID();
-            $this->getDatabase()->execute('DELETE FROM ' . _DB_PREFIX_ . 'layered_filter_shop WHERE `id_layered_filter` = ' . $last_id);
+            $this->getDatabase()->execute('DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop WHERE `id_gc_facetedsearch_filter` = ' . $last_id);
             foreach ($shopList as $idShop) {
-                $this->getDatabase()->execute('INSERT INTO ' . _DB_PREFIX_ . 'layered_filter_shop (`id_layered_filter`, `id_shop`)
+                $this->getDatabase()->execute('INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop (`id_gc_facetedsearch_filter`, `id_shop`)
 VALUES(' . $last_id . ', ' . (int) $idShop . ')');
             }
         }
 
-        // Now we need to build layered_category table from this template
+        // Now we need to build gc_facetedsearch_category table from this template
         $this->buildLayeredCategories();
     }
 
     /**
-     * This method gets serialized data of filter templates from layered_filter table and builds detailed
+     * This method gets serialized data of filter templates from gc_facetedsearch_filter table and builds detailed
      * information, one category = one line.
      */
     public function buildLayeredCategories()
     {
         // Get data for all filter templates in the database
-        $templates = $this->getDatabase()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'layered_filter ORDER BY date_add DESC');
+        $templates = $this->getDatabase()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter ORDER BY date_add DESC');
 
         // We will keep track of pages categories where filter was already set, so we don't have multiple
         // filters for the same category and shop.
@@ -1261,8 +1522,8 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
         // Clear cache
         $this->invalidateLayeredFilterBlockCache();
 
-        // Remove all previous data from layered_category
-        $this->getDatabase()->execute('TRUNCATE ' . _DB_PREFIX_ . 'layered_category');
+        // Remove all previous data from gc_facetedsearch_category
+        $this->getDatabase()->execute('TRUNCATE ' . _DB_PREFIX_ . 'gc_facetedsearch_category');
 
         // If no filter templates are defined, nothing else to do here
         if (!count($templates)) {
@@ -1270,7 +1531,7 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
         }
 
         // We will insert our queries by batches of hundred queries
-        $sqlInsertPrefix = 'INSERT INTO ' . _DB_PREFIX_ . 'layered_category (id_category, controller, id_shop, id_value, type, position, filter_show_limit, filter_type) VALUES ';
+        $sqlInsertPrefix = 'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_category (id_category, controller, id_shop, id_value, type, position, filter_show_limit, filter_type) VALUES ';
         $sqlInsert = '';
         $nbSqlValuesToInsert = 0;
 
@@ -1302,8 +1563,8 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
 
                         foreach ($data as $key => $value) {
                             // The template contains some other data than filters, so we clean it up a bit
-                            // All filters begin with layered_selection
-                            if (substr($key, 0, 17) != 'layered_selection') {
+                            // All filters begin with gc_facetedsearch_selection
+                            if (substr($key, 0, 26) != 'gc_facetedsearch_selection') {
                                 continue;
                             }
 
@@ -1311,25 +1572,25 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
                             $limit = $value['filter_show_limit'];
                             ++$n;
 
-                            if ($key == 'layered_selection_stock') {
+                            if ($key == 'gc_facetedsearch_selection_stock') {
                                 $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'availability\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'layered_selection_subcategories') {
+                            } elseif ($key == 'gc_facetedsearch_selection_subcategories') {
                                 $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'category\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'layered_selection_condition') {
+                            } elseif ($key == 'gc_facetedsearch_selection_condition') {
                                 $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'condition\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'layered_selection_weight_slider') {
+                            } elseif ($key == 'gc_facetedsearch_selection_weight_slider') {
                                 $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'weight\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'layered_selection_price_slider') {
+                            } elseif ($key == 'gc_facetedsearch_selection_price_slider') {
                                 $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'price\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'layered_selection_manufacturer') {
+                            } elseif ($key == 'gc_facetedsearch_selection_manufacturer') {
                                 $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'manufacturer\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif (substr($key, 0, 21) == 'layered_selection_ag_') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('layered_selection_ag_', '', $key) . ',
+                            } elseif (substr($key, 0, 30) == 'gc_facetedsearch_selection_ag_') {
+                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('gc_facetedsearch_selection_ag_', '', $key) . ',
     \'id_attribute_group\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif (substr($key, 0, 23) == 'layered_selection_feat_') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('layered_selection_feat_', '', $key) . ',
+                            } elseif (substr($key, 0, 32) == 'gc_facetedsearch_selection_feat_') {
+                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('gc_facetedsearch_selection_feat_', '', $key) . ',
     \'id_feature\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'layered_selection_extras') {
+                            } elseif ($key == 'gc_facetedsearch_selection_extras') {
                                 $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'extras\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             }
 
@@ -1407,7 +1668,7 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
      */
     public function invalidateLayeredFilterBlockCache()
     {
-        return $this->getDatabase()->execute('TRUNCATE TABLE ' . _DB_PREFIX_ . 'layered_filter_block');
+        return $this->getDatabase()->execute('TRUNCATE TABLE ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block');
     }
 
     /**
@@ -1415,10 +1676,10 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
      */
     public function rebuildPriceIndexTable()
     {
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'layered_price_index`');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index`');
 
         $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'layered_price_index` (
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` (
             `id_product` INT  NOT NULL,
             `id_currency` INT NOT NULL,
             `id_shop` INT NOT NULL,
@@ -1438,9 +1699,9 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
      */
     private function installProductAttributeTable()
     {
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'layered_product_attribute`');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute`');
         $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'layered_product_attribute` (
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute` (
             `id_attribute` int(10) unsigned NOT NULL,
             `id_product` int(10) unsigned NOT NULL,
             `id_attribute_group` int(10) unsigned NOT NULL DEFAULT "0",
@@ -1457,22 +1718,22 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
     private function installIndexableAttributeTable()
     {
         // Attributes Groups
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'layered_indexable_attribute_group`');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`');
         $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'layered_indexable_attribute_group` (
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` (
             `id_attribute_group` INT NOT NULL,
             `indexable` BOOL NOT NULL DEFAULT 0,
             PRIMARY KEY (`id_attribute_group`)
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
         );
         $this->getDatabase()->execute(
-            'INSERT INTO `' . _DB_PREFIX_ . 'layered_indexable_attribute_group` (id_attribute_group)
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` (id_attribute_group)
             SELECT id_attribute_group FROM `' . _DB_PREFIX_ . 'attribute_group`'
         );
 
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value`');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value`');
         $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value` (
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value` (
             `id_attribute_group` INT NOT NULL,
             `id_lang` INT NOT NULL,
             `url_name` VARCHAR(128),
@@ -1482,9 +1743,9 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
         );
 
         // Attributes
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value`');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value`');
         $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value` (
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value` (
             `id_attribute` INT NOT NULL,
             `id_lang` INT NOT NULL,
             `url_name` VARCHAR(128),
@@ -1494,9 +1755,9 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
         );
 
         // Features
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'layered_indexable_feature`');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature`');
         $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'layered_indexable_feature` (
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` (
             `id_feature` INT NOT NULL,
             `indexable` BOOL NOT NULL DEFAULT 0,
             PRIMARY KEY (`id_feature`)
@@ -1504,13 +1765,13 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
         );
 
         $this->getDatabase()->execute(
-            'INSERT INTO `' . _DB_PREFIX_ . 'layered_indexable_feature` (id_feature)
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` (id_feature)
             SELECT id_feature FROM `' . _DB_PREFIX_ . 'feature`'
         );
 
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'layered_indexable_feature_lang_value`');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_lang_value`');
         $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'layered_indexable_feature_lang_value` (
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_lang_value` (
             `id_feature` INT NOT NULL,
             `id_lang` INT NOT NULL,
             `url_name` VARCHAR(128) NOT NULL,
@@ -1520,9 +1781,9 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
         );
 
         // Features values
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value`');
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value`');
         $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value` (
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value` (
             `id_feature_value` INT NOT NULL,
             `id_lang` INT NOT NULL,
             `url_name` VARCHAR(128),
@@ -1556,7 +1817,7 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
                 'SELECT COUNT(DISTINCT p.`id_product`) ' .
                 'FROM `' . _DB_PREFIX_ . 'product` p ' .
                 'INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps ON (ps.`id_product` = p.`id_product` AND ps.`active` = 1 AND ps.`visibility` IN ("both", "catalog")) ' .
-                'LEFT JOIN  `' . _DB_PREFIX_ . 'layered_price_index` psi ON (psi.id_product = p.id_product) ' .
+                'LEFT JOIN  `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` psi ON (psi.id_product = p.id_product) ' .
                 'WHERE psi.id_product IS NULL'
             );
         }
@@ -1605,7 +1866,7 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
             ]);
         }
 
-        Configuration::updateGlobalValue('PS_LAYERED_INDEXED', 1);
+        Configuration::updateGlobalValue('GC_LAYERED_INDEXED', 1);
 
         if ($ajax) {
             return json_encode([
@@ -1641,7 +1902,7 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
                 'FROM `' . _DB_PREFIX_ . 'product` p ' .
                 'INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps ' .
                 'ON (ps.`id_product` = p.`id_product` AND ps.`active` = 1 AND ps.`visibility` IN ("both", "catalog")) ' .
-                'LEFT JOIN  `' . _DB_PREFIX_ . 'layered_price_index` psi ON (psi.id_product = p.id_product) ' .
+                'LEFT JOIN  `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` psi ON (psi.id_product = p.id_product) ' .
                 'WHERE psi.id_product IS NULL ' .
                 'GROUP BY p.`id_product` ' .
                 'ORDER BY p.`id_product` LIMIT 0,' . (int) $length;
@@ -1664,7 +1925,7 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
         $this->smarty->assign($this->getWidgetVariables($hookName, $configuration));
 
         return $this->fetch(
-            'module:ps_facetedsearch/ps_facetedsearch.tpl'
+            'module:gc_facetedsearch/gc_facetedsearch.tpl'
         );
     }
 
@@ -1687,8 +1948,8 @@ VALUES(' . $last_id . ', ' . (int) $idShop . ')');
     {
         return $this->getDatabase()->getRow(
             'SELECT *
-            FROM `' . _DB_PREFIX_ . 'layered_filter`
-            WHERE id_layered_filter = ' . (int) $idFilterTemplate
+            FROM `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
+            WHERE id_gc_facetedsearch_filter = ' . (int) $idFilterTemplate
         );
     }
 

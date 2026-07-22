@@ -21,7 +21,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_3_4_0(Ps_Facetedsearch $module)
+function upgrade_module_3_4_0(GC_FacetedSearch $module)
 {
     $newHooks = [
         'actionFeatureFormBuilderModifier',

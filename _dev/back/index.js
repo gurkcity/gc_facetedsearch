@@ -206,7 +206,7 @@ $(document).ready(() => {
     });
   });
 
-  if (typeof PS_LAYERED_INDEXED !== 'undefined' && PS_LAYERED_INDEXED) {
+  if (typeof GC_LAYERED_INDEXED !== 'undefined' && GC_LAYERED_INDEXED) {
     $('#url-indexe').click();
     $('#full-index').click();
   }
@@ -257,7 +257,7 @@ $(document).ready(() => {
 });
 
 $(document).on('ready', () => {
-  const layeredDefaultCategory = $('input[name="ps_layered_filter_by_default_category"]');
+  const layeredDefaultCategory = $('input[name="gc_layered_filter_by_default_category"]');
   layeredDefaultCategory.on('change', function initializeOptions(event) {
     const elm = $(this);
 
@@ -266,10 +266,10 @@ $(document).on('ready', () => {
     }
 
     if (elm.val() === '1') {
-      $('input[name="ps_layered_full_tree"][value="0"]').prop('checked', true);
-      $('input[name="ps_layered_full_tree"]').prop('disabled', true);
+      $('input[name="gc_layered_full_tree"][value="0"]').prop('checked', true);
+      $('input[name="gc_layered_full_tree"]').prop('disabled', true);
     } else {
-      $('input[name="ps_layered_full_tree"]').prop('disabled', false);
+      $('input[name="gc_layered_full_tree"]').prop('disabled', false);
     }
   });
 

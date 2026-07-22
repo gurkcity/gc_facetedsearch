@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Filters;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters;
 
 use Category;
 use Configuration;
@@ -27,9 +27,9 @@ use Db;
 use Feature;
 use Group;
 use Manufacturer;
-use PrestaShop\Module\FacetedSearch\Adapter\InterfaceAdapter;
-use PrestaShop\Module\FacetedSearch\Definition\Availability;
-use PrestaShop\Module\FacetedSearch\Product\Search;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Adapter\InterfaceAdapter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Definition\Availability;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product\Search;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
 use PrestaShop\PrestaShop\Core\Localization\Specification\NumberSymbolList;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
@@ -174,12 +174,12 @@ class Block
      */
     public function getFromCache($filterHash)
     {
-        if (!Configuration::get('PS_LAYERED_CACHE_ENABLED')) {
+        if (!Configuration::get('GC_LAYERED_CACHE_ENABLED')) {
             return null;
         }
 
         $row = $this->database->getRow(
-            'SELECT data FROM ' . _DB_PREFIX_ . 'layered_filter_block WHERE hash="' . pSQL($filterHash) . '"'
+            'SELECT data FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block WHERE hash="' . pSQL($filterHash) . '"'
         );
 
         if (!empty($row)) {
@@ -197,13 +197,13 @@ class Block
      */
     public function insertIntoCache($filterHash, $data)
     {
-        if (!Configuration::get('PS_LAYERED_CACHE_ENABLED')) {
+        if (!Configuration::get('GC_LAYERED_CACHE_ENABLED')) {
             return;
         }
 
         try {
             $this->database->execute(
-                'REPLACE INTO ' . _DB_PREFIX_ . 'layered_filter_block (hash, data) ' .
+                'REPLACE INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block (hash, data) ' .
                 'VALUES ("' . $filterHash . '", "' . pSQL(serialize($data)) . '")'
             );
         } catch (PrestaShopDatabaseException $e) {
@@ -945,7 +945,7 @@ class Block
             $filteredSearchAdapter->addFilter('id_group', $userGroups);
         }
 
-        $depth = (int) Configuration::get('PS_LAYERED_FILTER_CATEGORY_DEPTH', null, null, null, 1);
+        $depth = (int) Configuration::get('GC_LAYERED_FILTER_CATEGORY_DEPTH', null, null, null, 1);
 
         if ($depth) {
             $levelDepth = $parent->level_depth;

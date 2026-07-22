@@ -26,9 +26,9 @@
 
 declare(strict_types=1);
 
-namespace PrestaShop\Module\FacetedSearch\Form\Attribute;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\Attribute;
 
-use PrestaShop\Module\FacetedSearch\Constraint\UrlSegment;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Constraint\UrlSegment;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use PrestaShopBundle\Translation\DataCollectorTranslator;
 use PrestaShopBundle\Translation\TranslatorComponent;

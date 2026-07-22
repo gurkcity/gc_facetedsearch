@@ -18,15 +18,15 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Hook;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Hook;
 
 use Configuration;
-use PrestaShop\Module\FacetedSearch\Filters\Converter;
-use PrestaShop\Module\FacetedSearch\Filters\DataAccessor;
-use PrestaShop\Module\FacetedSearch\Filters\Provider;
-use PrestaShop\Module\FacetedSearch\Product\SearchFactory;
-use PrestaShop\Module\FacetedSearch\Product\SearchProvider;
-use PrestaShop\Module\FacetedSearch\URLSerializer;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Converter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\DataAccessor;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Provider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product\SearchFactory;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product\SearchProvider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\URLSerializer;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
 
@@ -85,16 +85,16 @@ class ProductSearch extends AbstractHook
         // Assign assets
         /** @var \FrontController $controller */
         $controller = $this->context->controller;
-        if ((bool) Configuration::get('PS_USE_JQUERY_UI_SLIDER')) {
+        if ((bool) Configuration::get('GC_USE_JQUERY_UI_SLIDER')) {
             $controller->addJqueryUi('ui.slider');
         }
         $controller->registerStylesheet(
             'facetedsearch_front',
-            '/modules/ps_facetedsearch/views/dist/front.css'
+            '/modules/gc_facetedsearch/views/dist/front.css'
         );
         $controller->registerJavascript(
             'facetedsearch_front',
-            '/modules/ps_facetedsearch/views/dist/front.js',
+            '/modules/gc_facetedsearch/views/dist/front.js',
             ['position' => 'bottom', 'priority' => 100]
         );
 

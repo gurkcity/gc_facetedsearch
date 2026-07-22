@@ -21,10 +21,10 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_4_0_4(Ps_Facetedsearch $module)
+function upgrade_module_4_0_4(GC_FacetedSearch $module)
 {
     // Change data column to longtext
-    Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'layered_filter_block` CHANGE `data` `data` LONGTEXT NULL;');
+    Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block` CHANGE `data` `data` LONGTEXT NULL;');
 
     return true;
 }

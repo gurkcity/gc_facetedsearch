@@ -18,14 +18,14 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Hook;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Hook;
 
 use Configuration;
 use Language;
-use PrestaShop\Module\FacetedSearch\Form\Feature\FormDataProvider;
-use PrestaShop\Module\FacetedSearch\Form\Feature\FormModifier;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\Feature\FormDataProvider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\Feature\FormModifier;
 use PrestaShopDatabaseException;
-use Ps_Facetedsearch;
+use GC_FacetedSearch;
 use Tools;
 
 class Feature extends AbstractHook
@@ -45,7 +45,7 @@ class Feature extends AbstractHook
      */
     private $isMigratedPage = false;
 
-    public function __construct(Ps_Facetedsearch $module)
+    public function __construct(GC_FacetedSearch $module)
     {
         parent::__construct($module);
 
@@ -112,7 +112,7 @@ class Feature extends AbstractHook
         }
 
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_feature
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature
             WHERE `id_feature` = ' . (int) $params['id_feature']
         );
         $this->module->invalidateLayeredFilterBlockCache();
@@ -142,13 +142,13 @@ class Feature extends AbstractHook
         $values = [];
         $isIndexable = $this->database->getValue(
             'SELECT `indexable` ' .
-            'FROM ' . _DB_PREFIX_ . 'layered_indexable_feature ' .
+            'FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature ' .
             'WHERE `id_feature` = ' . (int) $params['id_feature']
         );
 
         $result = $this->database->executeS(
             'SELECT `url_name`, `meta_title`, `id_lang` ' .
-            'FROM ' . _DB_PREFIX_ . 'layered_indexable_feature_lang_value ' .
+            'FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_lang_value ' .
             'WHERE `id_feature` = ' . (int) $params['id_feature']
         );
         if ($result) {
@@ -177,13 +177,13 @@ class Feature extends AbstractHook
      */
     public function actionFeatureSave(array $params)
     {
-        if (empty($params['id_feature']) || Tools::getValue('layered_indexable') === false) {
+        if (empty($params['id_feature']) || Tools::getValue('gc_facetedsearch_indexable') === false) {
             return;
         }
 
         $featureId = (int) $params['id_feature'];
         $formData = [
-            'layered_indexable' => Tools::getValue('layered_indexable'),
+            'gc_facetedsearch_indexable' => Tools::getValue('gc_facetedsearch_indexable'),
         ];
 
         foreach (Language::getLanguages(false) as $language) {
@@ -215,13 +215,13 @@ class Feature extends AbstractHook
         $this->cleanLayeredIndexableTables($featureId);
 
         $this->database->execute(
-            'INSERT INTO ' . _DB_PREFIX_ . 'layered_indexable_feature
+            'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature
             (`id_feature`, `indexable`)
-            VALUES (' . (int) $featureId . ', ' . (int) $formData['layered_indexable'] . ')'
+            VALUES (' . (int) $featureId . ', ' . (int) $formData['gc_facetedsearch_indexable'] . ')'
         );
 
         $defaultLangId = (int) Configuration::get('PS_LANG_DEFAULT');
-        $query = 'INSERT INTO ' . _DB_PREFIX_ . 'layered_indexable_feature_lang_value ' .
+        $query = 'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_lang_value ' .
                '(`id_feature`, `id_lang`, `url_name`, `meta_title`) ' .
                'VALUES (%d, %d, \'%s\', \'%s\')';
 
@@ -250,18 +250,18 @@ class Feature extends AbstractHook
     }
 
     /**
-     * Deletes from layered_indexable_feature and layered_indexable_feature_lang_value by feature id
+     * Deletes from gc_facetedsearch_indexable_feature and gc_facetedsearch_indexable_feature_lang_value by feature id
      *
      * @param int $featureId
      */
     private function cleanLayeredIndexableTables($featureId)
     {
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_feature
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature
             WHERE `id_feature` = ' . $featureId
         );
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_feature_lang_value
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_lang_value
             WHERE `id_feature` = ' . $featureId
         );
     }

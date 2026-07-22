@@ -78,11 +78,11 @@
 	<label class="control-label col-lg-4" for="">{l s='Indexable' d='Modules.Facetedsearch.Admin'}</label>
 	<div class="col-lg-8">
 		<span class="switch prestashop-switch fixed-width-lg">
-			<input type="radio" name="layered_indexable" id="indexable_on" value="1"{if $is_indexable} checked="checked"{/if}>
+			<input type="radio" name="gc_facetedsearch_indexable" id="indexable_on" value="1"{if $is_indexable} checked="checked"{/if}>
 			<label for="indexable_on">
 				<i class="color_success"></i> {l s='Yes' d='Admin.Global'}
 			</label>
-			<input type="radio" name="layered_indexable" id="indexable_off" value="0"{if !$is_indexable} checked="checked"{/if}>
+			<input type="radio" name="gc_facetedsearch_indexable" id="indexable_off" value="0"{if !$is_indexable} checked="checked"{/if}>
 			<label for="indexable_off">
 				<i class="color_danger"></i> {l s='No' d='Admin.Global'}
 			</label>

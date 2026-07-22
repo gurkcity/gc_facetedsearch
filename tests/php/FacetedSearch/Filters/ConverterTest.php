@@ -18,17 +18,17 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Tests\Filters;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Tests\Filters;
 
 use Configuration;
 use Context;
 use Db;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
-use PrestaShop\Module\FacetedSearch\Filters\Converter;
-use PrestaShop\Module\FacetedSearch\Filters\DataAccessor;
-use PrestaShop\Module\FacetedSearch\Filters\Provider;
-use PrestaShop\Module\FacetedSearch\URLSerializer;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Converter;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\DataAccessor;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters\Provider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\URLSerializer;
 use PrestaShop\PrestaShop\Core\Product\Search\Facet;
 use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 use Shop;
@@ -57,7 +57,7 @@ class ConverterTest extends MockeryTestCase
                     'PS_STOCK_MANAGEMENT' => '1',
                     'PS_ORDER_OUT_OF_STOCK' => '0',
                     'PS_UNIDENTIFIED_GROUP' => '1',
-                    'PS_LAYERED_FILTER_CATEGORY_DEPTH' => 3,
+                    'GC_LAYERED_FILTER_CATEGORY_DEPTH' => 3,
                 ];
 
                 return $valueMap[$arg];

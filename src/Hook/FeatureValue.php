@@ -18,12 +18,12 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Hook;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Hook;
 
 use Language;
-use PrestaShop\Module\FacetedSearch\Form\FeatureValue\FormDataProvider;
-use PrestaShop\Module\FacetedSearch\Form\FeatureValue\FormModifier;
-use Ps_Facetedsearch;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\FeatureValue\FormDataProvider;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Form\FeatureValue\FormModifier;
+use GC_FacetedSearch;
 use Tools;
 
 class FeatureValue extends AbstractHook
@@ -48,7 +48,7 @@ class FeatureValue extends AbstractHook
      */
     private $dataProvider;
 
-    public function __construct(Ps_Facetedsearch $module)
+    public function __construct(GC_FacetedSearch $module)
     {
         parent::__construct($module);
 
@@ -105,7 +105,7 @@ class FeatureValue extends AbstractHook
 
         //Removing all indexed language data for this attribute value id
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value
             WHERE `id_feature_value` = ' . (int) $params['id_feature_value']
         );
 
@@ -117,7 +117,7 @@ class FeatureValue extends AbstractHook
             }
 
             $this->database->execute(
-                'INSERT INTO ' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value
+                'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value
                 (`id_feature_value`, `id_lang`, `url_name`, `meta_title`)
                 VALUES (
                 ' . (int) $params['id_feature_value'] . ', ' . (int) $language['id_lang'] . ',
@@ -141,7 +141,7 @@ class FeatureValue extends AbstractHook
         }
 
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value
             WHERE `id_feature_value` = ' . (int) $params['id_feature_value']
         );
         $this->module->invalidateLayeredFilterBlockCache();
@@ -170,7 +170,7 @@ class FeatureValue extends AbstractHook
 
         if ($result = $this->database->executeS(
             'SELECT `url_name`, `meta_title`, `id_lang`
-            FROM ' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value
+            FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value
             WHERE `id_feature_value` = ' . (int) $params['id_feature_value']
         )) {
             foreach ($result as $data) {
@@ -191,11 +191,11 @@ class FeatureValue extends AbstractHook
     {
         $featureValueId = (int) $featureValueId;
         $this->database->execute(
-            'DELETE FROM ' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value
+            'DELETE FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value
             WHERE `id_feature_value` = ' . $featureValueId
         );
 
-        $query = 'INSERT INTO ' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value ' .
+        $query = 'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value ' .
             '(`id_feature_value`, `id_lang`, `url_name`, `meta_title`) ' .
             'VALUES (%d, %d, \'%s\', \'%s\')';
 

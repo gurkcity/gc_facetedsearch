@@ -18,14 +18,14 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Tests;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Tests;
 
 use Context;
 use Db;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
-use PrestaShop\Module\FacetedSearch\HookDispatcher;
-use Ps_Facetedsearch;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\HookDispatcher;
+use GC_FacetedSearch;
 
 class HookDispatcherTest extends MockeryTestCase
 {
@@ -34,7 +34,7 @@ class HookDispatcherTest extends MockeryTestCase
 
     protected function setUp()
     {
-        $this->module = Mockery::mock(Ps_Facetedsearch::class);
+        $this->module = Mockery::mock(GC_FacetedSearch::class);
         $contextMock = Mockery::mock(Context::class);
         $dbMock = Mockery::mock(Db::class);
         $this->module->shouldReceive('getDatabase')

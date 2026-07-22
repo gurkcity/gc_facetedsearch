@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Tests\Product;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Tests\Product;
 
 use Configuration;
 use Context;
@@ -27,9 +27,9 @@ use Group;
 use Hook;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
-use PrestaShop\Module\FacetedSearch\Adapter\MySQL;
-use PrestaShop\Module\FacetedSearch\Definition\Availability;
-use PrestaShop\Module\FacetedSearch\Product\Search;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Adapter\MySQL;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Definition\Availability;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product\Search;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use stdClass;
 
@@ -49,8 +49,8 @@ class SearchTest extends MockeryTestCase
                     'PS_STOCK_MANAGEMENT' => true,
                     'PS_ORDER_OUT_OF_STOCK' => true,
                     'PS_HOME_CATEGORY' => true,
-                    'PS_LAYERED_FULL_TREE' => false,
-                    'PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY' => true,
+                    'GC_LAYERED_FULL_TREE' => false,
+                    'GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY' => true,
                 ];
 
                 return $valueMap[$arg];
@@ -224,8 +224,8 @@ class SearchTest extends MockeryTestCase
                     'PS_STOCK_MANAGEMENT' => true,
                     'PS_ORDER_OUT_OF_STOCK' => true,
                     'PS_HOME_CATEGORY' => true,
-                    'PS_LAYERED_FULL_TREE' => true,
-                    'PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY' => false,
+                    'GC_LAYERED_FULL_TREE' => true,
+                    'GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY' => false,
                 ];
 
                 return $valueMap[$arg];
@@ -618,8 +618,8 @@ class SearchTest extends MockeryTestCase
                     'PS_STOCK_MANAGEMENT' => false,
                     'PS_ORDER_OUT_OF_STOCK' => true,
                     'PS_HOME_CATEGORY' => true,
-                    'PS_LAYERED_FULL_TREE' => false,
-                    'PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY' => true,
+                    'GC_LAYERED_FULL_TREE' => false,
+                    'GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY' => true,
                 ];
 
                 return $valueMap[$arg];

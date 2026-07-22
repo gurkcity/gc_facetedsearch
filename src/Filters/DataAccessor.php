@@ -18,7 +18,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Filters;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters;
 
 use Combination;
 use Db;
@@ -90,7 +90,7 @@ class DataAccessor
                 'ON (a.`id_attribute` = al.`id_attribute` AND al.`id_lang` = ' . (int) $idLang . ')' .
                 Shop::addSqlAssociation('attribute_group', 'ag') . ' ' .
                 Shop::addSqlAssociation('attribute', 'a') . ' ' .
-                'LEFT JOIN `' . _DB_PREFIX_ . 'layered_indexable_attribute_lang_value` lialv ' .
+                'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_lang_value` lialv ' .
                 'ON (a.`id_attribute` = lialv.`id_attribute` AND lialv.`id_lang` = ' . (int) $idLang . ') ' .
                 'WHERE ag.id_attribute_group = ' . (int) $idAttributeGroup . ' ' .
                 'ORDER BY agl.`name` ASC, a.`position` ASC'
@@ -130,9 +130,9 @@ class DataAccessor
                 Shop::addSqlAssociation('attribute_group', 'ag') . ' ' .
                 'LEFT JOIN `' . _DB_PREFIX_ . 'attribute_group_lang` agl ' .
                 'ON (ag.`id_attribute_group` = agl.`id_attribute_group` AND agl.`id_lang` = ' . (int) $idLang . ') ' .
-                'LEFT JOIN `' . _DB_PREFIX_ . 'layered_indexable_attribute_group` liag ' .
+                'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` liag ' .
                 'ON (ag.`id_attribute_group` = liag.`id_attribute_group`) ' .
-                'LEFT JOIN `' . _DB_PREFIX_ . 'layered_indexable_attribute_group_lang_value` AS liaglv ' .
+                'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value` AS liaglv ' .
                 'ON (ag.`id_attribute_group` = liaglv.`id_attribute_group` AND agl.`id_lang` = ' . (int) $idLang . ') ' .
                 'GROUP BY ag.id_attribute_group ORDER BY ag.`position` ASC'
             );
@@ -164,9 +164,9 @@ class DataAccessor
                 'FROM `' . _DB_PREFIX_ . 'feature` f ' .
                 '' . Shop::addSqlAssociation('feature', 'f') . ' ' .
                 'LEFT JOIN `' . _DB_PREFIX_ . 'feature_lang` fl ON (f.`id_feature` = fl.`id_feature` AND fl.`id_lang` = ' . (int) $idLang . ') ' .
-                'LEFT JOIN `' . _DB_PREFIX_ . 'layered_indexable_feature` lif ' .
+                'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` lif ' .
                 'ON (f.`id_feature` = lif.`id_feature`) ' .
-                'LEFT JOIN `' . _DB_PREFIX_ . 'layered_indexable_feature_lang_value` liflv ' .
+                'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_lang_value` liflv ' .
                 'ON (f.`id_feature` = liflv.`id_feature` AND liflv.`id_lang` = ' . (int) $idLang . ') ' .
                 'ORDER BY f.`position` ASC'
             );
@@ -198,7 +198,7 @@ class DataAccessor
                 'FROM `' . _DB_PREFIX_ . 'feature_value` v ' .
                 'LEFT JOIN `' . _DB_PREFIX_ . 'feature_value_lang` vl ' .
                 'ON (v.`id_feature_value` = vl.`id_feature_value` AND vl.`id_lang` = ' . (int) $idLang . ') ' .
-                'LEFT JOIN `' . _DB_PREFIX_ . 'layered_indexable_feature_value_lang_value` lifvlv ' .
+                'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value` lifvlv ' .
                 'ON (v.`id_feature_value` = lifvlv.`id_feature_value` AND lifvlv.`id_lang` = ' . (int) $idLang . ') ' .
                 'WHERE v.`id_feature` = ' . (int) $idFeature . ' ' .
                 'ORDER BY vl.`value` ASC'

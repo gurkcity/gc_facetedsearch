@@ -18,12 +18,12 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch;
 
-use Ps_Facetedsearch;
+use GC_FacetedSearch;
 
 /**
- * Class works with Hook\AbstractHook instances in order to reduce ps_facetedsearch.php size.
+ * Class works with Hook\AbstractHook instances in order to reduce gc_facetedsearch.php size.
  *
  * The dispatch method is called from the __call method in the module class.
  */
@@ -59,16 +59,16 @@ class HookDispatcher
     /**
      * Module
      *
-     * @var Ps_Facetedsearch
+     * @var GC_FacetedSearch
      */
     private $module;
 
     /**
      * Init hooks
      *
-     * @param Ps_Facetedsearch $module
+     * @param GC_FacetedSearch $module
      */
-    public function __construct(Ps_Facetedsearch $module)
+    public function __construct(GC_FacetedSearch $module)
     {
         $this->module = $module;
 

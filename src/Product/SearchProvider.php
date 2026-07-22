@@ -18,12 +18,12 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
 
-namespace PrestaShop\Module\FacetedSearch\Product;
+namespace Onlineshopmodule\PrestaShop\Module\FacetedSearch\Product;
 
 use Configuration;
 use Hook;
-use PrestaShop\Module\FacetedSearch\Filters;
-use PrestaShop\Module\FacetedSearch\URLSerializer;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\Filters;
+use Onlineshopmodule\PrestaShop\Module\FacetedSearch\URLSerializer;
 use PrestaShop\PrestaShop\Core\Product\Search\Facet;
 use PrestaShop\PrestaShop\Core\Product\Search\FacetCollection;
 use PrestaShop\PrestaShop\Core\Product\Search\FacetsRendererInterface;
@@ -32,13 +32,13 @@ use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchProviderInterface;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
-use Ps_Facetedsearch;
+use GC_FacetedSearch;
 use Tools;
 
 class SearchProvider implements FacetsRendererInterface, ProductSearchProviderInterface
 {
     /**
-     * @var Ps_Facetedsearch
+     * @var GC_FacetedSearch
      */
     private $module;
 
@@ -68,7 +68,7 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
     private $provider;
 
     public function __construct(
-        Ps_Facetedsearch $module,
+        GC_FacetedSearch $module,
         Filters\Converter $converter,
         URLSerializer $serializer,
         Filters\DataAccessor $dataAccessor,
@@ -305,7 +305,7 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
 
         $this->module->getContext()->smarty->assign(
             [
-                'show_quantities' => Configuration::get('PS_LAYERED_SHOW_QTIES'),
+                'show_quantities' => Configuration::get('GC_LAYERED_SHOW_QTIES'),
                 // Provide the language to the template so theme overrides can read it (e.g. the
                 // Hummingbird slider uses {$language.is_rtl} for the slider direction). It must be
                 // an ARRAY, mirroring the global `language` the front controller assigns (via
@@ -338,7 +338,7 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
         );
 
         return $this->module->fetch(
-            'module:ps_facetedsearch/views/templates/front/catalog/facets.tpl'
+            'module:gc_facetedsearch/views/templates/front/catalog/facets.tpl'
         );
     }
 
@@ -367,7 +367,7 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
         );
 
         return $this->module->fetch(
-            'module:ps_facetedsearch/views/templates/front/catalog/active-filters.tpl'
+            'module:gc_facetedsearch/views/templates/front/catalog/active-filters.tpl'
         );
     }
 
