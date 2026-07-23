@@ -1,0 +1,57 @@
+{#**
+ * GC Facetedsearch
+ * Module for PrestaShop E-Commerce Software
+ *
+ * @author    Markus Engel <info@onlineshop-module.de>
+ * @copyright Copyright (c) 2026, Onlineshop-Module.de
+ * @license   commercial, see licence.txt
+ *#}
+
+<div class="col-xl-12">
+  <div class="card">
+
+    <h3 class="card-header">
+      <i class="material-icons">html</i> {{ 'Smarty Caching'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+    </h3>
+
+    <div class="card-body">
+      <p>{{ 'Smarty caching helps to improve the performance of your shop by storing compiled templates and cached data. It is recommended to clear the Smarty cache after making changes to templates or configurations.'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</p>
+
+      {% if caching.files is empty %}
+      <p class="alert alert-info">{{ 'There are no cached files'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</p>
+      {% else %}
+
+      <table class="files-container table table-sm">
+        <thead>
+          <tr>
+            <th>{{ 'Filename'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+            <th>{{ 'Size'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+            <th>{{ 'Relative Path'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for file in caching.files %}
+          <tr>
+            <td>{{ file.filename }}</td>
+            <td>{{ file.size }} kB</td>
+            <td>{{ file.relative_path }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><b>{{ caching.total_count }} {{ 'Files'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</b></td>
+            <td><b>{{ caching.total_size }} kB</b></td>
+            <td></td>
+          </tr>
+      </table>
+      {% endif %}
+    </div>
+
+    <div class="card-footer">
+      <div class="d-flex justify-content-end">
+        <a class="btn btn-primary" href="{{ path('gc_facetedsearch_maintenance_caching_clear') }}">{{ 'Clear Smarty Cache'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</a>
+      </div>
+    </div>
+  </div>
+</div>

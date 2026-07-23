@@ -1,7 +1,19 @@
-/views/dist
+#dev
+/.idea
+
+#log
+/log/*
+!/log/.htaccess
+!/log/index.php
+
+#composer & node
 /node_modules
+/_dev/node_modules
+
+#files
+*.code-workspace
 config_*.xml
-.php_cs.cache
-.idea
-# PHPStan 9.x CI: custom php.ini directory (generated in workflow)
-.phpstan-php-ini/
+
+.php-cs-fixer.cache
+/_releases/*
+!/_releases/index.php

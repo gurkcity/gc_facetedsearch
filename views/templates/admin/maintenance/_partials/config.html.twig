@@ -1,0 +1,88 @@
+{#**
+ * GC Facetedsearch
+ * Module for PrestaShop E-Commerce Software
+ *
+ * @author    Markus Engel <info@onlineshop-module.de>
+ * @copyright Copyright (c) 2026, Onlineshop-Module.de
+ * @license   commercial, see licence.txt
+ *#}
+<div class="col-xl-12">
+  <div class="card">
+
+    <h3 class="card-header">
+      <i class="material-icons">settings</i> {{ 'Configuration'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+    </h3>
+
+    <div class="card-body">
+      <p>{{ 'This list shows the configuration that installs this module. If the configuration values are not installed correctly, you can reset them here. The displayed values correspond to those of the current context in the multi-shop.'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</p>
+
+      {% include '@Modules/gc_facetedsearch/views/templates/admin/maintenance/_partials/multishop.html.twig' %}
+
+      {% if config is not empty %}
+      <table class="config_list table table-sm table-responsive">
+        <thead>
+          <tr>
+            <th>{{ 'Status'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+            <th>{{ 'Name'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+            <th>{{ 'Value'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+            <th>{{ 'Scope'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for value in config %}
+          <tr>
+            <td>
+              {% if not value.valid %}
+              <span class="badge badge-warning">{{ 'missing!'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</span>
+              {% else %}
+              <span class="badge badge-success">{{ 'ok'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</span>
+              {% endif %}
+            </td>
+            <td>{{ value.name }}</td>
+            {% if value.value is null %}
+            <td class="text-muted font-italic">{{ 'Not set in this context'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</td>
+            {% elseif value.value is iterable %}
+            <td class="lang_grid">
+              {% for id_lang, lang_value in value.value %}
+              <span class="lang_id">{{ id_lang }}</span>
+              {% if lang_value|length > 200 %}
+                {{ lang_value|slice(0,200) }} ...
+              {% else %}
+                {{ lang_value }}
+              {% endif %}
+              {% if not loop.last %}<br>{% endif %}
+              {% endfor %}
+            </td>
+            {% elseif value.value|length > 200 %}
+            <td>{{ value.value|slice(0,200) }} ...</td>
+            {% else %}
+            <td>{{ value.value }}</td>
+            {% endif %}
+            <td>
+                {% if value.constraint == 'shop' %}
+                    {{- 'Shop'|trans({}, 'Modules.Gcfacetedsearch.Admin') -}}
+                {% elseif value.constraint == 'group' %}
+                    {{- 'Group'|trans({}, 'Modules.Gcfacetedsearch.Admin') -}}
+                {% elseif value.constraint == 'all' %}
+                    {{- 'All Shops'|trans({}, 'Modules.Gcfacetedsearch.Admin') -}}
+                {% else %}
+                    {{- 'Unknown'|trans({}, 'Modules.Gcfacetedsearch.Admin') -}}
+                {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="alert alert-info">{{ 'There is no configuration for this module to install'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</p>
+      {% endif %}
+    </div>
+
+    <div class="card-footer">
+      <div class="d-flex justify-content-end">
+        <a class="btn btn-primary" href="{{ path('gc_facetedsearch_maintenance_config_reset') }}">{{ 'Install missing configuration'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</a>
+      </div>
+    </div>
+
+  </div>
+</div>

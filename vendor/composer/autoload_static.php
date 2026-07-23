@@ -4,97 +4,108 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInita0b4227fa30ee4605207d4893da7ac00
+class ComposerStaticInit8e2da7e39ba563175b35136c8d6cc392
 {
     public static $prefixLengthsPsr4 = array (
-        'O' => 
+        'O' =>
         array (
-            'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\' => 49,
-        ),
-        'D' => 
-        array (
-            'Doctrine\\Deprecations\\' => 22,
-            'Doctrine\\Common\\Collections\\' => 28,
+            'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\' => 50,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\' => 
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
-        ),
-        'Doctrine\\Deprecations\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/deprecations/src',
-        ),
-        'Doctrine\\Common\\Collections\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections',
         ),
     );
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'Doctrine\\Common\\Collections\\AbstractLazyCollection' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/AbstractLazyCollection.php',
-        'Doctrine\\Common\\Collections\\ArrayCollection' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/ArrayCollection.php',
-        'Doctrine\\Common\\Collections\\Collection' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Collection.php',
-        'Doctrine\\Common\\Collections\\Criteria' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Criteria.php',
-        'Doctrine\\Common\\Collections\\Expr\\ClosureExpressionVisitor' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Expr/ClosureExpressionVisitor.php',
-        'Doctrine\\Common\\Collections\\Expr\\Comparison' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Expr/Comparison.php',
-        'Doctrine\\Common\\Collections\\Expr\\CompositeExpression' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Expr/CompositeExpression.php',
-        'Doctrine\\Common\\Collections\\Expr\\Expression' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Expr/Expression.php',
-        'Doctrine\\Common\\Collections\\Expr\\ExpressionVisitor' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Expr/ExpressionVisitor.php',
-        'Doctrine\\Common\\Collections\\Expr\\Value' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Expr/Value.php',
-        'Doctrine\\Common\\Collections\\ExpressionBuilder' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/ExpressionBuilder.php',
-        'Doctrine\\Common\\Collections\\ReadableCollection' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/ReadableCollection.php',
-        'Doctrine\\Common\\Collections\\Selectable' => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections/Selectable.php',
-        'Doctrine\\Deprecations\\Deprecation' => __DIR__ . '/..' . '/doctrine/deprecations/src/Deprecation.php',
-        'Doctrine\\Deprecations\\PHPUnit\\VerifyDeprecations' => __DIR__ . '/..' . '/doctrine/deprecations/src/PHPUnit/VerifyDeprecations.php',
-        'GC_FacetedSearch' => __DIR__ . '/../..' . '/gc_facetedsearch.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Adapter\\AbstractAdapter' => __DIR__ . '/../..' . '/src/Adapter/AbstractAdapter.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Adapter\\InterfaceAdapter' => __DIR__ . '/../..' . '/src/Adapter/InterfaceAdapter.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Adapter\\MySQL' => __DIR__ . '/../..' . '/src/Adapter/MySQL.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Constraint\\UrlSegment' => __DIR__ . '/../..' . '/src/Constraint/UrlSegment.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Constraint\\UrlSegmentValidator' => __DIR__ . '/../..' . '/src/Constraint/UrlSegmentValidator.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Definition\\Availability' => __DIR__ . '/../..' . '/src/Definition/Availability.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Filters\\Block' => __DIR__ . '/../..' . '/src/Filters/Block.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Filters\\Converter' => __DIR__ . '/../..' . '/src/Filters/Converter.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Filters\\DataAccessor' => __DIR__ . '/../..' . '/src/Filters/DataAccessor.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Filters\\Products' => __DIR__ . '/../..' . '/src/Filters/Products.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Filters\\Provider' => __DIR__ . '/../..' . '/src/Filters/Provider.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Form\\AttributeGroup\\FormDataProvider' => __DIR__ . '/../..' . '/src/Form/AttributeGroup/FormDataProvider.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Form\\AttributeGroup\\FormModifier' => __DIR__ . '/../..' . '/src/Form/AttributeGroup/FormModifier.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Form\\Attribute\\FormDataProvider' => __DIR__ . '/../..' . '/src/Form/Attribute/FormDataProvider.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Form\\Attribute\\FormModifier' => __DIR__ . '/../..' . '/src/Form/Attribute/FormModifier.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Form\\FeatureValue\\FormDataProvider' => __DIR__ . '/../..' . '/src/Form/FeatureValue/FormDataProvider.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Form\\FeatureValue\\FormModifier' => __DIR__ . '/../..' . '/src/Form/FeatureValue/FormModifier.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Form\\Feature\\FormDataProvider' => __DIR__ . '/../..' . '/src/Form/Feature/FormDataProvider.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Form\\Feature\\FormModifier' => __DIR__ . '/../..' . '/src/Form/Feature/FormModifier.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\HookDispatcher' => __DIR__ . '/../..' . '/src/HookDispatcher.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\AbstractHook' => __DIR__ . '/../..' . '/src/Hook/AbstractHook.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\Attribute' => __DIR__ . '/../..' . '/src/Hook/Attribute.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\AttributeGroup' => __DIR__ . '/../..' . '/src/Hook/AttributeGroup.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\Category' => __DIR__ . '/../..' . '/src/Hook/Category.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\Configuration' => __DIR__ . '/../..' . '/src/Hook/Configuration.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\Design' => __DIR__ . '/../..' . '/src/Hook/Design.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\Feature' => __DIR__ . '/../..' . '/src/Hook/Feature.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\FeatureValue' => __DIR__ . '/../..' . '/src/Hook/FeatureValue.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\Product' => __DIR__ . '/../..' . '/src/Hook/Product.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\ProductSearch' => __DIR__ . '/../..' . '/src/Hook/ProductSearch.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Hook\\SpecificPrice' => __DIR__ . '/../..' . '/src/Hook/SpecificPrice.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Product\\CoreSearchBackport' => __DIR__ . '/../..' . '/src/Product/CoreSearchBackport.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Product\\Search' => __DIR__ . '/../..' . '/src/Product/Search.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Product\\SearchFactory' => __DIR__ . '/../..' . '/src/Product/SearchFactory.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\Product\\SearchProvider' => __DIR__ . '/../..' . '/src/Product/SearchProvider.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\URLSerializer' => __DIR__ . '/../..' . '/src/URLSerializer.php',
+        'GC_Facetedsearch' => __DIR__ . '/../..' . '/gc_facetedsearch.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\Command' => __DIR__ . '/../..' . '/src/Command/Command.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\CronCommand' => __DIR__ . '/../..' . '/src/Command/CronCommand.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\ExampleCommand' => __DIR__ . '/../..' . '/src/Command/ExampleCommand.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\AdminController' => __DIR__ . '/../..' . '/src/Controller/AdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\ConfigurationAdminController' => __DIR__ . '/../..' . '/src/Controller/ConfigurationAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\CronAdminController' => __DIR__ . '/../..' . '/src/Controller/CronAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\ExampleAdminController' => __DIR__ . '/../..' . '/src/Controller/ExampleAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LicenseAdminController' => __DIR__ . '/../..' . '/src/Controller/LicenseAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LogAdminController' => __DIR__ . '/../..' . '/src/Controller/LogAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\MaintenanceAdminController' => __DIR__ . '/../..' . '/src/Controller/MaintenanceAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\PaymentAdminController' => __DIR__ . '/../..' . '/src/Controller/PaymentAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Cron\\CronExecuter' => __DIR__ . '/../..' . '/src/Cron/CronExecuter.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Cron\\CronPresenter' => __DIR__ . '/../..' . '/src/Cron/CronPresenter.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Cron\\CronQueueRepository' => __DIR__ . '/../..' . '/src/Cron/CronQueueRepository.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\CronException' => __DIR__ . '/../..' . '/src/Exception/CronException.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\InstallException' => __DIR__ . '/../..' . '/src/Exception/InstallException.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\LogException' => __DIR__ . '/../..' . '/src/Exception/LogException.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\SettingException' => __DIR__ . '/../..' . '/src/Exception/SettingException.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\AbstractFormDataProvider' => __DIR__ . '/../..' . '/src/Form/AbstractFormDataProvider.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\ConfigurationFormDataProvider' => __DIR__ . '/../..' . '/src/Form/DataProvider/ConfigurationFormDataProvider.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\CronFormDataProvider' => __DIR__ . '/../..' . '/src/Form/DataProvider/CronFormDataProvider.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\LicenseFormDataProvider' => __DIR__ . '/../..' . '/src/Form/DataProvider/LicenseFormDataProvider.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\LogFormDataProvider' => __DIR__ . '/../..' . '/src/Form/DataProvider/LogFormDataProvider.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\PaymentFormDataProvider' => __DIR__ . '/../..' . '/src/Form/DataProvider/PaymentFormDataProvider.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\Type\\ConfigurationType' => __DIR__ . '/../..' . '/src/Form/Type/ConfigurationType.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\Type\\CronType' => __DIR__ . '/../..' . '/src/Form/Type/CronType.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\Type\\ExampleType' => __DIR__ . '/../..' . '/src/Form/Type/ExampleType.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\Type\\ImageFileType' => __DIR__ . '/../..' . '/src/Form/Type/ImageFileType.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\Type\\LicenseType' => __DIR__ . '/../..' . '/src/Form/Type/LicenseType.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\Type\\LogType' => __DIR__ . '/../..' . '/src/Form/Type/LogType.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\Type\\PaymentType' => __DIR__ . '/../..' . '/src/Form/Type/PaymentType.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Grid\\Example\\ExampleFilters' => __DIR__ . '/../..' . '/src/Grid/Example/ExampleFilters.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Grid\\Example\\ExampleGridDefinitionFactory' => __DIR__ . '/../..' . '/src/Grid/Example/ExampleGridDefinitionFactory.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Grid\\Example\\ExampleQueryBuilder' => __DIR__ . '/../..' . '/src/Grid/Example/ExampleQueryBuilder.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Log\\LogLevel' => __DIR__ . '/../..' . '/src/Log/LogLevel.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Log\\LogRepository' => __DIR__ . '/../..' . '/src/Log/LogRepository.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Log\\Logger' => __DIR__ . '/../..' . '/src/Log/Logger.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Mail\\MailPartialTemplateRenderer' => __DIR__ . '/../..' . '/src/Mail/MailPartialTemplateRenderer.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\CachingMaintenance' => __DIR__ . '/../..' . '/src/Maintenance/CachingMaintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\ConfigMaintenance' => __DIR__ . '/../..' . '/src/Maintenance/ConfigMaintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\ControllerMaintenance' => __DIR__ . '/../..' . '/src/Maintenance/ControllerMaintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\HookMaintenance' => __DIR__ . '/../..' . '/src/Maintenance/HookMaintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\Maintenance' => __DIR__ . '/../..' . '/src/Maintenance/Maintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\MaintenanceInterface' => __DIR__ . '/../..' . '/src/Maintenance/MaintenanceInterface.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\OrderstateMaintenance' => __DIR__ . '/../..' . '/src/Maintenance/OrderstateMaintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\SqlMaintenance' => __DIR__ . '/../..' . '/src/Maintenance/SqlMaintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\TabMaintenance' => __DIR__ . '/../..' . '/src/Maintenance/TabMaintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Maintenance\\TemplateMaintenance' => __DIR__ . '/../..' . '/src/Maintenance/TemplateMaintenance.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Model\\Example' => __DIR__ . '/../..' . '/src/Model/Example.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Module\\AbstractSettings' => __DIR__ . '/../..' . '/src/Module/AbstractSettings.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Module\\ConfigurationAdapter' => __DIR__ . '/../..' . '/src/Module/ConfigurationAdapter.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Module\\Install' => __DIR__ . '/../..' . '/src/Module/Install.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Module\\OverrideTools' => __DIR__ . '/../..' . '/src/Module/OverrideTools.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Module\\TranslationLoader' => __DIR__ . '/../..' . '/src/Module/TranslationLoader.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Payment\\PaymentLogo' => __DIR__ . '/../..' . '/src/Payment/PaymentLogo.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Payment\\PaymentLogoFactory' => __DIR__ . '/../..' . '/src/Payment/PaymentLogoFactory.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Plugin\\PluginInterface' => __DIR__ . '/../..' . '/src/Plugin/PluginInterface.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Plugin\\PluginLoader' => __DIR__ . '/../..' . '/src/Plugin/PluginLoader.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Plugin\\PluginLoaderFactory' => __DIR__ . '/../..' . '/src/Plugin/PluginLoaderFactory.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Response\\Cron' => __DIR__ . '/../..' . '/src/Response/Cron.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Response\\Json' => __DIR__ . '/../..' . '/src/Response/Json.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings' => __DIR__ . '/../..' . '/src/Settings.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Config' => __DIR__ . '/../..' . '/src/Settings/Config.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Controller' => __DIR__ . '/../..' . '/src/Settings/Controller.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Hook' => __DIR__ . '/../..' . '/src/Settings/Hook.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Orderstate' => __DIR__ . '/../..' . '/src/Settings/Orderstate.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\SettingsInterface' => __DIR__ . '/../..' . '/src/Settings/SettingsInterface.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Sql' => __DIR__ . '/../..' . '/src/Settings/Sql.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Tab' => __DIR__ . '/../..' . '/src/Settings/Tab.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ExampleTrait' => __DIR__ . '/../..' . '/src/Traits/ExampleTrait.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleHelperTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleHelperTrait.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleLicenseTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleLicenseTrait.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModulePaymentTrait' => __DIR__ . '/../..' . '/src/Traits/ModulePaymentTrait.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleTrait.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ObjectAdminControllerTrait' => __DIR__ . '/../..' . '/src/Traits/ObjectAdminControllerTrait.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInita0b4227fa30ee4605207d4893da7ac00::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInita0b4227fa30ee4605207d4893da7ac00::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInita0b4227fa30ee4605207d4893da7ac00::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit8e2da7e39ba563175b35136c8d6cc392::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit8e2da7e39ba563175b35136c8d6cc392::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit8e2da7e39ba563175b35136c8d6cc392::$classMap;
 
         }, null, ClassLoader::class);
     }

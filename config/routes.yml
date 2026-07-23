@@ -1,0 +1,141 @@
+
+# Module main route
+gc_facetedsearch:
+  path: gc_facetedsearch
+  methods: [GET, POST]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\ConfigurationAdminController::indexAction
+    _legacy_controller: 'GcFacetedsearchConfigurationAdminController'
+    _legacy_link: 'GcFacetedsearchConfigurationAdminController'
+
+# License
+gc_facetedsearch_license:
+  path: gc_facetedsearch/license
+  methods: [GET, POST]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LicenseAdminController::indexAction
+    _legacy_controller: 'GcFacetedsearchLicenseAdminController'
+    _legacy_link: 'GcFacetedsearchLicenseAdminController'
+
+gc_facetedsearch_license_content:
+  path: gc_facetedsearch/license/content
+  methods: [GET, POST]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LicenseAdminController::displayLicenseTextAction
+    _legacy_controller: 'GcFacetedsearchLicenseAdminController'
+    _legacy_link: 'GcFacetedsearchLicenseAdminController'
+
+# Configuration
+gc_facetedsearch_configuration:
+  path: gc_facetedsearch/configuration
+  methods: [GET, POST, PATCH]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\ConfigurationAdminController::indexAction
+    _legacy_controller: 'GcFacetedsearchConfigurationAdminController'
+    _legacy_link: 'GcFacetedsearchConfigurationAdminController'
+
+
+
+# Logs
+gc_facetedsearch_logs:
+  path: gc_facetedsearch/logs
+  methods: [GET, POST]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController::indexAction
+    _legacy_controller: 'GcFacetedsearchLogsAdminController'
+    _legacy_link: 'GcFacetedsearchLogsAdminController'
+
+gc_facetedsearch_logs_clear:
+  path: gc_facetedsearch/logs/clear
+  methods: [ GET ]
+  defaults:
+    _controller:  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController::clearAction
+    _legacy_controller: GcFacetedsearchLogsAdminController
+    _legacy_link: GcFacetedsearchLogsAdminController
+
+gc_facetedsearch_logs_view:
+  path: gc_facetedsearch/logs/view/{filename}
+  methods: [ GET ]
+  defaults:
+    _controller:  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController::viewAction
+    _legacy_controller: GcFacetedsearchLogsAdminController
+    _legacy_link: GcFacetedsearchLogsAdminController
+  requirements:
+    filename: '[0-9a-z_-]+\.log'
+
+gc_facetedsearch_logs_delete:
+  path: gc_facetedsearch/logs/delete/{filename}
+  methods: [ GET ]
+  defaults:
+    _controller:  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController::deleteAction
+    _legacy_controller: GcFacetedsearchLogsAdminController
+    _legacy_link: GcFacetedsearchLogsAdminController
+  requirements:
+    filename: '[0-9a-z_-]+\.log'
+
+# Maintenance
+gc_facetedsearch_maintenance:
+  path: gc_facetedsearch/maintenance
+  methods: [GET]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController::maintenanceAction
+    _legacy_controller: 'GcFacetedsearchMaintenanceAdminController'
+    _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
+
+gc_facetedsearch_maintenance_hooks_reset:
+  path: gc_facetedsearch/maintenance/hooks/reset
+  methods: [GET]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController::maintenanceHooksResetAction
+    _legacy_controller: 'GcFacetedsearchMaintenanceAdminController'
+    _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
+
+gc_facetedsearch_maintenance_tabs_reset:
+  path: gc_facetedsearch/maintenance/tabs/reset
+  methods: [GET]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController::maintenanceTabsResetAction
+    _legacy_controller: 'GcFacetedsearchMaintenanceAdminController'
+    _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
+
+gc_facetedsearch_maintenance_sql_reset:
+  path: gc_facetedsearch/maintenance/sql/reset
+  methods: [GET]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController::maintenanceSqlResetAction
+    _legacy_controller: 'GcFacetedsearchMaintenanceAdminController'
+    _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
+
+gc_facetedsearch_maintenance_config_reset:
+  path: gc_facetedsearch/maintenance/config/reset
+  methods: [GET]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController::maintenanceConfigResetAction
+    _legacy_controller: 'GcFacetedsearchMaintenanceAdminController'
+    _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
+
+gc_facetedsearch_maintenance_controller_reset:
+  path: gc_facetedsearch/maintenance/controller/reset
+  methods: [GET]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController::maintenanceControllerResetAction
+    _legacy_controller: 'GcFacetedsearchMaintenanceAdminController'
+    _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
+
+gc_facetedsearch_maintenance_orderstate_reset:
+  path: gc_facetedsearch/maintenance/orderstates/reset
+  methods: [GET]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController::maintenanceOrderstatesResetAction
+    _legacy_controller: 'GcFacetedsearchMaintenanceAdminController'
+    _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
+
+gc_facetedsearch_maintenance_caching_clear:
+  path: gc_facetedsearch/maintenance/caching/clear
+  methods: [GET]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController::maintenanceCachingClearAction
+    _legacy_controller: 'GcFacetedsearchMaintenanceAdminController'
+    _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
+
+# custom routes here:

@@ -1,10 +1,260 @@
+
 services:
   _defaults:
     public: true
+    autowire: true
+    autoconfigure: true
 
-  onlineshopmodule.module.gc_facetedsearch.constraint.url_segment_validator:
-    class: Onlineshopmodule\PrestaShop\Module\FacetedSearch\Constraint\UrlSegmentValidator
+  # Module
+  onlineshopmodule.module.facetedsearch.gc_facetedsearch:
+    class: "GC_Facetedsearch"
+    factory: ["Module", "getInstanceByName"]
     arguments:
-      - '@prestashop.adapter.tools'
+      - 'gc_facetedsearch'
+
+  # Abstract Form Data Provider
+  onlineshopmodule.module.facetedsearch.form.data_provider:
+    class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\AbstractFormDataProvider'
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.configurationadapter'
+      - '@prestashop.adapter.shop.context'
+      - '@prestashop.adapter.feature.multistore'
+      - '@translator'
+
+  # Configuration Adapter
+  onlineshopmodule.module.facetedsearch.configurationadapter:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Module\ConfigurationAdapter
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+      - '@prestashop.adapter.legacy.configuration'
+      - "@=service('prestashop.adapter.legacy.context').getAvailableLanguages()"
+
+  # Settings
+  onlineshopmodule.module.facetedsearch.settings:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Settings
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+      - '@doctrine.dbal.default_connection'
+      - '%database_prefix%'
+
+  # Controller
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LicenseAdminController:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LicenseAdminController
+    parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
+    public: true
+    autowire: true
+    autoconfigure: true
+    tags: ['controller.service_arguments']
+
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\ConfigurationAdminController:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\ConfigurationAdminController
+    parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
+    public: true
+    autowire: true
+    autoconfigure: true
+    tags: ['controller.service_arguments']
+
+
+
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController
+    parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
+    public: true
+    autowire: true
+    autoconfigure: true
+    tags: ['controller.service_arguments']
+
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\MaintenanceAdminController
+    parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
+    public: true
+    autowire: true
+    autoconfigure: true
+    tags: ['controller.service_arguments']
+
+  # License
+  onlineshopmodule.module.facetedsearch.form.handler.license:
+    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@onlineshopmodule.module.facetedsearch.form.data_provider.license'
+      - 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\LicenseType'
+      - 'AdminFacetedsearchLicense'
+      - 'license'
+
+  onlineshopmodule.module.facetedsearch.form.data_provider.license:
+    class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\DataProvider\LicenseFormDataProvider'
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.configurationadapter'
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+
+  onlineshopmodule.module.facetedsearch.form.type.license:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\LicenseType
+    parent: 'form.type.translatable.aware'
+    public: true
     tags:
-      - { name: validator.constraint_validator }
+      - { name: form.type }
+
+  onlineshopmodule.module.facetedsearch.command:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Command\Command
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+    tags:
+      - { name: 'console.command' }
+
+
+  # Configuration
+  onlineshopmodule.module.facetedsearch.form.handler.configuration:
+    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@onlineshopmodule.module.facetedsearch.form.data_provider.configuration'
+      - 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\ConfigurationType'
+      - 'AdminFacetedsearchConfiguration'
+      - 'configuration'
+
+  onlineshopmodule.module.facetedsearch.form.data_provider.configuration:
+    class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\DataProvider\ConfigurationFormDataProvider'
+    parent: 'onlineshopmodule.module.facetedsearch.form.data_provider'
+
+  onlineshopmodule.module.facetedsearch.form.type.configuration:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\ConfigurationType
+    parent: 'form.type.translatable.aware'
+    public: true
+    arguments:
+      $context: '@=service("prestashop.adapter.legacy.context").getContext()'
+      $module: '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+    tags:
+      - { name: form.type }
+
+
+  # Logs
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Log\LogRepository:
+    arguments:
+      - '@filesystem'
+      - 'gc_facetedsearch/'
+
+  onlineshopmodule.module.facetedsearch.logrepository:
+    alias: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Log\LogRepository
+
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Log\LogLevel:
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.configurationadapter'
+
+  onlineshopmodule.module.facetedsearch.loglevel:
+    alias: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Log\LogLevel
+
+  onlineshopmodule.module.facetedsearch.logger:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Log\Logger
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.logrepository'
+      - '@onlineshopmodule.module.facetedsearch.loglevel'
+
+  onlineshopmodule.module.facetedsearch.form.handler.log:
+    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@onlineshopmodule.module.facetedsearch.form.data_provider.log'
+      - 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\LogType'
+      - 'AdminFacetedsearchLog'
+      - 'log'
+
+  onlineshopmodule.module.facetedsearch.form.data_provider.log:
+    class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\DataProvider\LogFormDataProvider'
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.loglevel'
+
+  onlineshopmodule.module.facetedsearch.form.type.log:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\LogType
+    parent: 'form.type.translatable.aware'
+    public: true
+    tags:
+      - { name: form.type }
+
+  # Maintenance
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\Maintenance:
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.maintenance.hook'
+      - '@onlineshopmodule.module.facetedsearch.maintenance.tab'
+      - '@onlineshopmodule.module.facetedsearch.maintenance.sql'
+      - '@onlineshopmodule.module.facetedsearch.maintenance.config'
+      - '@onlineshopmodule.module.facetedsearch.maintenance.controller'
+      - '@onlineshopmodule.module.facetedsearch.maintenance.orderstates'
+      - '@onlineshopmodule.module.facetedsearch.maintenance.template'
+      - '@onlineshopmodule.module.facetedsearch.maintenance.caching'
+
+  onlineshopmodule.module.facetedsearch.maintenance:
+    alias: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\Maintenance
+
+  onlineshopmodule.module.facetedsearch.maintenance.hook:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\HookMaintenance
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+      - '@=service("prestashop.adapter.legacy.context").getContext().shop.id'
+      - '@doctrine.dbal.default_connection'
+      - '%database_prefix%'
+
+  onlineshopmodule.module.facetedsearch.maintenance.tab:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\TabMaintenance
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+      - '@prestashop.core.admin.tab.repository'
+      - '@prestashop.adapter.module.tab.register'
+      - '@doctrine.dbal.default_connection'
+      - '%database_prefix%'
+      - '@=service("prestashop.adapter.legacy.context").getLanguages()'
+
+  onlineshopmodule.module.facetedsearch.maintenance.sql:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\SqlMaintenance
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+      - '@doctrine.dbal.default_connection'
+      - '%database_prefix%'
+
+  onlineshopmodule.module.facetedsearch.maintenance.config:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\ConfigMaintenance
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+      - '@onlineshopmodule.module.facetedsearch.configurationadapter'
+      - '@prestashop.adapter.shop.context'
+      - '@=service("prestashop.adapter.legacy.context").getAvailableLanguages()'
+
+  onlineshopmodule.module.facetedsearch.maintenance.controller:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\ControllerMaintenance
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+      - '@doctrine.dbal.default_connection'
+      - '%database_prefix%'
+
+  onlineshopmodule.module.facetedsearch.maintenance.orderstates:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\OrderstateMaintenance
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+
+  onlineshopmodule.module.facetedsearch.maintenance.template:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\TemplateMaintenance
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+      - '@finder'
+      - '@PrestaShop\PrestaShop\Core\Context\ShopContext'
+
+  onlineshopmodule.module.facetedsearch.maintenance.caching:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Maintenance\CachingMaintenance
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+
+  # Tools
+  onlineshopmodule.module.facetedsearch.module.overridetools:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Module\OverrideTools
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+
+# custom services here:

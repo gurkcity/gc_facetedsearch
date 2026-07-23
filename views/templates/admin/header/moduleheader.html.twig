@@ -1,0 +1,123 @@
+{#**
+ * GC Facetedsearch
+ * Module for PrestaShop E-Commerce Software
+ *
+ * @author    Markus Engel <info@onlineshop-module.de>
+ * @copyright Copyright (c) 2026, Onlineshop-Module.de
+ * @license   commercial, see licence.txt
+ *#}
+
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content_header %}
+  <div class="info_panel" id="info_panel">
+    <div class="panel-body">
+      <div class="wrapper">
+        <div class="info_text">
+          <div class="info_logo">
+            <img src="{{ module.logo }}" alt="Logo {{ module.display_name }}" width="64" height="64" />
+          </div>
+          <h1>{{ module.display_name_pre }} <span>{{ module.display_name_post }}</span></h1>
+          <h2>{{ module.description }} </h2>
+          <p>{{ module.description_full }}</p>
+        </div>
+
+        <div class="info_author">
+          <h2>{{ module.author }} </h2>
+          <p>
+            {{ 'Gurkcity creates professional and individual modules and addons for PrestaShop onlinestores since 2010.'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+            {{ 'Get more information from the links below.'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+          </p>
+          <address>
+            <table>
+              <tbody>
+                <tr>
+                  <td><i class="material-icons">public</i></i></td>
+                  <td>www</td>
+                  <td><a href="http://www.onlineshop-module.de" target="_blank">onlineshop-module.de</a></td>
+                </tr>
+                <tr>
+                  <td><i class="material-icons">mail</i></td>
+                  <td>E-Mail</td>
+                  <td><a href="mailto:info@onlineshop-module.de">info@onlineshop-module.de</a></td>
+                </tr>
+                {% if help_link %}
+                <tr>
+                  <td><i class="material-icons">help</i></td>
+                  <td>{{ 'Help'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</td>
+                  <td><a href="{{ help_link }}" target="_blank">{{ 'Documentation %module_name%'|trans({'%module_name%': module.display_name}, 'Modules.Gcfacetedsearch.Admin') }}</a></td>
+                </tr>
+                {% endif %}
+                <tr>
+                  <td><i class="material-icons">key</i></td>
+                  <td>{{ 'License key'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</td>
+                  <td><a href="http://www.onlineshop-module.de/lizenz-registrieren" target="_blank">{{ module.license_key }}</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </address>
+          <p><a href="{{ path('gc_facetedsearch_license_content') }}" target="_blank">{{ 'Please consider our license disclaimer.'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</a></p>
+        </div>
+        <ul class="info_buttons nav nav-pills">
+          <li class="nav-item">
+            <a
+              id="page-header-desc-configuration-hooks"
+              class="nav-link"
+              href="{{ layoutHeaderToolbarBtn.hooks.href }}"
+              title="{{ layoutHeaderToolbarBtn.hooks.desc }}"
+              target="_blank"
+            >
+              <i class="material-icons">{{ layoutHeaderToolbarBtn.hooks.icon }}</i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              id="page-header-desc-configuration-translation"
+              class="nav-link"
+              href="{{ layoutHeaderToolbarBtn.translation.href }}"
+              title="{{ layoutHeaderToolbarBtn.translation.desc }}"
+              target="_blank"
+            >
+              <i class="material-icons">{{ layoutHeaderToolbarBtn.translation.icon }}</i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="panel-separator"></div>
+    <div class="panel-footer">
+      <div class="panel-footer-info">
+        <span>{{ module.display_name }}  v{{ module.version }} / {{ module.author }}  &copy; {{ "now"|date('Y') }}</span>
+        <a href="#" class="expand_info"><i class="material-icons">expand_less</i> Info</a>
+        <a href="http://www.gurkcity.de/" target="_blank" class="panel-footer-logo"><img class="img-fluid" src="{{ module.path }}views/img/logo_shop_module.png" alt="{{ module.author }}" width="355" height="45"></a>
+      </div>
+      {% if not isEnabled %}
+        <div class="alert alert-warning panel-footer-moduledisabled">
+          {{ 'This module is disabled in this context!'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  {{ parent() }}
+{% endblock %}
+
+{% block extra_javascripts %}
+  {{ parent() }}
+  <script>
+    const menuIcons = {{ menuIcons|json_encode|raw }};
+  </script>
+  <script src="{{ module.path }}views/js/admin/module.js"></script>
+{% endblock %}
+
+{% block extra_stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" type="text/css" href="{{ module.path }}views/css/admin/module.css">
+
+  {% if module.hideConfigTab %}
+    <style>
+      #subtab-GcFacetedsearchConfigurationAdminController {
+        display: none;
+      }
+    </style>
+  {% endif %}
+{% endblock %}

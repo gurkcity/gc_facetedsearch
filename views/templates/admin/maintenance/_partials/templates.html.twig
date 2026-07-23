@@ -1,0 +1,57 @@
+{#**
+ * GC Facetedsearch
+ * Module for PrestaShop E-Commerce Software
+ *
+ * @author    Markus Engel <info@onlineshop-module.de>
+ * @copyright Copyright (c) 2026, Onlineshop-Module.de
+ * @license   commercial, see licence.txt
+ *#}
+<div class="col-xl-6">
+  <div class="card">
+
+    <h3 class="card-header">
+      <i class="material-icons">list</i> {{ 'Templates'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+    </h3>
+
+    <div class="card-body">
+      <p>{{ 'All front office templates are listed here. It checks whether the template has been overwritten in the theme and whether it is still up to date with the module version. The displayed theme is that of the current context.'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</p>
+
+      <table class="templates_list table table-sm table-responsive">
+        <thead>
+          <tr>
+            <th>{{ 'Status'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+            <th>{{ 'Path'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+            <th>{{ 'Version in module'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+            <th>{{ 'Override in theme %theme_name%'|trans({'%theme_name%': themeName}, 'Modules.Gcfacetedsearch.Admin') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for template in templates %}
+          <tr>
+            <td>
+              {% if not template.valid %}
+              <span class="badge badge-info">{{ 'info'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</span>
+              {% else %}
+              <span class="badge badge-success">{{ 'ok'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</span>
+              {% endif %}
+            </td>
+            <td>{{ template.path }}</td>
+            <td>{{ template.version }}</td>
+            <td>
+              {% if template.override_exists %}
+                {% if template.version_override is not empty %}
+                  {{ template.version_override }}
+                {% else %}
+                  {{ 'version not found'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+                {% endif %}
+              {% else %}
+                <i class="text-muted">{{ 'not overridden'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</i>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -10,15 +10,14 @@
             "email": "info@onlineshop-module.de"
         }
     ],
-    "require": {
-        "php": ">=7.1",
-        "doctrine/collections": "^1.4"
-    },
-    "require-dev": {
-        "phpstan/phpstan": "^1.11",
-        "prestashop/php-dev-tools": "^4.3",
-        "phpunit/phpunit": "~5.7",
-        "mockery/mockery": "^1.2"
+    "autoload": {
+        "psr-4": {
+            "Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\": "src/"
+        },
+        "classmap": [
+            "gc_facetedsearch.php"
+        ],
+        "exclude-from-classmap": []
     },
     "config": {
         "preferred-install": "dist",
@@ -27,13 +26,12 @@
         "optimize-autoloader": true,
         "sort-packages": true
     },
-    "autoload": {
-        "psr-4": {
-            "Onlineshopmodule\\PrestaShop\\Module\\FacetedSearch\\": "src/"
-        },
-        "classmap": [
-            "gc_facetedsearch.php"
-        ]
+    "require": {
+        "php": ">= 8.1"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.11",
+        "prestashop/php-dev-tools": "^4.3"
     },
     "scripts": {
         "autoindex": [
