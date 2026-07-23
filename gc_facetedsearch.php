@@ -25,6 +25,71 @@ class GC_Facetedsearch extends Module
     use ModuleHelperTrait;
     use ModuleLicenseTrait;
 
+    /**
+     * @var string Name of the module running on PS 1.6.x. Used for data migration.
+     */
+    const PS_16_EQUIVALENT_MODULE = 'blocklayered';
+
+    /**
+     * @var string Official PrestaShop faceted search module to migrate from.
+     */
+    const PS_FACETEDSEARCH_MODULE = 'ps_facetedsearch';
+
+    /**
+     * Lock indexation if too many products
+     *
+     * @var int
+     */
+    const LOCK_TOO_MANY_PRODUCTS = 5000;
+
+    /**
+     * Lock template filter creation if too many products
+     *
+     * @var int
+     */
+    const LOCK_TEMPLATE_CREATION = 20000;
+
+    /**
+     * US iso code, used to prevent taxes usage while computing prices
+     *
+     * @var array
+     */
+    const ISO_CODE_TAX_FREE = [
+        'US',
+    ];
+
+    /**
+     * Number of digits for MySQL DECIMAL
+     *
+     * @var int
+     */
+    const DECIMAL_DIGITS = 6;
+
+    /**
+     * @var array List of controllers supported by this module
+     */
+    protected $supportedControllers = [];
+
+    /**
+     * @var bool
+     */
+    private $ajax;
+
+    /**
+     * @var int
+     */
+    private $gcLayeredFullTree;
+
+    /**
+     * @var Db
+     */
+    private $database;
+
+    /**
+     * @var HookDispatcher
+     */
+    private $hookDispatcher;
+
     public function __construct()
     {
         $this->version = '9.0.0';
@@ -41,10 +106,10 @@ class GC_Facetedsearch extends Module
         $this->tab = 'front_office_features';
 
         $this->displayName = $this->trans('GC Facetedsearch', [], 'Modules.Gcfacetedsearch.Admin');
-        $this->displayNamePre = $this->trans('Module Name 1', [], 'Modules.Gcfacetedsearch.Admin');
-        $this->displayNamePost = $this->trans('Module Name 2', [], 'Modules.Gcfacetedsearch.Admin');
-        $this->description = $this->trans('Module Description', [], 'Modules.Gcfacetedsearch.Admin');
-        $this->description_full = $this->trans('Module Description Extended', [], 'Modules.Gcfacetedsearch.Admin');
+        $this->displayNamePre = $this->trans('Faceted', [], 'Modules.Gcfacetedsearch.Admin');
+        $this->displayNamePost = $this->trans('Search', [], 'Modules.Gcfacetedsearch.Admin');
+        $this->description = $this->trans('Filter your catalog to help visitors picture the category tree and browse your store easily.', [], 'Modules.Gcfacetedsearch.Admin');
+        $this->description_full = $this->trans('Filter your catalog to help visitors picture the category tree and browse your store easily.', [], 'Modules.Gcfacetedsearch.Admin');
 
         parent::__construct();
 

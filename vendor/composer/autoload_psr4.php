@@ -7,4 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\' => array($baseDir . '/src'),
+    'Doctrine\\Deprecations\\' => array($vendorDir . '/doctrine/deprecations/src'),
+    'Doctrine\\Common\\Collections\\' => array($vendorDir . '/doctrine/collections/lib/Doctrine/Common/Collections'),
 );

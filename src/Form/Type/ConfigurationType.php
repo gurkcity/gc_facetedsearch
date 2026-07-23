@@ -16,7 +16,9 @@ use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use PrestaShopBundle\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ConfigurationType extends TranslatorAwareType
 {
@@ -39,6 +41,63 @@ class ConfigurationType extends TranslatorAwareType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $builder
+            ->add('CACHE_ENABLED', SwitchType::class, [
+                'label' => $this->trans('Enable cache system', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'help' => $this->trans('This option caches filtering blocks, so the module does not have to query for matching products all the time. The cache is invalidated on every modification on your store. If you encounter some incosistencies, disable this cache or make sure to flush it if needed.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('SHOW_QUIES', SwitchType::class, [
+                'label' => $this->trans('Show the number of matching products', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'help' => $this->trans('Enable or disable display of matching products after filters. Disabling this won\'t bring any performance benefit, because matching products need to be calculated anyway.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('FULL_TREE', SwitchType::class, [
+                'label' => $this->trans('Show products from subcategories', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'help' => $this->trans('Enable this, if you want to display products from subcategories, even if they are not specifically assigned to the currently browsed category.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('FILTER_BY_DEFAULT_CATEGORY', SwitchType::class, [
+                'label' => $this->trans('Show products only from default category', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'help' => $this->trans('Works only if "Show products from subcategories" is off.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('FILTER_CATEGORY_DEPTH', NumberType::class, [
+                'label' => $this->trans('Category filter depth', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => true,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => $this->trans('The %s field is required.', 'Admin.Notifications.Error'),
+                    ]),
+                ],
+                'help' => $this->trans('This option controls the behavior of category filter block - how deep children of the currently browsed category you want to display? The default value is 1 - only the direct children. Use 0 for unlimited depth.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('FILTER_PRICE_USETAX', SwitchType::class, [
+                'label' => $this->trans('Use tax to filter price', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+            ])
+            ->add('FILTER_PRICE_ROUNDING', SwitchType::class, [
+                'label' => $this->trans('Use rounding to filter price', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+            ])
+            ->add('FILTER_SHOW_OUT_OF_STOCK_LAST', SwitchType::class, [
+                'label' => $this->trans('Show unavailable, out of stock last', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+            ])
+            ->add('USE_JQUERY_UI_SLIDER', SwitchType::class, [
+                'label' => $this->trans('Use Jquery UI slider', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'help' => $this->trans('Switch this off only if your theme does not use jQuery UI slider. It is recommended to keep it on when using classic theme.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('DEFAULT_CATEGORY_TEMPLATE', ChoiceType::class, [
+                'required' => false,
+                'label' => $this->trans('Default filter template for new categories', 'Modules.Gcfacetedsearch.Admin'),
+                'help' => $this->trans('If you want to automatically assign a filter template to new categories, select it here..', 'Modules.Gcfacetedsearch.Admin'),
+                'placeholder' => $this->trans('None', 'Admin.Global'),
+                'choices' => [],
+            ])
+        ;
+
         if ($this->module->hasJavascriptFiles()) {
             $builder
                 ->add('js_defer', SwitchType::class, [

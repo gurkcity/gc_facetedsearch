@@ -23,27 +23,29 @@ class Settings extends AbstractSettings
 {
     public function config(): array
     {
-        return [];
-
-        /*
         return [
-            'TEST_CONFIG' => new Config(
-                'TEST_CONFIG',
-                [
-                    'en' => 'Value',
-                    'de' => 'Wert',
-                ]
-            ),
-            'TEST_CONFIG_ABC' => new Config(
-                'TEST_CONFIG_ABC',
-                1
-            ),
-            'TEST_CONFIG_ABC' => new Config(
-                'TEST_CONFIG_ABC',
-                'value'
-            ),
+            // 'TEST_CONFIG' => new Config(
+            //     'TEST_CONFIG',
+            //     [
+            //         'en' => 'Value',
+            //         'de' => 'Wert',
+            //     ]
+            // ),
+            'CACHE_ENABLED' => new Config('CACHE_ENABLED', 1),
+            'SHOW_QUIES' => new Config('SHOW_QUIES', 1),
+            'FULL_TREE' => new Config('FULL_TREE', 1),
+            'FILTER_BY_DEFAULT_CATEGORY' => new Config('FILTER_BY_DEFAULT_CATEGORY', 0),
+            'FILTER_CATEGORY_DEPTH' => new Config('FILTER_CATEGORY_DEPTH', 1),
+            'FILTER_PRICE_USETAX' => new Config('FILTER_PRICE_USETAX', 1),
+            'FILTER_PRICE_ROUNDING' => new Config('FILTER_PRICE_ROUNDING', 1),
+            'FILTER_SHOW_OUT_OF_STOCK_LAST' => new Config('FILTER_SHOW_OUT_OF_STOCK_LAST', 0),
+            'USE_JQUERY_UI_SLIDER' => new Config('USE_JQUERY_UI_SLIDER', 1),
+            'DEFAULT_CATEGORY_TEMPLATE' => new Config('DEFAULT_CATEGORY_TEMPLATE', 0),
+            // 'TEST_CONFIG_ABC' => new Config(
+            //     'TEST_CONFIG_ABC',
+            //     'value'
+            // ),
         ];
-        */
     }
 
     public function controllers(): array
@@ -91,13 +93,55 @@ class Settings extends AbstractSettings
 
     public function hooks(): array
     {
-        return [];
-
-        /*
         return [
-            'actionTestHook' => new Hook('actionTestHook'),
+            // // attribute
+            // 'actionAttributeGroupDelete' => new Hook('actionAttributeGroupDelete'),
+            // 'actionAttributeSave' => new Hook('actionAttributeSave'),
+            // 'displayAttributeForm' => new Hook('displayAttributeForm'),
+            // 'actionAttributePostProcess' => new Hook('actionAttributePostProcess'),
+            // 'actionAttributeFormBuilderModifier' => new Hook('actionAttributeFormBuilderModifier'),
+            // 'actionAttributeFormDataProviderData' => new Hook('actionAttributeFormDataProviderData'),
+            // 'actionAfterCreateAttributeFormHandler' => new Hook('actionAfterCreateAttributeFormHandler'),
+            // 'actionAfterUpdateAttributeFormHandler' => new Hook('actionAfterUpdateAttributeFormHandler'),
+            // // attribute group
+            // 'actionAttributeGroupSave' => new Hook('actionAttributeGroupSave'),
+            // 'displayAttributeGroupForm' => new Hook('displayAttributeGroupForm'),
+            // 'displayAttributeGroupPostProcess' => new Hook('displayAttributeGroupPostProcess'),
+            // 'actionAttributeGroupFormBuilderModifier' => new Hook('actionAttributeGroupFormBuilderModifier'),
+            // 'actionAttributeGroupFormDataProviderData' => new Hook('actionAttributeGroupFormDataProviderData'),
+            // 'actionAfterCreateAttributeGroupFormHandler' => new Hook('actionAfterCreateAttributeGroupFormHandler'),
+            // 'actionAfterUpdateAttributeGroupFormHandler' => new Hook('actionAfterUpdateAttributeGroupFormHandler'),
+            // // product
+            // 'actionProductSave' => new Hook('actionProductSave'),
+            // // category
+            // 'actionCategoryAdd' => new Hook('actionCategoryAdd'),
+            // 'actionCategoryDelete' => new Hook('actionCategoryDelete'),
+            // // configuration
+            // 'actionProductPreferencesPageStockSave' => new Hook('actionProductPreferencesPageStockSave'),
+            // // design
+            // 'displayLeftColumn' => new Hook('displayLeftColumn'),
+            // // feature
+            // 'actionFeatureSave' => new Hook('actionFeatureSave'),
+            // 'actionFeatureDelete' => new Hook('actionFeatureDelete'),
+            // 'displayFeatureForm' => new Hook('displayFeatureForm'),
+            // 'displayFeaturePostProcess' => new Hook('displayFeaturePostProcess'),
+            // 'actionFeatureFormBuilderModifier' => new Hook('actionFeatureFormBuilderModifier'),
+            // 'actionAfterCreateFeatureFormHandler' => new Hook('actionAfterCreateFeatureFormHandler'),
+            // 'actionAfterUpdateFeatureFormHandler' => new Hook('actionAfterUpdateFeatureFormHandler'),
+            // // feature value
+            // 'actionFeatureValueSave' => new Hook('actionFeatureValueSave'),
+            // 'actionFeatureValueDelete' => new Hook('actionFeatureValueDelete'),
+            // 'displayFeatureValueForm' => new Hook('displayFeatureValueForm'),
+            // 'displayFeatureValuePostProcess' => new Hook('displayFeatureValuePostProcess'),
+            // 'actionFeatureValueFormBuilderModifier' => new Hook('actionFeatureValueFormBuilderModifier'),
+            // 'actionAfterCreateFeatureValueFormHandler' => new Hook('actionAfterCreateFeatureValueFormHandler'),
+            // 'actionAfterUpdateFeatureValueFormHandler' => new Hook('actionAfterUpdateFeatureValueFormHandler'),
+            // // product search
+            // 'productSearchProvider' => new Hook('productSearchProvider'),
+            // // specific price
+            // 'actionObjectSpecificPriceRuleUpdateBefore' => new Hook('actionObjectSpecificPriceRuleUpdateBefore'),
+            // 'actionAdminSpecificPriceRuleControllerSaveAfter' => new Hook('actionAdminSpecificPriceRuleControllerSaveAfter'),
         ];
-        */
     }
 
     public function orderStates(): array

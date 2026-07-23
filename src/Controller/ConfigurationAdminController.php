@@ -11,6 +11,7 @@
 
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller;
 
+use PrestaShop\PrestaShop\Adapter\LegacyContext;
 use PrestaShop\PrestaShop\Core\Form\FormHandlerInterface;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use PrestaShopBundle\Security\Annotation\ModuleActivated;
@@ -32,7 +33,9 @@ class ConfigurationAdminController extends AdminController
     public function indexAction(
         Request $request,
         #[Autowire(service: 'onlineshopmodule.module.facetedsearch.form.handler.configuration')]
-        FormHandlerInterface $configurationFormHandler
+        FormHandlerInterface $configurationFormHandler,
+        #[Autowire(service: 'prestashop.adapter.legacy.context')]
+        LegacyContext $legacyContext
     ): Response {
         $this->setLayoutTitle($this->trans('Configuration', [], 'Modules.Gcfacetedsearch.Admin'));
 
@@ -40,11 +43,26 @@ class ConfigurationAdminController extends AdminController
             return $this->redirectToRoute($this->module->redirectAdminConfigurationPermanentTo);
         }
 
+        $context = $legacyContext->getContext();
+
+        $cronToken = substr(\Tools::hash('gc_facetedsearch/index'), 0, 10);
+
         return $this->processForm(
             $request,
             $configurationFormHandler,
             'gc_facetedsearch_configuration',
-            'views/templates/admin/configuration.html.twig'
+            'views/templates/admin/configuration.html.twig',
+            [
+                'price_indexer_url_for_cron' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexPrices', 'token' => $cronToken]),
+                'full_price_indexer_url_for_cron' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexPrices', 'token' => $cronToken]),
+                'attribute_indexer_url_for_cron' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexAttributes', 'token' => $cronToken]),
+                'clear_cache_url_for_cron' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'clearCache', 'token' => $cronToken]),
+
+                'price_indexer_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexPrices', 'token' => $cronToken]),
+                'full_price_indexer_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexPrices', 'full' => 1, 'token' => $cronToken]),
+                'attribute_indexer_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexAttributes', 'token' => $cronToken]),
+                'clear_cache_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'clearCache', 'token' => $cronToken]),
+            ]
         );
     }
 }
