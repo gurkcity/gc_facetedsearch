@@ -1,0 +1,24 @@
+{#**
+ * GC Facetedsearch
+ * Module for PrestaShop E-Commerce Software
+ *
+ * @author    Markus Engel <info@onlineshop-module.de>
+ * @copyright Copyright (c) 2026, Onlineshop-Module.de
+ * @license   commercial, see licence.txt
+ *#}
+{% extends '@PrestaShop/Admin/Common/Grid/grid_panel.html.twig' %}
+
+{% block grid_actions_block %}
+    <div class="d-inline-block float-right d-flex ">
+        {%  if gridActions is defined %}
+            <div class="grid-actions">
+                {% for gridAction in gridActions %}
+                    <a class="btn btn-primary" href="{{ gridAction.href }}">{% if gridAction.icon is defined and gridAction.icon is not empty %}<i class="material-icons">{{ gridAction.icon }}</i>{% endif %} {{ gridAction.desc }}</a>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="ml-3">
+            {{ include('@PrestaShop/Admin/Common/Grid/Blocks/grid_actions.html.twig', {grid: grid}) }}
+        </div>
+    </div>
+{% endblock %}

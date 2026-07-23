@@ -177,30 +177,62 @@ class Settings extends AbstractSettings
         $table->addUniqueIndex(['id_example', 'id_shop']);
         */
 
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_category');
+        $table->addColumn('id_gc_facetedsearch_category', 'integer', ['unsigned' => true, 'autoincrement' => true]);
+        $table->addColumn('id_shop', 'integer', ['unsigned' => true]);
+        $table->addColumn('controller', 'string', ['length' => 64]);
+        $table->addColumn('id_category', 'integer', ['unsigned' => true]);
+        $table->addColumn('id_value', 'integer', ['unsigned' => true, 'notnull' => false, 'default' => 0]);
+        $table->addColumn('type', 'string', [
+            'columnDefinition' => "ENUM('category','id_feature','id_attribute_group','availability','condition','manufacturer','weight','price','extras') NOT NULL",
+        ]);
+        $table->addColumn('position', 'integer', ['unsigned' => true]);
+        $table->addColumn('filter_type', 'integer', ['unsigned' => true, 'default' => 0]);
+        $table->addColumn('filter_show_limit', 'integer', ['unsigned' => true, 'default' => 0]);
+        $table->setPrimaryKey(['id_gc_facetedsearch_category']);
+        $table->addIndex(['id_category', 'id_shop', 'type', 'id_value', 'position'], 'id_category_shop');
+        $table->addIndex(['id_category', 'type'], 'id_category');
+
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_filter');
+        $table->addColumn('id_gc_facetedsearch_filter', 'integer', ['unsigned' => true, 'autoincrement' => true]);
+        $table->addColumn('name', 'string', ['length' => 64]);
+        $table->addColumn('filters', 'text', ['notnull' => false, 'length' => 4294967295]);
+        $table->addColumn('n_categories', 'integer', ['unsigned' => true]);
+        $table->addColumn('date_add', 'datetime');
+        $table->setPrimaryKey(['id_gc_facetedsearch_filter']);
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_filter_block');
+        $table->addColumn('hash', 'string', ['length' => 32, 'fixed' => true, 'default' => '']);
+        $table->addColumn('data', 'text', ['notnull' => false, 'length' => 4294967295]);
+        $table->setPrimaryKey(['hash']);
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_filter_shop');
+        $table->addColumn('id_gc_facetedsearch_filter', 'integer', ['unsigned' => true]);
+        $table->addColumn('id_shop', 'integer', ['unsigned' => true]);
+        $table->setPrimaryKey(['id_gc_facetedsearch_filter', 'id_shop']);
+        $table->addIndex(['id_shop'], 'id_shop');
+
         return new Sql($schema);
     }
 
     public function tabs(): array
     {
-        return [];
-
-        /*
         return [
             new Tab(
                 [
-                    'en' => 'Example',
-                    'de' => 'Example',
+                    'en' => 'Filter templates',
+                    'de' => 'Filter templates',
                 ],
-                'GcFacetedsearchExampleAdminController',
+                'GcFacetedsearchFilterTemplateAdminController',
                 'GcFacetedsearchConfigurationAdminParentController',
-                'gc_facetedsearch_examplegrid_index',
+                'gc_facetedsearch_configuration',
                 '',
-                'Example',
+                'Filter templates',
                 'Modules.Gcfacetedsearch.Admin',
-                true
+                false
             ),
         ];
-        */
     }
 
     public function translations(): array

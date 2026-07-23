@@ -1,0 +1,12 @@
+services:
+  _defaults:
+    public: true
+
+  onlineshopmodule.module.facetedsearch.form.type.filter_template:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\FilterTemplateType
+    parent: 'form.type.translatable.aware'
+    public: true
+    arguments:
+      $multistoreFeature: '@prestashop.adapter.feature.multistore'
+    tags:
+      - { name: form.type }

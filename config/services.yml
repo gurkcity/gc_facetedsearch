@@ -1,3 +1,6 @@
+imports:
+  - { resource: _filtersgrid.yml }
+  - { resource: _filtersform.yml }
 
 services:
   _defaults:
@@ -59,7 +62,13 @@ services:
     autoconfigure: true
     tags: ['controller.service_arguments']
 
-
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\FilterTemplateAdminController:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\FilterTemplateAdminController
+    parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
+    public: true
+    autowire: true
+    autoconfigure: true
+    tags: ['controller.service_arguments']
 
   Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController:
     class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController
