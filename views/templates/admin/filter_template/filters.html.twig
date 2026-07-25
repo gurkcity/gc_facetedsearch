@@ -1,0 +1,78 @@
+{#**
+ * GC Facetedsearch
+ * Module for PrestaShop E-Commerce Software
+ *
+ * @author    Markus Engel <info@onlineshop-module.de>
+ * @copyright Copyright (c) 2026, Onlineshop-Module.de
+ * @license   commercial, see licence.txt
+ *#}
+
+{% block gc_filter_item_widget %}
+  <li class="filter_list_item d-flex" draggable="true">
+    <div class="col-2">
+      {{ form_widget(form.enabled) }}
+    </div>
+    <div class="col-4">
+      <h4>{{ form.vars.label }}</h4>
+    </div>
+    {% if form.vars.slider == false %}
+      <div class="col-3 d-flex flex-nowrap align-items-center">
+        <label class="control-label pr-1 m-0" for="{{ form.filter_show_limit.vars.id }}">
+          {{ form.filter_show_limit.vars.label }}
+        </label>
+        <div>
+          {{ form_widget(form.filter_show_limit) }}
+        </div>
+      </div>
+      <div class="col-3 d-flex flex-nowrap align-items-center">
+        <label class="control-label pr-1 m-0" for="{{ form.filter_type.vars.id }}">
+          {{ form.filter_type.vars.label }}
+        </label>
+        <div>
+          {{ form_widget(form.filter_type) }}
+        </div>
+      </div>
+    {% else %}
+      <div class="col-3 d-flex flex-nowrap align-items-center">
+        <label class="control-label pr-1 m-0">
+          {{ form.filter_type.vars.label }}
+        </label>
+        <div>
+          {{ 'List of ranges'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+        </div>
+      </div>
+    {% endif %}
+  </li>
+{% endblock %}
+
+{% block gc_filter_item_row %}
+  {{- form_widget(form) -}}
+{% endblock %}
+
+{% block gc_filters_widget %}
+  <div class="form-group row flex-nowrap">
+    <label class="form-control-label required">
+      <span class="badge badge-dark-hover" id="selected_filters">0</span> {{ 'Filters'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
+    </label>
+    <div class="col-sm">
+      <section class="filter_panel">
+        <header class="clearfix d-flex justify-content-end">
+          <span class="badge badge-dark-hover">
+            {{ 'Total filters: %total%'|trans({'%total%': form.children|length}, 'Modules.Gcfacetedsearch.Admin') }}
+          </span>
+        </header>
+        <section class="filter_list">
+          <ul class="list-unstyled sortable" id="list-filters">
+            {% for child in form %}
+              {{ form_widget(child) }}
+            {% endfor %}
+          </ul>
+        </section>
+      </section>
+    </div>
+  </div>
+{% endblock %}
+
+{% block gc_filters_row %}
+  {{- form_widget(form) -}}
+{% endblock %}

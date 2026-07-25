@@ -8,7 +8,10 @@
  *#}
 
 {% extends '@Modules/gc_facetedsearch/views/templates/admin/header/moduleheader.html.twig' %}
-{% form_theme filterTemplateForm '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit.html.twig' %}
+{% form_theme filterTemplateForm with [
+  '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit.html.twig',
+  '@Modules/gc_facetedsearch/views/templates/admin/filter_template/filters.html.twig'
+] %}
 
 {% block content %}
   {{ form_start(filterTemplateForm) }}

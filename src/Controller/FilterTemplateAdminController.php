@@ -40,6 +40,7 @@ class FilterTemplateAdminController extends AdminController
                 'name' => '',
                 'categories' => [],
                 'shop_association' => [],
+                'filters' => [],
             ]
         );
 

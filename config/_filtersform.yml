@@ -2,11 +2,28 @@ services:
   _defaults:
     public: true
 
+  onlineshopmodule.module.facetedsearch.form.type.filter_item:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\FilterItemType
+    parent: 'form.type.translatable.aware'
+    public: true
+    tags:
+      - { name: form.type }
+
+  onlineshopmodule.module.facetedsearch.form.type.filters:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\FiltersType
+    parent: 'form.type.translatable.aware'
+    public: true
+    arguments:
+      $languageId: '@=service("prestashop.adapter.legacy.context").getContext().language.id'
+    tags:
+      - { name: form.type }
+
   onlineshopmodule.module.facetedsearch.form.type.filter_template:
     class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\FilterTemplateType
     parent: 'form.type.translatable.aware'
     public: true
     arguments:
       $multistoreFeature: '@prestashop.adapter.feature.multistore'
+      $module: '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
     tags:
       - { name: form.type }

@@ -18,6 +18,7 @@ use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use PrestaShopBundle\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -31,14 +32,21 @@ class FilterTemplateType extends TranslatorAwareType
      */
     private $multistoreFeature;
 
+    /**
+     * @var \GC_Facetedsearch
+     */
+    private $module;
+
     public function __construct(
         TranslatorInterface $translator,
         array $locales,
-        MultistoreFeature $multistoreFeature
+        MultistoreFeature $multistoreFeature,
+        \GC_Facetedsearch $module
     ) {
         parent::__construct($translator, $locales);
 
         $this->multistoreFeature = $multistoreFeature;
+        $this->module = $module;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -77,6 +85,18 @@ class FilterTemplateType extends TranslatorAwareType
                 ],
             ]);
         }
+
+        $supportedControllers = $this->resolveSupportedControllers();
+        if ($supportedControllers) {
+            $builder->add('controllers', ChoiceType::class, [
+                'label' => $this->trans('Pages using this template', 'Modules.Gcfacetedsearch.Admin'),
+                'choices' => $supportedControllers,
+                'multiple' => true,
+                'expanded' => true,
+            ]);
+        }
+
+        $builder->add('filters', FiltersType::class);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -84,7 +104,24 @@ class FilterTemplateType extends TranslatorAwareType
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
-            'form_theme' => '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit.html.twig',
+            'form_theme' => [
+                '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit.html.twig',
+                '@Modules/gc_facetedsearch/views/templates/admin/form/filters.html.twig',
+            ],
+            'translation_domain' => 'Modules.Gcfacetedsearch.Admin',
+            'allow_extra_fields' => true,
         ]);
+    }
+
+    private function resolveSupportedControllers(): array
+    {
+        $controllers = $this->module->getSupportedControllers();
+
+        $result = [];
+        foreach ($controllers as $name => $controller) {
+            $result[$controller['name']] = $name;
+        }
+
+        return $result;
     }
 }

@@ -12,6 +12,7 @@
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleHelperTrait;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleLicenseTrait;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleTrait;
+use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleFunctionsTrait;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -22,6 +23,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 class GC_Facetedsearch extends Module
 {
     use ModuleTrait;
+    use ModuleFunctionsTrait;
     use ModuleHelperTrait;
     use ModuleLicenseTrait;
 
@@ -64,11 +66,6 @@ class GC_Facetedsearch extends Module
      * @var int
      */
     const DECIMAL_DIGITS = 6;
-
-    /**
-     * @var array List of controllers supported by this module
-     */
-    protected $supportedControllers = [];
 
     /**
      * @var bool
