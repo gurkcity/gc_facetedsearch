@@ -27,3 +27,14 @@ services:
       $module: '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
     tags:
       - { name: form.type }
+  
+  onlineshopmodule.module.facetedsearch.form.identifiable_object.handler.filter_template_form_handler:
+    class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandler'
+    factory: [ '@prestashop.core.form.identifiable_object.handler.form_handler_factory', 'create' ]
+    arguments:
+      - '@onlineshopmodule.module.facetedsearch.form.identifiable_object.data_handler.filter_template_form_data_handler'
+
+  onlineshopmodule.module.facetedsearch.form.identifiable_object.data_handler.filter_template_form_data_handler:
+    class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\DataHandler\FilterTemplateFormDataHandler'
+    arguments:
+      $module: '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'

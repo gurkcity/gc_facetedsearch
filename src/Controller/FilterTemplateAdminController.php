@@ -11,9 +11,13 @@
 
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller;
 
+use Exception;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\FilterTemplateType;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use PrestaShopBundle\Security\Annotation\ModuleActivated;
+use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilderInterface;
+use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandlerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -30,25 +34,37 @@ class FilterTemplateAdminController extends AdminController
      *     message="Access denied."
      * )
      */
-    public function addAction(Request $request): Response
-    {
+    public function addAction(
+        Request $request,
+        #[Autowire(service: 'onlineshopmodule.module.facetedsearch.form.identifiable_object.handler.filter_template_form_handler')]
+        FormHandlerInterface $formHandler
+    ): Response {
         $this->setLayoutTitle($this->trans('Add filter template', [], 'Modules.Gcfacetedsearch.Admin'));
 
-        $filterTemplateForm = $this->createForm(
-            FilterTemplateType::class,
-            [
-                'name' => '',
-                'categories' => [],
-                'shop_association' => [],
-                'filters' => [],
-            ]
-        );
+        try {
+            $filterTemplateForm = $this->createForm(
+                FilterTemplateType::class,
+                [
+                    'name' => '',
+                    'categories' => [],
+                    'shop_association' => [],
+                    'filters' => [],
+                ]
+            );
 
-        $filterTemplateForm->handleRequest($request);
+            $filterTemplateForm->handleRequest($request);
 
-        if ($filterTemplateForm->isSubmitted() && $filterTemplateForm->isValid()) {
-            die('save');
-            return $this->redirectToRoute('gc_facetedsearch_configuration');
+            $formHandler->handle($filterTemplateForm);
+
+            if ($filterTemplateForm->isSubmitted() && $filterTemplateForm->isValid()) {
+                // $this->clearSmartyCache('*');
+
+                $this->addFlash('success', $this->trans('Successful creation', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('gc_facetedsearch_configuration');
+            }
+        } catch (Exception $e) {
+            $this->addFlash('error', $e->getMessage());
         }
 
         return $this->render(

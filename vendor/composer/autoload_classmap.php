@@ -36,6 +36,7 @@ return array(
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\LogException' => $baseDir . '/src/Exception/LogException.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\SettingException' => $baseDir . '/src/Exception/SettingException.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\AbstractFormDataProvider' => $baseDir . '/src/Form/AbstractFormDataProvider.php',
+    'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataHandler\\FilterTemplateFormDataHandler' => $baseDir . '/src/Form/DataHandler/FilterTemplateFormDataHandler.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\ConfigurationFormDataProvider' => $baseDir . '/src/Form/DataProvider/ConfigurationFormDataProvider.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\LicenseFormDataProvider' => $baseDir . '/src/Form/DataProvider/LicenseFormDataProvider.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\LogFormDataProvider' => $baseDir . '/src/Form/DataProvider/LogFormDataProvider.php',

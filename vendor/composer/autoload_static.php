@@ -64,6 +64,7 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\LogException' => __DIR__ . '/../..' . '/src/Exception/LogException.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\SettingException' => __DIR__ . '/../..' . '/src/Exception/SettingException.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\AbstractFormDataProvider' => __DIR__ . '/../..' . '/src/Form/AbstractFormDataProvider.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataHandler\\FilterTemplateFormDataHandler' => __DIR__ . '/../..' . '/src/Form/DataHandler/FilterTemplateFormDataHandler.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\ConfigurationFormDataProvider' => __DIR__ . '/../..' . '/src/Form/DataProvider/ConfigurationFormDataProvider.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\LicenseFormDataProvider' => __DIR__ . '/../..' . '/src/Form/DataProvider/LicenseFormDataProvider.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\LogFormDataProvider' => __DIR__ . '/../..' . '/src/Form/DataProvider/LogFormDataProvider.php',

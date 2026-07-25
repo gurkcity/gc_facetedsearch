@@ -412,3 +412,4 @@ $(document).on('ready', () => {
 
   layeredDefaultCategory.filter('[value="1"]').trigger('change');
 });
+

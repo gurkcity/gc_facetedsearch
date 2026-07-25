@@ -108,7 +108,7 @@ class FiltersGridDefinitionFactory extends AbstractGridDefinitionFactory impleme
                         'actions' => (new RowActionCollection())
                             ->add(
                                 (new LinkRowAction('edit'))
-                                ->setIcon('reply')
+                                ->setIcon('edit')
                                 ->setName($this->trans('Edit', [], 'Modules.Gcfacetedsearch.Admin'))
                                 ->setOptions([
                                     'route' => 'gc_facetedsearch_filtersgrid_edit',
