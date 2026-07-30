@@ -1,0 +1,75 @@
+<?php
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ */
+
+namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Hook;
+
+use Context;
+use Db;
+use GC_FacetedSearch;
+
+abstract class AbstractHook
+{
+    const AVAILABLE_HOOKS = [];
+
+    /**
+     * @var Context
+     */
+    protected $context;
+
+    /**
+     * @var GC_FacetedSearch
+     */
+    protected $module;
+
+    /**
+     * @var Db
+     */
+    protected $database;
+
+    public function __construct(GC_FacetedSearch $module)
+    {
+        $this->module = $module;
+        $this->context = $module->getContext();
+        $this->database = $module->getDatabase();
+    }
+
+    /**
+     * @return array
+     */
+    public function getAvailableHooks()
+    {
+        return static::AVAILABLE_HOOKS;
+    }
+
+    /**
+     * Context::$controller is typed as the PHPStan-opaque LegacyControllerContext on
+     * PrestaShop 9.x, which prevents static resolution of legacy AdminController members
+     * such as the $default_form_language property. This returns it with a concrete type.
+     *
+     * @return \AdminController
+     */
+    protected function getAdminController()
+    {
+        /** @var \AdminController $controller */
+        $controller = $this->context->controller;
+
+        return $controller;
+    }
+}

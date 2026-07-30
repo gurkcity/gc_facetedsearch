@@ -11,6 +11,9 @@
 
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits;
 
+use Context;
+use Db;
+
 trait ModuleFunctionsTrait
 {
     /**
@@ -25,7 +28,7 @@ trait ModuleFunctionsTrait
     public function buildLayeredCategories()
     {
         // Get data for all filter templates in the database
-        $templates = \Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter ORDER BY date_add DESC');
+        $templates = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter ORDER BY date_add DESC');
 
         // We will keep track of pages categories where filter was already set, so we don't have multiple
         // filters for the same category and shop.
@@ -35,7 +38,7 @@ trait ModuleFunctionsTrait
         $this->invalidateLayeredFilterBlockCache();
 
         // Remove all previous data from gc_facetedsearch_category
-        \Db::getInstance()->execute('TRUNCATE ' . _DB_PREFIX_ . 'gc_facetedsearch_category');
+        Db::getInstance()->execute('TRUNCATE ' . _DB_PREFIX_ . 'gc_facetedsearch_category');
 
         // If no filter templates are defined, nothing else to do here
         if (!count($templates)) {
@@ -111,7 +114,7 @@ trait ModuleFunctionsTrait
 
                             // If we reached the limit, we will execute it and flush our "cache"
                             if ($nbSqlValuesToInsert >= 100) {
-                                \Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
+                                Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
                                 $sqlInsert = '';
                                 $nbSqlValuesToInsert = 0;
                             }
@@ -123,7 +126,7 @@ trait ModuleFunctionsTrait
 
         // We will execute remaining queries because we almost certainly didn't reach 100 in the batch
         if ($nbSqlValuesToInsert) {
-            \Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
+            Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
         }
     }
 
@@ -132,7 +135,7 @@ trait ModuleFunctionsTrait
      */
     public function invalidateLayeredFilterBlockCache()
     {
-        return \Db::getInstance()->execute('TRUNCATE TABLE ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block');
+        return Db::getInstance()->execute('TRUNCATE TABLE ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block');
     }
 
     /**
@@ -192,5 +195,29 @@ trait ModuleFunctionsTrait
         );
 
         $this->setSupportedControllers($supportedControllers);
+    }
+
+    /**
+     * Return current context
+     *
+     * @return Context
+     */
+    public function getContext()
+    {
+        return $this->context;
+    }
+
+    /**
+     * Return the current database instance
+     *
+     * @return Db
+     */
+    public function getDatabase()
+    {
+        if ($this->database === null) {
+            $this->database = Db::getInstance();
+        }
+
+        return $this->database;
     }
 }

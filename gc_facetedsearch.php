@@ -13,6 +13,7 @@ use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleHelperTrait;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleLicenseTrait;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleTrait;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleFunctionsTrait;
+use Onlineshopmodule\PrestaShop\Module\Facetedsearch\HookDispatcher;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -80,12 +81,12 @@ class GC_Facetedsearch extends Module
     /**
      * @var Db
      */
-    private $database;
+    protected $database;
 
     /**
      * @var HookDispatcher
      */
-    private $hookDispatcher;
+    protected $hookDispatcher;
 
     public function __construct()
     {
@@ -111,5 +112,36 @@ class GC_Facetedsearch extends Module
         parent::__construct();
 
         $this->initModule();
+    }
+
+    public function parentInitModule()
+    {
+        $this->hookDispatcher = new HookDispatcher($this);
+    }
+
+    /**
+     * Dispatch hooks
+     *
+     * @param string $methodName
+     * @param array $arguments
+     */
+    public function __call($methodName, array $arguments)
+    {
+        if (strpos($methodName, 'hook') === false) {
+            throw new Exception('Call missing method ::' . $methodName);
+        }
+
+        return $this->getHookDispatcher()->dispatch(
+            $methodName,
+            !empty($arguments[0]) ? $arguments[0] : []
+        );
+    }
+
+    /**
+     * @return HookDispatcher
+     */
+    public function getHookDispatcher()
+    {
+        return $this->hookDispatcher;
     }
 }

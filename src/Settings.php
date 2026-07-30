@@ -99,10 +99,10 @@ class Settings extends AbstractSettings
             // 'actionAttributeSave' => new Hook('actionAttributeSave'),
             // 'displayAttributeForm' => new Hook('displayAttributeForm'),
             // 'actionAttributePostProcess' => new Hook('actionAttributePostProcess'),
-            // 'actionAttributeFormBuilderModifier' => new Hook('actionAttributeFormBuilderModifier'),
-            // 'actionAttributeFormDataProviderData' => new Hook('actionAttributeFormDataProviderData'),
-            // 'actionAfterCreateAttributeFormHandler' => new Hook('actionAfterCreateAttributeFormHandler'),
-            // 'actionAfterUpdateAttributeFormHandler' => new Hook('actionAfterUpdateAttributeFormHandler'),
+            'actionAttributeFormBuilderModifier' => new Hook('actionAttributeFormBuilderModifier'),
+            'actionAttributeFormDataProviderData' => new Hook('actionAttributeFormDataProviderData'),
+            'actionAfterCreateAttributeFormHandler' => new Hook('actionAfterCreateAttributeFormHandler'),
+            'actionAfterUpdateAttributeFormHandler' => new Hook('actionAfterUpdateAttributeFormHandler'),
             // // attribute group
             // 'actionAttributeGroupSave' => new Hook('actionAttributeGroupSave'),
             // 'displayAttributeGroupForm' => new Hook('displayAttributeGroupForm'),
@@ -212,6 +212,13 @@ class Settings extends AbstractSettings
         $table->addColumn('id_shop', 'integer', ['unsigned' => true]);
         $table->setPrimaryKey(['id_gc_facetedsearch_filter', 'id_shop']);
         $table->addIndex(['id_shop'], 'id_shop');
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_indexable_attribute_lang_value');
+        $table->addColumn('id_attribute', 'integer');
+        $table->addColumn('id_lang', 'integer');
+        $table->addColumn('url_name', 'string', ['length' => 128, 'notnull' => false]);
+        $table->addColumn('meta_title', 'string', ['length' => 128, 'notnull' => false]);
+        $table->setPrimaryKey(['id_attribute', 'id_lang']);
 
         return new Sql($schema);
     }
