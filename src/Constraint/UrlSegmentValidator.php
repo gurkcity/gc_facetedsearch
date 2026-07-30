@@ -29,9 +29,9 @@ class UrlSegmentValidator extends ConstraintValidator
     /**
      * @param Tools $tools
      */
-    public function __construct(Tools $tools)
+    public function __construct(?Tools $tools = null)
     {
-        $this->tools = $tools;
+        $this->tools = $tools ?? new Tools();
     }
 
     /**

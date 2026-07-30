@@ -26,6 +26,7 @@ return array(
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\Command' => $baseDir . '/src/Command/Command.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\CronCommand' => $baseDir . '/src/Command/CronCommand.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Constraint\\UrlSegment' => $baseDir . '/src/Constraint/UrlSegment.php',
+    'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Constraint\\UrlSegmentValidator' => $baseDir . '/src/Constraint/UrlSegmentValidator.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\AdminController' => $baseDir . '/src/Controller/AdminController.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\ConfigurationAdminController' => $baseDir . '/src/Controller/ConfigurationAdminController.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\FilterTemplateAdminController' => $baseDir . '/src/Controller/FilterTemplateAdminController.php',

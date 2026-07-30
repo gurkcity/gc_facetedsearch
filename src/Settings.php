@@ -95,22 +95,22 @@ class Settings extends AbstractSettings
     {
         return [
             // // attribute
-            // 'actionAttributeGroupDelete' => new Hook('actionAttributeGroupDelete'),
-            // 'actionAttributeSave' => new Hook('actionAttributeSave'),
-            // 'displayAttributeForm' => new Hook('displayAttributeForm'),
-            // 'actionAttributePostProcess' => new Hook('actionAttributePostProcess'),
+            'actionAttributeGroupDelete' => new Hook('actionAttributeGroupDelete'),
+            'actionAttributeSave' => new Hook('actionAttributeSave'),
+            'displayAttributeForm' => new Hook('displayAttributeForm'),
+            'actionAttributePostProcess' => new Hook('actionAttributePostProcess'),
             'actionAttributeFormBuilderModifier' => new Hook('actionAttributeFormBuilderModifier'),
             'actionAttributeFormDataProviderData' => new Hook('actionAttributeFormDataProviderData'),
             'actionAfterCreateAttributeFormHandler' => new Hook('actionAfterCreateAttributeFormHandler'),
             'actionAfterUpdateAttributeFormHandler' => new Hook('actionAfterUpdateAttributeFormHandler'),
             // // attribute group
-            // 'actionAttributeGroupSave' => new Hook('actionAttributeGroupSave'),
-            // 'displayAttributeGroupForm' => new Hook('displayAttributeGroupForm'),
-            // 'displayAttributeGroupPostProcess' => new Hook('displayAttributeGroupPostProcess'),
-            // 'actionAttributeGroupFormBuilderModifier' => new Hook('actionAttributeGroupFormBuilderModifier'),
-            // 'actionAttributeGroupFormDataProviderData' => new Hook('actionAttributeGroupFormDataProviderData'),
-            // 'actionAfterCreateAttributeGroupFormHandler' => new Hook('actionAfterCreateAttributeGroupFormHandler'),
-            // 'actionAfterUpdateAttributeGroupFormHandler' => new Hook('actionAfterUpdateAttributeGroupFormHandler'),
+            'actionAttributeGroupSave' => new Hook('actionAttributeGroupSave'),
+            'displayAttributeGroupForm' => new Hook('displayAttributeGroupForm'),
+            'displayAttributeGroupPostProcess' => new Hook('displayAttributeGroupPostProcess'),
+            'actionAttributeGroupFormBuilderModifier' => new Hook('actionAttributeGroupFormBuilderModifier'),
+            'actionAttributeGroupFormDataProviderData' => new Hook('actionAttributeGroupFormDataProviderData'),
+            'actionAfterCreateAttributeGroupFormHandler' => new Hook('actionAfterCreateAttributeGroupFormHandler'),
+            'actionAfterUpdateAttributeGroupFormHandler' => new Hook('actionAfterUpdateAttributeGroupFormHandler'),
             // // product
             // 'actionProductSave' => new Hook('actionProductSave'),
             // // category
@@ -121,21 +121,21 @@ class Settings extends AbstractSettings
             // // design
             // 'displayLeftColumn' => new Hook('displayLeftColumn'),
             // // feature
-            // 'actionFeatureSave' => new Hook('actionFeatureSave'),
-            // 'actionFeatureDelete' => new Hook('actionFeatureDelete'),
-            // 'displayFeatureForm' => new Hook('displayFeatureForm'),
-            // 'displayFeaturePostProcess' => new Hook('displayFeaturePostProcess'),
-            // 'actionFeatureFormBuilderModifier' => new Hook('actionFeatureFormBuilderModifier'),
-            // 'actionAfterCreateFeatureFormHandler' => new Hook('actionAfterCreateFeatureFormHandler'),
-            // 'actionAfterUpdateFeatureFormHandler' => new Hook('actionAfterUpdateFeatureFormHandler'),
+            'actionFeatureSave' => new Hook('actionFeatureSave'),
+            'actionFeatureDelete' => new Hook('actionFeatureDelete'),
+            'displayFeatureForm' => new Hook('displayFeatureForm'),
+            'displayFeaturePostProcess' => new Hook('displayFeaturePostProcess'),
+            'actionFeatureFormBuilderModifier' => new Hook('actionFeatureFormBuilderModifier'),
+            'actionAfterCreateFeatureFormHandler' => new Hook('actionAfterCreateFeatureFormHandler'),
+            'actionAfterUpdateFeatureFormHandler' => new Hook('actionAfterUpdateFeatureFormHandler'),
             // // feature value
-            // 'actionFeatureValueSave' => new Hook('actionFeatureValueSave'),
-            // 'actionFeatureValueDelete' => new Hook('actionFeatureValueDelete'),
-            // 'displayFeatureValueForm' => new Hook('displayFeatureValueForm'),
-            // 'displayFeatureValuePostProcess' => new Hook('displayFeatureValuePostProcess'),
-            // 'actionFeatureValueFormBuilderModifier' => new Hook('actionFeatureValueFormBuilderModifier'),
-            // 'actionAfterCreateFeatureValueFormHandler' => new Hook('actionAfterCreateFeatureValueFormHandler'),
-            // 'actionAfterUpdateFeatureValueFormHandler' => new Hook('actionAfterUpdateFeatureValueFormHandler'),
+            'actionFeatureValueSave' => new Hook('actionFeatureValueSave'),
+            'actionFeatureValueDelete' => new Hook('actionFeatureValueDelete'),
+            'displayFeatureValueForm' => new Hook('displayFeatureValueForm'),
+            'displayFeatureValuePostProcess' => new Hook('displayFeatureValuePostProcess'),
+            'actionFeatureValueFormBuilderModifier' => new Hook('actionFeatureValueFormBuilderModifier'),
+            'actionAfterCreateFeatureValueFormHandler' => new Hook('actionAfterCreateFeatureValueFormHandler'),
+            'actionAfterUpdateFeatureValueFormHandler' => new Hook('actionAfterUpdateFeatureValueFormHandler'),
             // // product search
             // 'productSearchProvider' => new Hook('productSearchProvider'),
             // // specific price
@@ -219,6 +219,37 @@ class Settings extends AbstractSettings
         $table->addColumn('url_name', 'string', ['length' => 128, 'notnull' => false]);
         $table->addColumn('meta_title', 'string', ['length' => 128, 'notnull' => false]);
         $table->setPrimaryKey(['id_attribute', 'id_lang']);
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_indexable_attribute_group_lang_value');
+        $table->addColumn('id_attribute_group', 'integer');
+        $table->addColumn('id_lang', 'integer');
+        $table->addColumn('url_name', 'string', ['length' => 128, 'notnull' => false]);
+        $table->addColumn('meta_title', 'string', ['length' => 128, 'notnull' => false]);
+        $table->setPrimaryKey(['id_attribute_group', 'id_lang']);
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_indexable_attribute_group');
+        $table->addColumn('id_attribute_group', 'integer');
+        $table->addColumn('indexable', 'boolean', ['default' => 0]);
+        $table->setPrimaryKey(['id_attribute_group']);
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_indexable_feature');
+        $table->addColumn('id_feature', 'integer');
+        $table->addColumn('indexable', 'boolean', ['default' => 0]);
+        $table->setPrimaryKey(['id_feature']);
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_indexable_feature_lang_value');
+        $table->addColumn('id_feature', 'integer');
+        $table->addColumn('id_lang', 'integer');
+        $table->addColumn('url_name', 'string', ['length' => 128]);
+        $table->addColumn('meta_title', 'string', ['length' => 128, 'notnull' => false]);
+        $table->setPrimaryKey(['id_feature', 'id_lang']);
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_indexable_feature_value_lang_value');
+        $table->addColumn('id_feature_value', 'integer');
+        $table->addColumn('id_lang', 'integer');
+        $table->addColumn('url_name', 'string', ['length' => 128, 'notnull' => false]);
+        $table->addColumn('meta_title', 'string', ['length' => 128, 'notnull' => false]);
+        $table->setPrimaryKey(['id_feature_value', 'id_lang']);
 
         return new Sql($schema);
     }
