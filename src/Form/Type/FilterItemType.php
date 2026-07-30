@@ -70,6 +70,11 @@ class FilterItemType extends TranslatorAwareType
             'required' => false,
             'error_bubbling' => false,
             'slider' => false,
+            'default_empty_data' => [
+                'enabled' => false,
+                'filter_show_limit' => 0,
+                'filter_type' => 0,
+            ]
         ]);
     }
 

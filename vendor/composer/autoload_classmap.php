@@ -38,6 +38,7 @@ return array(
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\AbstractFormDataProvider' => $baseDir . '/src/Form/AbstractFormDataProvider.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataHandler\\FilterTemplateFormDataHandler' => $baseDir . '/src/Form/DataHandler/FilterTemplateFormDataHandler.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\ConfigurationFormDataProvider' => $baseDir . '/src/Form/DataProvider/ConfigurationFormDataProvider.php',
+    'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\FilterTemplateFormDataProvider' => $baseDir . '/src/Form/DataProvider/FilterTemplateFormDataProvider.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\LicenseFormDataProvider' => $baseDir . '/src/Form/DataProvider/LicenseFormDataProvider.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\DataProvider\\LogFormDataProvider' => $baseDir . '/src/Form/DataProvider/LogFormDataProvider.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\Type\\ConfigurationType' => $baseDir . '/src/Form/Type/ConfigurationType.php',

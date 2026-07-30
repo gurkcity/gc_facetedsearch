@@ -38,3 +38,13 @@ services:
     class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\DataHandler\FilterTemplateFormDataHandler'
     arguments:
       $module: '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
+
+  onlineshopmodule.module.facetedsearch.form.identifiable_object.data_provider.filter_template_form_data_provider:
+    class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\DataProvider\FilterTemplateFormDataProvider'
+  
+  onlineshopmodule.module.facetedsearch.form.identifiable_object.builder.filter_template_form_builder:
+    class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
+    factory: [ '@prestashop.core.form.builder.form_builder_factory', 'create' ]
+    arguments:
+      - 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\FilterTemplateType'
+      - '@onlineshopmodule.module.facetedsearch.form.identifiable_object.data_provider.filter_template_form_data_provider'

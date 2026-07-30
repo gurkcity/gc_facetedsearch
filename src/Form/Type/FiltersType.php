@@ -41,52 +41,22 @@ class FiltersType extends TranslatorAwareType
         $builder
             ->add('filter_subcategories', FilterItemType::class, [
                 'label' => $this->trans('Sub-categories filter', 'Modules.Gcfacetedsearch.Admin'),
-                'data' => [
-                    'enabled' => false,
-                    'filter_show_limit' => 0,
-                    'filter_type' => 0,
-                ],
             ])
             ->add('filter_stock', FilterItemType::class, [
                 'label' => $this->trans('Product stock filter', 'Modules.Gcfacetedsearch.Admin'),
-                'data' => [
-                    'enabled' => false,
-                    'filter_show_limit' => 0,
-                    'filter_type' => 0,
-                ],
             ])
             ->add('filter_condition', FilterItemType::class, [
                 'label' => $this->trans('Product condition filter', 'Modules.Gcfacetedsearch.Admin'),
-                'data' => [
-                    'enabled' => false,
-                    'filter_show_limit' => 0,
-                    'filter_type' => 0,
-                ],
             ])
             ->add('filter_manufacturer', FilterItemType::class, [
                 'label' => $this->trans('Product brand filter', 'Modules.Gcfacetedsearch.Admin'),
-                'data' => [
-                    'enabled' => false,
-                    'filter_show_limit' => 0,
-                    'filter_type' => 0,
-                ],
             ])
             ->add('filter_weight_slider', FilterItemType::class, [
                 'label' => $this->trans('Product weight filter (slider)', 'Modules.Gcfacetedsearch.Admin'),
-                'data' => [
-                    'enabled' => false,
-                    'filter_show_limit' => 0,
-                    'filter_type' => 0,
-                ],
                 'slider' => true,
             ])
             ->add('filter_price_slider', FilterItemType::class, [
                 'label' => $this->trans('Product price filter (slider)', 'Modules.Gcfacetedsearch.Admin'),
-                'data' => [
-                    'enabled' => false,
-                    'filter_show_limit' => 0,
-                    'filter_type' => 0,
-                ],
                 'slider' => true,
             ])
         ;
@@ -115,11 +85,6 @@ class FiltersType extends TranslatorAwareType
             $builder->add('filter_attribute_group_' . $group['id_attribute_group'], FilterItemType::class, [
                 'label' => $label,
                 'slider' => false,
-                'data' => [
-                    'enabled' => false,
-                    'filter_show_limit' => 0,
-                    'filter_type' => 0,
-                ],
             ]);
         }
 
@@ -147,16 +112,8 @@ class FiltersType extends TranslatorAwareType
             $builder->add('filter_feature_' . $feature['id_feature'], FilterItemType::class, [
                 'label' => $label,
                 'slider' => false,
-                'data' => [
-                    'enabled' => false,
-                    'filter_show_limit' => 0,
-                    'filter_type' => 0,
-                ],
             ]);
         }
-
-        // echo "<pre>"; print_r($groups); echo '</pre>';
-        // exit;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

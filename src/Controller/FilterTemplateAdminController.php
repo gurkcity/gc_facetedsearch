@@ -48,7 +48,13 @@ class FilterTemplateAdminController extends AdminController
                     'name' => '',
                     'categories' => [],
                     'shop_association' => [],
-                    'filters' => [],
+                    'filters' => [
+                        // 'filter_subcategories' => [
+                        //     'enabled' => 1,
+                        //     'filter_type' => 0,
+                        //     'filter_show_limit' => 0,
+                        // ],
+                    ],
                 ]
             );
 
@@ -84,13 +90,41 @@ class FilterTemplateAdminController extends AdminController
      *     message="Access denied."
      * )
      */
-    public function editAction(Request $request, int $idTemplate): Response
-    {
+    public function editAction(
+        Request $request,
+        int $idTemplate,
+        #[Autowire(service: 'onlineshopmodule.module.facetedsearch.form.identifiable_object.builder.filter_template_form_builder')]
+        FormBuilderInterface $formBuilder,
+        #[Autowire(service: 'onlineshopmodule.module.facetedsearch.form.identifiable_object.handler.filter_template_form_handler')]
+        FormHandlerInterface $formHandler
+    ): Response {
         $this->setLayoutTitle($this->trans('Edit filter template', [], 'Modules.Gcfacetedsearch.Admin'));
 
-        // TODO: load template by $idTemplate, render edit form and save changes
+        try {
+            $templateForm = $formBuilder->getFormFor($idTemplate, []);
 
-        return $this->redirectToRoute('gc_facetedsearch_configuration');
+            $templateForm->handleRequest($request);
+
+            $formHandler->handleFor($idTemplate, $templateForm);
+
+            if ($templateForm->isSubmitted() && $templateForm->isValid()) {
+                // $this->clearSmartyCache('*');
+
+                $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('gc_facetedsearch_configuration');
+            }
+        } catch (Exception $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        return $this->render(
+            'views/templates/admin/filter_template/form.html.twig',
+            [
+                'filterTemplateForm' => $templateForm->createView(),
+                'layoutTitle' => $this->trans('Edit filter template', [], 'Modules.Gcfacetedsearch.Admin'),
+            ]
+        );
     }
 
     /**
