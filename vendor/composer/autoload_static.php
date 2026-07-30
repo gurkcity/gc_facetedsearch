@@ -53,6 +53,7 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'GC_Facetedsearch' => __DIR__ . '/../..' . '/gc_facetedsearch.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\Command' => __DIR__ . '/../..' . '/src/Command/Command.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\CronCommand' => __DIR__ . '/../..' . '/src/Command/CronCommand.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Constraint\\UrlSegment' => __DIR__ . '/../..' . '/src/Constraint/UrlSegment.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\AdminController' => __DIR__ . '/../..' . '/src/Controller/AdminController.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\ConfigurationAdminController' => __DIR__ . '/../..' . '/src/Controller/ConfigurationAdminController.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\FilterTemplateAdminController' => __DIR__ . '/../..' . '/src/Controller/FilterTemplateAdminController.php',

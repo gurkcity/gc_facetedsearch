@@ -158,31 +158,31 @@ trait ModuleFunctionsTrait
     {
         $supportedControllers = [
             'category' => [
-                'name' => $this->trans('Category', [], 'Modules.Facetedsearch.Admin'),
+                'name' => $this->trans('Category', [], 'Modules.Gcfacetedsearch.Admin'),
                 'cacheable' => true,
             ],
             'manufacturer' => [
-                'name' => $this->trans('Manufacturer', [], 'Modules.Facetedsearch.Admin'),
+                'name' => $this->trans('Manufacturer', [], 'Modules.Gcfacetedsearch.Admin'),
                 'cacheable' => true,
             ],
             'supplier' => [
-                'name' => $this->trans('Supplier', [], 'Modules.Facetedsearch.Admin'),
+                'name' => $this->trans('Supplier', [], 'Modules.Gcfacetedsearch.Admin'),
                 'cacheable' => true,
             ],
             'new-products' => [
-                'name' => $this->trans('New products', [], 'Modules.Facetedsearch.Admin'),
+                'name' => $this->trans('New products', [], 'Modules.Gcfacetedsearch.Admin'),
                 'cacheable' => false,
             ],
             'best-sales' => [
-                'name' => $this->trans('Best sales', [], 'Modules.Facetedsearch.Admin'),
+                'name' => $this->trans('Best sales', [], 'Modules.Gcfacetedsearch.Admin'),
                 'cacheable' => false,
             ],
             'prices-drop' => [
-                'name' => $this->trans('Prices drop', [], 'Modules.Facetedsearch.Admin'),
+                'name' => $this->trans('Prices drop', [], 'Modules.Gcfacetedsearch.Admin'),
                 'cacheable' => false,
             ],
             'search' => [
-                'name' => $this->trans('Search', [], 'Modules.Facetedsearch.Admin'),
+                'name' => $this->trans('Search', [], 'Modules.Gcfacetedsearch.Admin'),
                 'cacheable' => false,
             ],
         ];

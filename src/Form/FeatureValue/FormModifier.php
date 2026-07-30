@@ -51,7 +51,7 @@ class FormModifier
         $invalidCharsHint = $translator->trans(
             'Invalid characters: <>;=#{}_',
             [],
-            'Modules.Facetedsearch.Admin'
+            'Modules.Gcfacetedsearch.Admin'
         );
 
         $urlTip = $translator->trans(
@@ -59,14 +59,14 @@ class FormModifier
             'the word that best represents this feature. By default, PrestaShop uses the ' .
             'feature\'s value, but you can change that setting using this field.',
             [],
-            'Modules.Facetedsearch.Admin'
+            'Modules.Gcfacetedsearch.Admin'
         );
         $metaTitleTip = $translator->trans(
             'When the Faceted Search module is enabled, you can get more detailed page titles by ' .
             'choosing the word that best represents this feature. By default, PrestaShop uses the ' .
             'feature\'s value, but you can change that setting using this field.',
             [],
-            'Modules.Facetedsearch.Admin'
+            'Modules.Gcfacetedsearch.Admin'
         );
 
         $formBuilder
@@ -75,7 +75,7 @@ class FormModifier
                 TranslatableType::class,
                 [
                     'required' => false,
-                    'label' => $translator->trans('URL', [], 'Modules.Facetedsearch.Admin'),
+                    'label' => $translator->trans('URL', [], 'Modules.Gcfacetedsearch.Admin'),
                     'help' => $urlTip . ' ' . $invalidCharsHint,
                     'options' => [
                         'constraints' => [
@@ -92,7 +92,7 @@ class FormModifier
                 TranslatableType::class,
                 [
                     'required' => false,
-                    'label' => $translator->trans('Meta title', [], 'Modules.Facetedsearch.Admin'),
+                    'label' => $translator->trans('Meta title', [], 'Modules.Gcfacetedsearch.Admin'),
                     'help' => $metaTitleTip,
                     'data' => $data['meta_title'],
                 ]
