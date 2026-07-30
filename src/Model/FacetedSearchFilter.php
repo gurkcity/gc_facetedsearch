@@ -11,8 +11,10 @@
 
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Model;
 
+use Db;
 use ObjectModel;
 use Shop;
+use Validate;
 
 /**
  * ObjectModel for table gc_facetedsearch_filter (+ shop association).
@@ -69,5 +71,40 @@ class FacetedSearchFilter extends ObjectModel
         Shop::addTableAssociation(self::$definition['table'], ['type' => 'shop']);
 
         parent::__construct($id, $id_lang, $id_shop, $translator);
+    }
+
+    /**
+     * Delete filter template and all related rows.
+     *
+     * Related tables:
+     * - gc_facetedsearch_filter_shop (shop associations)
+     * - gc_facetedsearch_filter (main record via parent)
+     *
+     * Derived data (gc_facetedsearch_category, gc_facetedsearch_filter_block)
+     * is rebuilt/invalidated by ModuleFunctionsTrait::buildLayeredCategories().
+     */
+    public function delete()
+    {
+        if (!Validate::isLoadedObject($this)) {
+            return false;
+        }
+
+        $id = (int) $this->id;
+        $primary = bqSQL(self::$definition['primary']);
+        $table = bqSQL(self::$definition['table']);
+
+        $result = Db::getInstance()->delete(
+            $table . '_shop',
+            '`' . $primary . '` = ' . $id
+        );
+
+        if (!$result) {
+            return false;
+        }
+
+        // All shop links removed — parent must delete the main row, not only context shops.
+        $this->id_shop_list = [];
+
+        return parent::delete();
     }
 }

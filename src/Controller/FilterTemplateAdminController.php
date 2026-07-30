@@ -13,6 +13,7 @@ namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller;
 
 use Exception;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\FilterTemplateType;
+use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Model\FacetedSearchFilter;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use PrestaShopBundle\Security\Annotation\ModuleActivated;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilderInterface;
@@ -137,8 +138,41 @@ class FilterTemplateAdminController extends AdminController
      */
     public function deleteAction(Request $request, int $idTemplate): Response
     {
-        // TODO: delete template by $idTemplate and flash result message
+        try {
+            $filterTemplate = new FacetedSearchFilter($idTemplate);
+            if (!\Validate::isLoadedObject($filterTemplate)) {
+                throw new Exception($this->trans('Filter template not found', [], 'Modules.Gcfacetedsearch.Admin'));
+            }
+
+            $templateName = $filterTemplate->name;
+
+            if (!$filterTemplate->delete()) {
+                throw new Exception($this->trans('An error occurred while deleting the filter template.', [], 'Modules.Gcfacetedsearch.Admin'));
+            }
+
+            $this->resetDefaultCategoryTemplateIfNeeded($idTemplate);
+            $this->module->buildLayeredCategories();
+
+            $this->addFlash(
+                'success',
+                $this->trans(
+                    'Filter template deleted, categories updated (reverted to default Filter template).',
+                    [],
+                    'Modules.Gcfacetedsearch.Admin'
+                ) . ' "' . $templateName . '"'
+            );
+        } catch (Exception $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
 
         return $this->redirectToRoute('gc_facetedsearch_configuration');
+    }
+
+    private function resetDefaultCategoryTemplateIfNeeded(int $idTemplate): void
+    {
+        $defaultTemplateId = (int) $this->config->get('DEFAULT_CATEGORY_TEMPLATE');
+        if ($defaultTemplateId === $idTemplate) {
+            $this->config->set('DEFAULT_CATEGORY_TEMPLATE', 0);
+        }
     }
 }

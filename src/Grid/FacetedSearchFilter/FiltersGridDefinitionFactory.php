@@ -116,6 +116,21 @@ class FiltersGridDefinitionFactory extends AbstractGridDefinitionFactory impleme
                                     'route_param_field' => 'id_gc_facetedsearch_filter',
                                 ])
                             )
+                            ->add(
+                                (new LinkRowAction('delete'))
+                                ->setIcon('delete')
+                                ->setName($this->trans('Delete', [], 'Admin.Actions'))
+                                ->setOptions([
+                                    'route' => 'gc_facetedsearch_filtersgrid_delete',
+                                    'route_param_name' => 'idTemplate',
+                                    'route_param_field' => 'id_gc_facetedsearch_filter',
+                                    'confirm_message' => $this->trans(
+                                        'Delete selected item?',
+                                        [],
+                                        'Admin.Notifications.Warning'
+                                    ),
+                                ])
+                            )
                     ])
             )
         ;

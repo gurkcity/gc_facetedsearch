@@ -93,8 +93,9 @@ class ConfigurationType extends TranslatorAwareType
                 'required' => false,
                 'label' => $this->trans('Default filter template for new categories', 'Modules.Gcfacetedsearch.Admin'),
                 'help' => $this->trans('If you want to automatically assign a filter template to new categories, select it here..', 'Modules.Gcfacetedsearch.Admin'),
-                'placeholder' => $this->trans('None', 'Admin.Global'),
-                'choices' => [],
+                'placeholder' => false,
+                'choices' => $this->resolveFilterTemplateChoices(),
+                'choice_translation_domain' => false,
             ])
         ;
 
@@ -134,5 +135,32 @@ class ConfigurationType extends TranslatorAwareType
     public function getParent(): string
     {
         return MultistoreConfigurationType::class;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function resolveFilterTemplateChoices(): array
+    {
+        $templates = \Db::getInstance()->executeS(
+            'SELECT `id_gc_facetedsearch_filter`, `name`
+            FROM `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
+            ORDER BY `name` ASC'
+        );
+
+        if (!$templates) {
+            return [
+                $this->trans('None', 'Admin.Global') => 0,
+            ];
+        }
+
+        $choices = [
+            $this->trans('None', 'Admin.Global') => 0,
+        ];
+        foreach ($templates as $template) {
+            $choices[$template['name']] = (int) $template['id_gc_facetedsearch_filter'];
+        }
+
+        return $choices;
     }
 }
