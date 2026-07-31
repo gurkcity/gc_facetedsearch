@@ -334,6 +334,9 @@ class Search
             $groups = FrontController::getCurrentCustomerGroups();
             $this->addFilter('id_group', empty($groups) ? [Group::getCurrent()->id] : $groups);
         }
+
+        // show products with quantity only
+        $this->getSearchAdapter()->addFilter('quantity', ['0'], '>');
     }
 
     /**
