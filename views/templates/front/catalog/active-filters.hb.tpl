@@ -9,22 +9,31 @@
 
 {* template version 1, do not remove this comment from template *}
 
-<section id="js-active-search-filters" class="{if $activeFilters|count}active_filters{else}hide{/if}">
-  {block name='active_filters_title'}
-    <p class="h6 {if $activeFilters|count}active-filter-title{else}hidden-xs-up{/if}">{l s='Active filters' d='Shop.Theme.Global'}</p>
-  {/block}
+{$componentName = 'active-filters'}
 
+<div id="js-active-search-filters" class="{$componentName}">
   {if $activeFilters|count}
-    <ul>
+    <ul class="{$componentName}__list">
+      {block name='active_filters_title'}
+        <li class="{$componentName}__item">
+          <span class="{$componentName}__title">{l s='Active filters' d='Shop.Theme.Global'}</span>
+        </li>
+      {/block}
       {foreach from=$activeFilters item="filter"}
         {block name='active_filters_item'}
-          <li class="filter-block">
-            {l s='%1$s:' d='Shop.Theme.Catalog' sprintf=[$filter.facetLabel]}
-            {$filter.label}
-            <a class="js-search-link" href="{$filter.nextEncodedFacetsURL}"><i class="material-icons close">&#xE5CD;</i></a>
+          <li class="{$componentName}__item">
+            <a
+              class="{$componentName}__link btn btn-outline-tertiary rounded-pill btn-sm js-search-link"
+              href="{$filter.nextEncodedFacetsURL}"
+              rel="nofollow"
+              aria-label="{l s='Remove %1$s filter: %2$s' d='Shop.Theme.Catalog' sprintf=[$filter.facetLabel|lower, $filter.label]}"
+            >
+              {l s='%1$s:' d='Shop.Theme.Catalog' sprintf=[$filter.facetLabel]} {$filter.label}
+              <i class="material-icons" aria-hidden="true">&#xE14C;</i>
+            </a>
           </li>
         {/block}
       {/foreach}
     </ul>
   {/if}
-</section>
+</div>

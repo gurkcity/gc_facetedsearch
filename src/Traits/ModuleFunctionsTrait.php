@@ -386,7 +386,7 @@ trait ModuleFunctionsTrait
                 'GROUP BY id_product, tr.id_country'
             );
 
-            if (empty($taxRatesByCountry) || !Configuration::get('GC_LAYERED_FILTER_PRICE_USETAX')) {
+            if (empty($taxRatesByCountry) || !Configuration::get('GC_FACETEDSEARCH_FILTER_PRICE_USETAX')) {
                 $shopCountries = Country::getCountriesByIdShop($idShop, $this->getContext()->language->id);
                 $taxCountries = array_filter($shopCountries, function ($country) {
                     return $country['active'];

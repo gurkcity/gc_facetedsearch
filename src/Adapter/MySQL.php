@@ -421,7 +421,7 @@ class MySQL extends AbstractAdapter
     {
         // allow only if feature is enabled & it is main product list query (caller ensures $orderField is non-empty)
         if ($this->getInitialPopulation() === null
-            || !Configuration::get('GC_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST')
+            || !Configuration::get('GC_FACETEDSEARCH_FILTER_SHOW_OUT_OF_STOCK_LAST')
         ) {
             return $orderField;
         }

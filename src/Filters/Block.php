@@ -165,7 +165,7 @@ class Block
      */
     public function getFromCache($filterHash)
     {
-        if (!Configuration::get('GC_LAYERED_CACHE_ENABLED')) {
+        if (!Configuration::get('GC_FACETEDSEARCH_CACHE_ENABLED')) {
             return null;
         }
 
@@ -188,7 +188,7 @@ class Block
      */
     public function insertIntoCache($filterHash, $data)
     {
-        if (!Configuration::get('GC_LAYERED_CACHE_ENABLED')) {
+        if (!Configuration::get('GC_FACETEDSEARCH_CACHE_ENABLED')) {
             return;
         }
 
@@ -936,7 +936,7 @@ class Block
             $filteredSearchAdapter->addFilter('id_group', $userGroups);
         }
 
-        $depth = (int) Configuration::get('GC_LAYERED_FILTER_CATEGORY_DEPTH', null, null, null, 1);
+        $depth = (int) Configuration::get('GC_FACETEDSEARCH_FILTER_CATEGORY_DEPTH', null, null, null, 1);
 
         if ($depth) {
             $levelDepth = $parent->level_depth;

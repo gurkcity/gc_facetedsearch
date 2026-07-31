@@ -357,7 +357,7 @@ class Search
 
             // If we want to display only products from this category AND not it's subcategories,
             // we add this one specific category ID, otherwise, we will add everything using nleft and nright
-            if (Configuration::get('GC_LAYERED_FULL_TREE')) {
+            if (Configuration::get('GC_FACETEDSEARCH_FULL_TREE')) {
                 $this->getSearchAdapter()->addFilter('nleft', [$category->nleft], '>=');
                 $this->getSearchAdapter()->addFilter('nright', [$category->nright], '<=');
             } else {
@@ -365,7 +365,7 @@ class Search
             }
 
             // If we want to display products, which have this category as their default category
-            if (Configuration::get('GC_LAYERED_FILTER_BY_DEFAULT_CATEGORY')) {
+            if (Configuration::get('GC_FACETEDSEARCH_FILTER_BY_DEFAULT_CATEGORY')) {
                 $this->addFilter('id_category_default', [$idCategory]);
             }
         }

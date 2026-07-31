@@ -116,11 +116,11 @@ class Products
         $priceFilter['max'] = (float) ($selectedFilters['price'][1]);
 
         if ($this->gcLayeredFilterPriceUsetax === null) {
-            $this->gcLayeredFilterPriceUsetax = (bool) Configuration::get('GC_LAYERED_FILTER_PRICE_USETAX');
+            $this->gcLayeredFilterPriceUsetax = (bool) Configuration::get('GC_FACETEDSEARCH_FILTER_PRICE_USETAX');
         }
 
         if ($this->gcLayeredFilterPriceRounding === null) {
-            $this->gcLayeredFilterPriceRounding = (bool) Configuration::get('GC_LAYERED_FILTER_PRICE_ROUNDING');
+            $this->gcLayeredFilterPriceRounding = (bool) Configuration::get('GC_FACETEDSEARCH_FILTER_PRICE_ROUNDING');
         }
 
         if ($this->gcLayeredFilterPriceUsetax || $this->gcLayeredFilterPriceRounding) {
