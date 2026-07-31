@@ -118,6 +118,7 @@ class GC_Facetedsearch extends Module
     {
         $this->hookDispatcher = new HookDispatcher($this);
         $this->initializeSupportedControllers();
+        $this->ajax = (bool) Tools::getValue('ajax');
     }
 
     /**

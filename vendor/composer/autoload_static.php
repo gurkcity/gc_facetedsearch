@@ -64,6 +64,7 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LicenseAdminController' => __DIR__ . '/../..' . '/src/Controller/LicenseAdminController.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LogAdminController' => __DIR__ . '/../..' . '/src/Controller/LogAdminController.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\MaintenanceAdminController' => __DIR__ . '/../..' . '/src/Controller/MaintenanceAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Definition\\Availability' => __DIR__ . '/../..' . '/src/Definition/Availability.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\CronException' => __DIR__ . '/../..' . '/src/Exception/CronException.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\InstallException' => __DIR__ . '/../..' . '/src/Exception/InstallException.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\LogException' => __DIR__ . '/../..' . '/src/Exception/LogException.php',

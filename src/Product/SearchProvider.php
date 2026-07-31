@@ -294,9 +294,9 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
 
         $language = $this->module->getContext()->language;
 
-        $this->module->getContext()->smarty->assign(
+        return $this->module->smartyAssign(
             [
-                'show_quantities' => Configuration::get('GC_LAYERED_SHOW_QTIES'),
+                'show_quantities' => Configuration::get('GC_FACETEDSEARCH_SHOW_QUIES'),
                 // Provide the language to the template so theme overrides can read it (e.g. the
                 // Hummingbird slider uses {$language.is_rtl} for the slider direction). It must be
                 // an ARRAY, mirroring the global `language` the front controller assigns (via
@@ -325,10 +325,7 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
                         'page' => null,
                     ]
                 ),
-            ]
-        );
-
-        return $this->module->fetch(
+            ],
             'module:gc_facetedsearch/views/templates/front/catalog/facets.tpl'
         );
     }

@@ -212,6 +212,25 @@ trait ModuleFunctionsTrait
     }
 
     /**
+     * Should this controller filter blocks be cached?
+     */
+    public function shouldCacheController(string $controller)
+    {
+        return $this->supportedControllers[$controller]['cacheable'];
+    }
+
+    /**
+     * Check if method is an ajax request.
+     * This check is an old behavior and only check for _GET value.
+     *
+     * @return bool
+     */
+    public function isAjax()
+    {
+        return (bool) $this->ajax;
+    }
+
+    /**
      * Return current context
      *
      * @return Context

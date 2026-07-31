@@ -36,6 +36,7 @@ return array(
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LicenseAdminController' => $baseDir . '/src/Controller/LicenseAdminController.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LogAdminController' => $baseDir . '/src/Controller/LogAdminController.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\MaintenanceAdminController' => $baseDir . '/src/Controller/MaintenanceAdminController.php',
+    'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Definition\\Availability' => $baseDir . '/src/Definition/Availability.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\CronException' => $baseDir . '/src/Exception/CronException.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\InstallException' => $baseDir . '/src/Exception/InstallException.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\LogException' => $baseDir . '/src/Exception/LogException.php',
