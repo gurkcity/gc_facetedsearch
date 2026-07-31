@@ -117,7 +117,7 @@ class Settings extends AbstractSettings
             'actionCategoryAdd' => new Hook('actionCategoryAdd'),
             'actionCategoryDelete' => new Hook('actionCategoryDelete'),
             // // configuration
-            // 'actionProductPreferencesPageStockSave' => new Hook('actionProductPreferencesPageStockSave'),
+            'actionProductPreferencesPageStockSave' => new Hook('actionProductPreferencesPageStockSave'),
             // // design
             // 'displayLeftColumn' => new Hook('displayLeftColumn'),
             // // feature
@@ -139,8 +139,8 @@ class Settings extends AbstractSettings
             // // product search
             // 'productSearchProvider' => new Hook('productSearchProvider'),
             // // specific price
-            // 'actionObjectSpecificPriceRuleUpdateBefore' => new Hook('actionObjectSpecificPriceRuleUpdateBefore'),
-            // 'actionAdminSpecificPriceRuleControllerSaveAfter' => new Hook('actionAdminSpecificPriceRuleControllerSaveAfter'),
+            'actionObjectSpecificPriceRuleUpdateBefore' => new Hook('actionObjectSpecificPriceRuleUpdateBefore'),
+            'actionAdminSpecificPriceRuleControllerSaveAfter' => new Hook('actionAdminSpecificPriceRuleControllerSaveAfter'),
         ];
     }
 
@@ -250,6 +250,26 @@ class Settings extends AbstractSettings
         $table->addColumn('url_name', 'string', ['length' => 128, 'notnull' => false]);
         $table->addColumn('meta_title', 'string', ['length' => 128, 'notnull' => false]);
         $table->setPrimaryKey(['id_feature_value', 'id_lang']);
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_price_index');
+        $table->addColumn('id_product', 'integer');
+        $table->addColumn('id_currency', 'integer');
+        $table->addColumn('id_shop', 'integer');
+        $table->addColumn('price_min', 'decimal', ['precision' => 20, 'scale' => 6]);
+        $table->addColumn('price_max', 'decimal', ['precision' => 20, 'scale' => 6]);
+        $table->addColumn('id_country', 'integer');
+        $table->setPrimaryKey(['id_product', 'id_currency', 'id_shop', 'id_country']);
+        $table->addIndex(['id_currency'], 'id_currency');
+        $table->addIndex(['price_min'], 'price_min');
+        $table->addIndex(['price_max'], 'price_max');
+
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_product_attribute');
+        $table->addColumn('id_attribute', 'integer', ['unsigned' => true]);
+        $table->addColumn('id_product', 'integer', ['unsigned' => true]);
+        $table->addColumn('id_attribute_group', 'integer', ['unsigned' => true, 'default' => 0]);
+        $table->addColumn('id_shop', 'integer', ['unsigned' => true, 'default' => 1]);
+        $table->setPrimaryKey(['id_attribute', 'id_product', 'id_shop']);
+        $table->addUniqueIndex(['id_attribute_group', 'id_attribute', 'id_product', 'id_shop'], 'id_attribute_group');
 
         return new Sql($schema);
     }
