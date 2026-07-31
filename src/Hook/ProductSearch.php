@@ -1,21 +1,12 @@
 <?php
+
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ * GC Facetedsearch
+ * Module for PrestaShop E-Commerce Software
  *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/AFL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ * @author    Markus Engel <info@onlineshop-module.de>
+ * @copyright Copyright (c) 2026, Onlineshop-Module.de
+ * @license   commercial, see licence.txt
  */
 
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Hook;
@@ -85,18 +76,9 @@ class ProductSearch extends AbstractHook
         // Assign assets
         /** @var \FrontController $controller */
         $controller = $this->context->controller;
-        if ((bool) Configuration::get('GC_USE_JQUERY_UI_SLIDER')) {
+        if ((bool) Configuration::get('GC_FACETEDSEARCH_USE_JQUERY_UI_SLIDER')) {
             $controller->addJqueryUi('ui.slider');
         }
-        $controller->registerStylesheet(
-            'facetedsearch_front',
-            '/modules/gc_facetedsearch/views/dist/front.css'
-        );
-        $controller->registerJavascript(
-            'facetedsearch_front',
-            '/modules/gc_facetedsearch/views/dist/front.js',
-            ['position' => 'bottom', 'priority' => 100]
-        );
 
         $urlSerializer = new URLSerializer();
         $dataAccessor = new DataAccessor($this->module->getDatabase());

@@ -137,7 +137,7 @@ class Settings extends AbstractSettings
             'actionAfterCreateFeatureValueFormHandler' => new Hook('actionAfterCreateFeatureValueFormHandler'),
             'actionAfterUpdateFeatureValueFormHandler' => new Hook('actionAfterUpdateFeatureValueFormHandler'),
             // // product search
-            // 'productSearchProvider' => new Hook('productSearchProvider'),
+            'productSearchProvider' => new Hook('productSearchProvider'),
             // // specific price
             'actionObjectSpecificPriceRuleUpdateBefore' => new Hook('actionObjectSpecificPriceRuleUpdateBefore'),
             'actionAdminSpecificPriceRuleControllerSaveAfter' => new Hook('actionAdminSpecificPriceRuleControllerSaveAfter'),

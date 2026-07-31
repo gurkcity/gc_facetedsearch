@@ -23,7 +23,7 @@ namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Hook;
 use Language;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\FeatureValue\FormDataProvider;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\FeatureValue\FormModifier;
-use GC_FacetedSearch;
+use GC_Facetedsearch;
 use Tools;
 
 class FeatureValue extends AbstractHook
@@ -48,7 +48,7 @@ class FeatureValue extends AbstractHook
      */
     private $dataProvider;
 
-    public function __construct(GC_FacetedSearch $module)
+    public function __construct(GC_Facetedsearch $module)
     {
         parent::__construct($module);
 

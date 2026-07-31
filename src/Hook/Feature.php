@@ -25,7 +25,7 @@ use Language;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Feature\FormDataProvider;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Feature\FormModifier;
 use PrestaShopDatabaseException;
-use GC_FacetedSearch;
+use GC_Facetedsearch;
 use Tools;
 
 class Feature extends AbstractHook
@@ -45,7 +45,7 @@ class Feature extends AbstractHook
      */
     private $isMigratedPage = false;
 
-    public function __construct(GC_FacetedSearch $module)
+    public function __construct(GC_Facetedsearch $module)
     {
         parent::__construct($module);
 

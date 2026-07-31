@@ -65,6 +65,11 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\InstallException' => __DIR__ . '/../..' . '/src/Exception/InstallException.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\LogException' => __DIR__ . '/../..' . '/src/Exception/LogException.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Exception\\SettingException' => __DIR__ . '/../..' . '/src/Exception/SettingException.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Filters\\Block' => __DIR__ . '/../..' . '/src/Filters/Block.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Filters\\Converter' => __DIR__ . '/../..' . '/src/Filters/Converter.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Filters\\DataAccessor' => __DIR__ . '/../..' . '/src/Filters/DataAccessor.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Filters\\Products' => __DIR__ . '/../..' . '/src/Filters/Products.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Filters\\Provider' => __DIR__ . '/../..' . '/src/Filters/Provider.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\AbstractFormDataProvider' => __DIR__ . '/../..' . '/src/Form/AbstractFormDataProvider.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\AttributeGroup\\FormDataProvider' => __DIR__ . '/../..' . '/src/Form/AttributeGroup/FormDataProvider.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Form\\AttributeGroup\\FormModifier' => __DIR__ . '/../..' . '/src/Form/AttributeGroup/FormModifier.php',
@@ -125,6 +130,10 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Plugin\\PluginInterface' => __DIR__ . '/../..' . '/src/Plugin/PluginInterface.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Plugin\\PluginLoader' => __DIR__ . '/../..' . '/src/Plugin/PluginLoader.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Plugin\\PluginLoaderFactory' => __DIR__ . '/../..' . '/src/Plugin/PluginLoaderFactory.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Product\\CoreSearchBackport' => __DIR__ . '/../..' . '/src/Product/CoreSearchBackport.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Product\\Search' => __DIR__ . '/../..' . '/src/Product/Search.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Product\\SearchFactory' => __DIR__ . '/../..' . '/src/Product/SearchFactory.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Product\\SearchProvider' => __DIR__ . '/../..' . '/src/Product/SearchProvider.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Response\\Json' => __DIR__ . '/../..' . '/src/Response/Json.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings' => __DIR__ . '/../..' . '/src/Settings.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Config' => __DIR__ . '/../..' . '/src/Settings/Config.php',
@@ -139,6 +148,7 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleLicenseTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleLicenseTrait.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleTrait.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ObjectAdminControllerTrait' => __DIR__ . '/../..' . '/src/Traits/ObjectAdminControllerTrait.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\URLSerializer' => __DIR__ . '/../..' . '/src/URLSerializer.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

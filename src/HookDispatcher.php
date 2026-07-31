@@ -11,7 +11,7 @@
 
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch;
 
-use GC_FacetedSearch;
+use GC_Facetedsearch;
 
 /**
  * Class works with Hook\AbstractHook instances in order to reduce gc_facetedsearch.php size.
@@ -50,16 +50,16 @@ class HookDispatcher
     /**
      * Module
      *
-     * @var GC_FacetedSearch
+     * @var GC_Facetedsearch
      */
     private $module;
 
     /**
      * Init hooks
      *
-     * @param GC_FacetedSearch $module
+     * @param GC_Facetedsearch $module
      */
-    public function __construct(GC_FacetedSearch $module)
+    public function __construct(GC_Facetedsearch $module)
     {
         $this->module = $module;
 

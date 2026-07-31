@@ -22,7 +22,7 @@ namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Hook;
 
 use Context;
 use Db;
-use GC_FacetedSearch;
+use GC_Facetedsearch;
 
 abstract class AbstractHook
 {
@@ -34,7 +34,7 @@ abstract class AbstractHook
     protected $context;
 
     /**
-     * @var GC_FacetedSearch
+     * @var GC_Facetedsearch
      */
     protected $module;
 
@@ -43,7 +43,7 @@ abstract class AbstractHook
      */
     protected $database;
 
-    public function __construct(GC_FacetedSearch $module)
+    public function __construct(GC_Facetedsearch $module)
     {
         $this->module = $module;
         $this->context = $module->getContext();

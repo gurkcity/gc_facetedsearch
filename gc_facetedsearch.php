@@ -117,6 +117,7 @@ class GC_Facetedsearch extends Module
     public function parentInitModule()
     {
         $this->hookDispatcher = new HookDispatcher($this);
+        $this->initializeSupportedControllers();
     }
 
     /**

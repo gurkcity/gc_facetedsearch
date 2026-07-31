@@ -204,6 +204,14 @@ trait ModuleFunctionsTrait
     }
 
     /**
+     * Returns array with all controllers supported by this module
+     */
+    public function isControllerSupported($controller)
+    {
+        return isset($this->supportedControllers[$controller]);
+    }
+
+    /**
      * Return current context
      *
      * @return Context
