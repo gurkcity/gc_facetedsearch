@@ -35,7 +35,7 @@ class Gc_FacetedSearchCronModuleFrontController extends ModuleFrontController
             case 'indexAttributes':
                 Shop::setContext(Shop::CONTEXT_ALL);
 
-                $psFacetedsearch = new GC_FacetedSearch();
+                $psFacetedsearch = new GC_Facetedsearch();
                 $psFacetedsearch->indexAttributes();
                 $psFacetedsearch->indexFeatures();
                 $psFacetedsearch->indexAttributeGroup();
@@ -43,13 +43,13 @@ class Gc_FacetedSearchCronModuleFrontController extends ModuleFrontController
                 $this->ajaxRender('1');
                 break;
             case 'clearCache':
-                $psFacetedsearch = new GC_FacetedSearch();
+                $psFacetedsearch = new GC_Facetedsearch();
                 $this->ajaxRender($psFacetedsearch->invalidateLayeredFilterBlockCache());
                 break;
             case 'indexPrices':
                 Shop::setContext(Shop::CONTEXT_ALL);
 
-                $module = new GC_FacetedSearch();
+                $module = new GC_Facetedsearch();
                 if (Tools::getValue('full')) {
                     $this->ajaxRender($module->fullPricesIndexProcess((int) Tools::getValue('cursor'), (bool) Tools::getValue('ajax'), true));
                 } else {

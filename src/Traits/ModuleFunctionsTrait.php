@@ -50,7 +50,7 @@ trait ModuleFunctionsTrait
                 SELECT id_attribute_group FROM `' . _DB_PREFIX_ . 'attribute_group`'
             );
 
-            $this->migratePsFilterTemplates();
+            $this->migrateFromPsFacetedSearch();
 
             $this->rebuildPriceIndexTable();
         } catch (\Exception $e) {
