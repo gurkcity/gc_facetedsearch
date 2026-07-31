@@ -14,6 +14,8 @@ namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use PrestaShopBundle\Translation\TranslatorInterface;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -113,6 +115,37 @@ class FiltersType extends TranslatorAwareType
                 'label' => $label,
                 'slider' => false,
             ]);
+        }
+
+        $builder->addEventListener(FormEvents::POST_SET_DATA, [$this, 'assignMissingPositions']);
+    }
+
+    /**
+     * Filters without saved position (e.g. newly added attributes) go to the end.
+     */
+    public function assignMissingPositions(FormEvent $event): void
+    {
+        $form = $event->getForm();
+        $data = $event->getData();
+        if (!is_array($data)) {
+            $data = [];
+        }
+
+        $maxPosition = -1;
+        foreach ($data as $filterConfig) {
+            if (is_array($filterConfig) && array_key_exists('position', $filterConfig)) {
+                $maxPosition = max($maxPosition, (int) $filterConfig['position']);
+            }
+        }
+
+        foreach ($form as $name => $child) {
+            if (!$child->has('position')) {
+                continue;
+            }
+            if (isset($data[$name]) && array_key_exists('position', $data[$name])) {
+                continue;
+            }
+            $child->get('position')->setData(++$maxPosition);
         }
     }
 

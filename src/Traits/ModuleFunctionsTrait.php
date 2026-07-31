@@ -114,39 +114,44 @@ trait ModuleFunctionsTrait
                         }
                         $alreadyAssigned[$idShop][] = $jobName;
 
-                        foreach ($data as $key => $value) {
-                            // The template contains some other data than filters, so we clean it up a bit
-                            // All filters begin with filter
-                            if (substr($key, 0, 6) != 'filter') {
+                        foreach ($this->resolveTemplateFilterKeys($data) as $key) {
+                            $value = $data[$key] ?? null;
+                            if (!is_array($value) || !isset($value['filter_type'])) {
                                 continue;
                             }
 
                             $type = $value['filter_type'];
                             $limit = $value['filter_show_limit'];
-                            ++$n;
+                            $rowSql = '';
 
                             if ($key == 'filter_stock') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'availability\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'availability\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             } elseif ($key == 'filter_subcategories') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'category\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'category\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             } elseif ($key == 'filter_condition') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'condition\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'condition\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             } elseif ($key == 'filter_weight_slider') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'weight\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'weight\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             } elseif ($key == 'filter_price_slider') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'price\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'price\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             } elseif ($key == 'filter_manufacturer') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'manufacturer\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'manufacturer\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             } elseif (substr($key, 0, 23) == 'filter_attribute_group_') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('filter_attribute_group_', '', $key) . ',
-    \'id_attribute_group\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('filter_attribute_group_', '', $key) . ',
+    \'id_attribute_group\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             } elseif (substr($key, 0, 15) == 'filter_feature_') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('filter_feature_', '', $key) . ',
-    \'id_feature\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('filter_feature_', '', $key) . ',
+    \'id_feature\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             } elseif ($key == 'filter_extras') {
-                                $sqlInsert .= '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'extras\',' . (int) $n . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'extras\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
                             }
 
+                            if ($rowSql === '') {
+                                continue;
+                            }
+
+                            ++$n;
+                            $sqlInsert .= $rowSql;
                             ++$nbSqlValuesToInsert;
 
                             // If we reached the limit, we will execute it and flush our "cache"
@@ -165,6 +170,34 @@ trait ModuleFunctionsTrait
         if ($nbSqlValuesToInsert) {
             Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
         }
+    }
+
+    /**
+     * Ordered filter keys for a template (includes disabled slots from filters_order).
+     */
+    private function resolveTemplateFilterKeys(array $data): array
+    {
+        $reserved = ['categories', 'shop_list', 'controllers', 'filters_order'];
+        $order = [];
+
+        if (!empty($data['filters_order']) && is_array($data['filters_order'])) {
+            foreach ($data['filters_order'] as $key) {
+                if (is_string($key) && $key !== '' && !in_array($key, $reserved, true)) {
+                    $order[] = $key;
+                }
+            }
+        }
+
+        foreach ($data as $key => $value) {
+            if (in_array($key, $reserved, true) || !is_array($value)) {
+                continue;
+            }
+            if (!in_array($key, $order, true)) {
+                $order[] = $key;
+            }
+        }
+
+        return $order;
     }
 
     /**

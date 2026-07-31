@@ -306,6 +306,12 @@ $(document).ready(() => {
     });
   });
 
+  function syncFilterPositions() {
+    $('#list-filters > li.filter_list_item').each(function (index) {
+      $(this).find('.filter-position').val(index);
+    });
+  }
+
   if (typeof Sortable !== 'undefined') {
     const listFilters = document.getElementById('list-filters');
 
@@ -313,13 +319,17 @@ $(document).ready(() => {
       new Sortable(listFilters, {
         animation: 150,
         ghostClass: 'sortable-ghost',
+        onEnd: syncFilterPositions,
       });
     }
   } else {
     $('.sortable').sortable({
       forcePlaceholderSize: true,
+      update: syncFilterPositions,
     });
   }
+
+  syncFilterPositions();
 
   function enableFilter() {
     $('#selected_filters').html($('.filter_list_item .filter-switch[value="1"]:checked').length);

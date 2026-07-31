@@ -105,7 +105,7 @@ class FilterTemplateType extends TranslatorAwareType
         $resolver->setDefaults([
             'form_theme' => [
                 '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit.html.twig',
-                '@Modules/gc_facetedsearch/views/templates/admin/form/filters.html.twig',
+                '@Modules/gc_facetedsearch/views/templates/admin/filter_template/filters.html.twig',
             ],
             'translation_domain' => 'Modules.Gcfacetedsearch.Admin',
             'allow_extra_fields' => true,

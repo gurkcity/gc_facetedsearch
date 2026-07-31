@@ -69,6 +69,8 @@ class FilterTemplateFormDataHandler implements FormDataHandlerInterface
             throw new PrestaShopException(sprintf('Unable to update filter template with id "%d".', (int) $id));
         }
 
+        $this->module->buildLayeredCategories();
+
         return (int) $filter->id;
     }
 
@@ -92,7 +94,12 @@ class FilterTemplateFormDataHandler implements FormDataHandlerInterface
             'controllers' => array_values($data['controllers'] ?? []),
         ];
 
-        foreach ($data['filters'] ?? [] as $filterKey => $filterConfig) {
+        $items = is_array($data['filters'] ?? null) ? $data['filters'] : [];
+        $sortedItems = $this->sortFiltersByPosition($items);
+
+        $filterValues['filters_order'] = array_keys($sortedItems);
+
+        foreach ($sortedItems as $filterKey => $filterConfig) {
             if (!is_array($filterConfig) || empty($filterConfig['enabled'])) {
                 continue;
             }
@@ -104,6 +111,18 @@ class FilterTemplateFormDataHandler implements FormDataHandlerInterface
         }
 
         return $filterValues;
+    }
+
+    private function sortFiltersByPosition(array $items): array
+    {
+        uasort($items, static function ($left, $right) {
+            $leftPosition = is_array($left) ? (int) ($left['position'] ?? 0) : 0;
+            $rightPosition = is_array($right) ? (int) ($right['position'] ?? 0) : 0;
+
+            return $leftPosition <=> $rightPosition;
+        });
+
+        return $items;
     }
 
     private function resolveShopIds(array $data): array

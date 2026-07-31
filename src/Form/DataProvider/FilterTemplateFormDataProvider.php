@@ -25,6 +25,7 @@ class FilterTemplateFormDataProvider implements FormDataProviderInterface
         'categories',
         'shop_list',
         'controllers',
+        'filters_order',
     ];
 
     /**
@@ -78,20 +79,55 @@ class FilterTemplateFormDataProvider implements FormDataProviderInterface
     private function mapFiltersForForm(array $filterValues): array
     {
         $filters = [];
+        $order = $this->resolveFiltersOrder($filterValues);
 
-        foreach ($filterValues as $filterKey => $filterConfig) {
-            if (in_array($filterKey, self::RESERVED_FILTER_KEYS, true) || !is_array($filterConfig)) {
-                continue;
-            }
+        foreach ($order as $position => $filterKey) {
+            $filterConfig = $filterValues[$filterKey] ?? null;
+            $enabled = is_array($filterConfig);
 
             $filters[$filterKey] = [
-                'enabled' => true,
+                'enabled' => $enabled,
+                'position' => (int) $position,
                 'filter_type' => (int) ($filterConfig['filter_type'] ?? 0),
                 'filter_show_limit' => (int) ($filterConfig['filter_show_limit'] ?? 0),
             ];
         }
 
         return $filters;
+    }
+
+    /**
+     * Full UI order including disabled filters. Falls back to enabled keys order for legacy data.
+     */
+    private function resolveFiltersOrder(array $filterValues): array
+    {
+        $order = [];
+
+        if (!empty($filterValues['filters_order']) && is_array($filterValues['filters_order'])) {
+            foreach ($filterValues['filters_order'] as $filterKey) {
+                if (is_string($filterKey) && $filterKey !== '') {
+                    $order[] = $filterKey;
+                }
+            }
+        } else {
+            foreach ($filterValues as $filterKey => $filterConfig) {
+                if (in_array($filterKey, self::RESERVED_FILTER_KEYS, true) || !is_array($filterConfig)) {
+                    continue;
+                }
+                $order[] = $filterKey;
+            }
+        }
+
+        foreach ($filterValues as $filterKey => $filterConfig) {
+            if (in_array($filterKey, self::RESERVED_FILTER_KEYS, true) || !is_array($filterConfig)) {
+                continue;
+            }
+            if (!in_array($filterKey, $order, true)) {
+                $order[] = $filterKey;
+            }
+        }
+
+        return $order;
     }
 
     private function resolveShopAssociation(FacetedSearchFilter $filterTemplate, array $filterValues): array

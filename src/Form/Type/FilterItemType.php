@@ -14,10 +14,10 @@ namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -34,6 +34,12 @@ class FilterItemType extends TranslatorAwareType
                 'show_choices' => false,
                 'attr' => [
                     'class' => 'filter-switch',
+                ],
+            ])
+            ->add('position', HiddenType::class, [
+                'required' => false,
+                'attr' => [
+                    'class' => 'filter-position',
                 ],
             ])
             ->add('filter_show_limit', ChoiceType::class, [
@@ -74,7 +80,7 @@ class FilterItemType extends TranslatorAwareType
                 'enabled' => false,
                 'filter_show_limit' => 0,
                 'filter_type' => 0,
-            ]
+            ],
         ]);
     }
 

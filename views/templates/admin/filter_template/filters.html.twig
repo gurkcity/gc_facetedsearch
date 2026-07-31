@@ -8,7 +8,8 @@
  *#}
 
 {% block gc_filter_item_widget %}
-  <li class="filter_list_item d-flex" draggable="true">
+  <li class="filter_list_item d-flex" draggable="true" data-filter-key="{{ form.vars.name }}">
+    {{ form_widget(form.position) }}
     <div class="col-2">
       {{ form_widget(form.enabled) }}
     </div>
@@ -41,6 +42,8 @@
           {{ 'List of ranges'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
         </div>
       </div>
+      {{ form_widget(form.filter_show_limit, {attr: {class: 'd-none'}}) }}
+      {{ form_widget(form.filter_type, {attr: {class: 'd-none'}}) }}
     {% endif %}
   </li>
 {% endblock %}
@@ -50,6 +53,7 @@
 {% endblock %}
 
 {% block gc_filters_widget %}
+  {% set sortedChildren = form.children|sort((a, b) => (a.position.vars.value|default(9999)) <=> (b.position.vars.value|default(9999))) %}
   <div class="form-group row flex-nowrap">
     <label class="form-control-label required">
       <span class="badge badge-dark-hover" id="selected_filters">0</span> {{ 'Filters'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}
@@ -63,7 +67,7 @@
         </header>
         <section class="filter_list">
           <ul class="list-unstyled sortable" id="list-filters">
-            {% for child in form %}
+            {% for child in sortedChildren %}
               {{ form_widget(child) }}
             {% endfor %}
           </ul>
