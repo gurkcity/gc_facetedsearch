@@ -114,8 +114,8 @@ class Settings extends AbstractSettings
             // // product
             // 'actionProductSave' => new Hook('actionProductSave'),
             // // category
-            // 'actionCategoryAdd' => new Hook('actionCategoryAdd'),
-            // 'actionCategoryDelete' => new Hook('actionCategoryDelete'),
+            'actionCategoryAdd' => new Hook('actionCategoryAdd'),
+            'actionCategoryDelete' => new Hook('actionCategoryDelete'),
             // // configuration
             // 'actionProductPreferencesPageStockSave' => new Hook('actionProductPreferencesPageStockSave'),
             // // design

@@ -102,7 +102,7 @@ class Category extends AbstractHook
     public function addCategoryToDefaultFilter(int $idCategory)
     {
         // Get default template
-        $defaultFilterTemplateId = (int) Configuration::get('GC_LAYERED_DEFAULT_CATEGORY_TEMPLATE');
+        $defaultFilterTemplateId = (int) Configuration::get('GC_FACETEDSEARCH_DEFAULT_CATEGORY_TEMPLATE');
         if (empty($defaultFilterTemplateId)) {
             return;
         }

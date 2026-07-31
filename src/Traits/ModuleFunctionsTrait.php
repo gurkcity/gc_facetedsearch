@@ -237,4 +237,20 @@ trait ModuleFunctionsTrait
         }
         return true;
     }
+
+    /**
+     * Provides data about single filter template.
+     *
+     * @param int $idFilterTemplate ID of filter template
+     *
+     * @return array Filter data
+     */
+    public function getFilterTemplate($idFilterTemplate)
+    {
+        return $this->getDatabase()->getRow(
+            'SELECT *
+            FROM `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
+            WHERE id_gc_facetedsearch_filter = ' . (int) $idFilterTemplate
+        );
+    }
 }
