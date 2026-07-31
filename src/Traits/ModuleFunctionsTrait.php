@@ -16,6 +16,8 @@ use Context;
 use Country;
 use Currency;
 use Db;
+use Exception;
+use Module;
 use Product;
 use Shop;
 use Tools;
@@ -26,6 +28,35 @@ trait ModuleFunctionsTrait
      * @var array|null List of controllers supported by this module
      */
     protected $supportedControllers;
+
+    public function installPost(): bool
+    {
+        try {
+            $this->getDatabase()->execute(
+                'TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature`'
+            );
+
+            $this->getDatabase()->execute(
+                'TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`'
+            );
+
+            $this->getDatabase()->execute(
+                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` (id_feature)
+                SELECT id_feature FROM `' . _DB_PREFIX_ . 'feature`'
+            );
+
+            $this->getDatabase()->execute(
+                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` (id_attribute_group)
+                SELECT id_attribute_group FROM `' . _DB_PREFIX_ . 'attribute_group`'
+            );
+
+            $this->migratePsFilterTemplates();
+
+            $this->rebuildPriceIndexTable();
+        } catch (\Exception $e) {
+        }
+        return true;
+    }
 
     /**
      * This method gets serialized data of filter templates from gc_facetedsearch_filter table and builds detailed
@@ -252,25 +283,6 @@ trait ModuleFunctionsTrait
         }
 
         return $this->database;
-    }
-
-    public function installPost(): bool
-    {
-        try {
-            $this->getDatabase()->execute(
-                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` (id_feature)
-                SELECT id_feature FROM `' . _DB_PREFIX_ . 'feature`'
-            );
-
-            $this->getDatabase()->execute(
-                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` (id_attribute_group)
-                SELECT id_attribute_group FROM `' . _DB_PREFIX_ . 'attribute_group`'
-            );
-
-            $this->rebuildPriceIndexTable();
-        } catch (\Exception $e) {
-        }
-        return true;
     }
 
     /**
@@ -762,5 +774,223 @@ trait ModuleFunctionsTrait
             'WHERE id_attribute_group NOT IN (SELECT id_attribute_group FROM ' .
             '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`)'
         );
+    }
+
+    /**
+     * Migrate configuration, filter templates and indexable SEO data from ps_facetedsearch,
+     * then uninstall the original module. Price/attribute indexes are rebuilt by install().
+     *
+     * @return bool true when migration run
+     */
+    private function migrateFromPsFacetedSearch()
+    {
+        if (!Module::isInstalled(self::PS_FACETEDSEARCH_MODULE)) {
+            return false;
+        }
+
+        if (!$this->databaseTableExists('layered_filter')) {
+            // Module marked installed but tables missing — still try to uninstall it
+            $this->uninstallPsFacetedSearchModule();
+
+            return false;
+        }
+
+        $this->migratePsConfiguration();
+        $this->migratePsFilterTemplates();
+        $this->migratePsIndexableTables();
+
+        $this->uninstallPsFacetedSearchModule();
+
+        return true;
+    }
+
+    /**
+     * @param string $tableWithoutPrefix
+     *
+     * @return bool
+     */
+    private function databaseTableExists($tableWithoutPrefix)
+    {
+        $result = $this->getDatabase()->executeS(
+            'SHOW TABLES LIKE "' . _DB_PREFIX_ . pSQL($tableWithoutPrefix) . '"'
+        );
+
+        return !empty($result);
+    }
+
+    private function uninstallPsFacetedSearchModule()
+    {
+        /** @var Module|bool $oldModule */
+        $oldModule = Module::getInstanceByName(self::PS_FACETEDSEARCH_MODULE);
+        if ($oldModule) {
+            $oldModule->uninstall();
+        }
+    }
+
+    private function migratePsConfiguration()
+    {
+        $configMap = [
+            'PS_LAYERED_CACHE_ENABLED' => 'GC_FACETEDSEARCH_CACHE_ENABLED',
+            'PS_LAYERED_SHOW_QTIES' => 'GC_FACETEDSEARCH_SHOW_QUIES',
+            'PS_LAYERED_FULL_TREE' => 'GC_FACETEDSEARCH_FULL_TREE',
+            'PS_LAYERED_FILTER_PRICE_USETAX' => 'GC_FACETEDSEARCH_FILTER_PRICE_USETAX',
+            'PS_LAYERED_FILTER_CATEGORY_DEPTH' => 'GC_FACETEDSEARCH_FILTER_CATEGORY_DEPTH',
+            'PS_LAYERED_FILTER_PRICE_ROUNDING' => 'GC_FACETEDSEARCH_FILTER_PRICE_ROUNDING',
+            'PS_LAYERED_FILTER_SHOW_OUT_OF_STOCK_LAST' => 'GC_FACETEDSEARCH_FILTER_SHOW_OUT_OF_STOCK_LAST',
+            'PS_LAYERED_FILTER_BY_DEFAULT_CATEGORY' => 'GC_FACETEDSEARCH_FILTER_BY_DEFAULT_CATEGORY',
+            'PS_LAYERED_DEFAULT_CATEGORY_TEMPLATE' => 'GC_FACETEDSEARCH_DEFAULT_CATEGORY_TEMPLATE',
+            'PS_LAYERED_INDEXED' => 'GC_FACETEDSEARCH_INDEXED',
+            'PS_USE_JQUERY_UI_SLIDER' => 'GC_FACETEDSEARCH_USE_JQUERY_UI_SLIDER',
+        ];
+
+        foreach ($configMap as $oldKey => $newKey) {
+            $value = Configuration::get($oldKey);
+            if ($value === false) {
+                $value = Configuration::getGlobalValue($oldKey);
+            }
+            if ($value !== false) {
+                if ($oldKey === 'PS_LAYERED_INDEXED') {
+                    Configuration::updateGlobalValue($newKey, $value);
+                } else {
+                    Configuration::updateValue($newKey, $value);
+                }
+            }
+        }
+    }
+
+    private function migratePsFilterTemplates()
+    {
+        $db = $this->getDatabase();
+
+        $db->execute('TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`');
+        $db->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
+            (`id_gc_facetedsearch_filter`, `name`, `filters`, `n_categories`, `date_add`)
+            SELECT `id_layered_filter`, `name`, `filters`, `n_categories`, `date_add`
+            FROM `' . _DB_PREFIX_ . 'layered_filter`'
+        );
+
+        $templates = $db->executeS('SELECT `id_gc_facetedsearch_filter`, `filters` FROM `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`');
+        if (is_array($templates)) {
+            foreach ($templates as $template) {
+                $filters = @unserialize($template['filters']);
+                if (!is_array($filters)) {
+                    continue;
+                }
+
+                $remapped = $this->remapLayeredFilterKeys($filters);
+                $db->execute(
+                    'UPDATE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
+                    SET `filters` = "' . pSQL(serialize($remapped)) . '"
+                    WHERE `id_gc_facetedsearch_filter` = ' . (int) $template['id_gc_facetedsearch_filter']
+                );
+            }
+        }
+
+        $db->execute('TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop`');
+        if ($this->databaseTableExists('layered_filter_shop')) {
+            $db->execute(
+                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_filter_shop`
+                (`id_gc_facetedsearch_filter`, `id_shop`)
+                SELECT `id_layered_filter`, `id_shop`
+                FROM `' . _DB_PREFIX_ . 'layered_filter_shop`'
+            );
+        }
+
+        $db->execute('TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_category`');
+        if ($this->databaseTableExists('layered_category')) {
+            // Older schemas may miss controller column
+            $columns = $db->executeS('SHOW COLUMNS FROM `' . _DB_PREFIX_ . 'layered_category`');
+            $columnNames = is_array($columns) ? array_column($columns, 'Field') : [];
+            if (in_array('controller', $columnNames, true)) {
+                $db->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_category`
+                    (`id_gc_facetedsearch_category`, `id_shop`, `controller`, `id_category`, `id_value`, `type`, `position`, `filter_type`, `filter_show_limit`)
+                    SELECT `id_layered_category`, `id_shop`, `controller`, `id_category`, `id_value`, `type`, `position`, `filter_type`, `filter_show_limit`
+                    FROM `' . _DB_PREFIX_ . 'layered_category`'
+                );
+            } else {
+                $db->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_category`
+                    (`id_gc_facetedsearch_category`, `id_shop`, `controller`, `id_category`, `id_value`, `type`, `position`, `filter_type`, `filter_show_limit`)
+                    SELECT `id_layered_category`, `id_shop`, \'category\', `id_category`, `id_value`, `type`, `position`, `filter_type`, `filter_show_limit`
+                    FROM `' . _DB_PREFIX_ . 'layered_category`'
+                );
+            }
+        }
+    }
+
+    /**
+     * Remap ps_facetedsearch layered_selection_* keys to gc_facetedsearch filter_* keys.
+     */
+    private function remapLayeredFilterKeys(array $filters): array
+    {
+        $staticMap = [
+            'layered_selection_subcategories' => 'filter_subcategories',
+            'layered_selection_stock' => 'filter_stock',
+            'layered_selection_condition' => 'filter_condition',
+            'layered_selection_manufacturer' => 'filter_manufacturer',
+            'layered_selection_weight_slider' => 'filter_weight_slider',
+            'layered_selection_price_slider' => 'filter_price_slider',
+            'layered_selection_extras' => 'filter_extras',
+        ];
+
+        $remapped = [];
+        foreach ($filters as $key => $value) {
+            if (isset($staticMap[$key])) {
+                $key = $staticMap[$key];
+            } elseif (strpos($key, 'layered_selection_ag_') === 0) {
+                $key = 'filter_attribute_group_' . substr($key, strlen('layered_selection_ag_'));
+            } elseif (strpos($key, 'layered_selection_feat_') === 0) {
+                $key = 'filter_feature_' . substr($key, strlen('layered_selection_feat_'));
+            }
+
+            $remapped[$key] = $value;
+        }
+
+        return $remapped;
+    }
+
+    private function migratePsIndexableTables()
+    {
+        $db = $this->getDatabase();
+
+        $copies = [
+            'layered_indexable_attribute_group' => [
+                'gc_facetedsearch_indexable_attribute_group',
+                '(`id_attribute_group`, `indexable`) SELECT `id_attribute_group`, `indexable`',
+            ],
+            'layered_indexable_attribute_group_lang_value' => [
+                'gc_facetedsearch_indexable_attribute_group_lang_value',
+                '(`id_attribute_group`, `id_lang`, `url_name`, `meta_title`) SELECT `id_attribute_group`, `id_lang`, `url_name`, `meta_title`',
+            ],
+            'layered_indexable_attribute_lang_value' => [
+                'gc_facetedsearch_indexable_attribute_lang_value',
+                '(`id_attribute`, `id_lang`, `url_name`, `meta_title`) SELECT `id_attribute`, `id_lang`, `url_name`, `meta_title`',
+            ],
+            'layered_indexable_feature' => [
+                'gc_facetedsearch_indexable_feature',
+                '(`id_feature`, `indexable`) SELECT `id_feature`, `indexable`',
+            ],
+            'layered_indexable_feature_lang_value' => [
+                'gc_facetedsearch_indexable_feature_lang_value',
+                '(`id_feature`, `id_lang`, `url_name`, `meta_title`) SELECT `id_feature`, `id_lang`, `url_name`, `meta_title`',
+            ],
+            'layered_indexable_feature_value_lang_value' => [
+                'gc_facetedsearch_indexable_feature_value_lang_value',
+                '(`id_feature_value`, `id_lang`, `url_name`, `meta_title`) SELECT `id_feature_value`, `id_lang`, `url_name`, `meta_title`',
+            ],
+        ];
+
+        foreach ($copies as $oldTable => $spec) {
+            list($newTable, $selectPart) = $spec;
+            $db->execute('TRUNCATE TABLE `' . _DB_PREFIX_ . $newTable . '`');
+            if ($this->databaseTableExists($oldTable)) {
+                $db->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . $newTable . '` ' . $selectPart .
+                    ' FROM `' . _DB_PREFIX_ . $oldTable . '`'
+                );
+            }
+        }
     }
 }
