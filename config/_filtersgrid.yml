@@ -31,7 +31,8 @@ services:
   onlineshopmodule.module.facetedsearch.grid.data.factory.filters.decorator:
     class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Grid\FacetedSearchFilter\FiltersGridDecorator'
     arguments:
-      - '@onlineshopmodule.module.facetedsearch.grid.data.factory.filters'
+      $dataFactory: '@onlineshopmodule.module.facetedsearch.grid.data.factory.filters'
+      $module: '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
 
   onlineshopmodule.module.facetedsearch.grid.query_builder.filters:
     class: 'Onlineshopmodule\PrestaShop\Module\Facetedsearch\Grid\FacetedSearchFilter\FiltersQueryBuilder'

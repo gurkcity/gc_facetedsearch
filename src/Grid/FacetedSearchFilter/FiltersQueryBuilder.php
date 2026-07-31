@@ -40,6 +40,7 @@ class FiltersQueryBuilder extends AbstractDoctrineQueryBuilder
             ->select('
                 a.id_gc_facetedsearch_filter,
                 a.name,
+                a.filters,
                 a.n_categories,
                 a.date_add
             ');

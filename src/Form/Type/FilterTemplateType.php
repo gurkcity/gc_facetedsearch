@@ -51,28 +51,37 @@ class FilterTemplateType extends TranslatorAwareType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder
-            ->add('name', TextType::class, [
-                'label' => $this->trans('Template name', 'Modules.Gcfacetedsearch.Admin'),
-                'required' => true,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => $this->trans('The %s field is required.', 'Admin.Notifications.Error'),
-                    ]),
-                ],
-                'help' => $this->trans('Only as a reminder', 'Modules.Gcfacetedsearch.Admin'),
-            ])
-            ->add('categories', CategoryChoiceTreeType::class, [
-                'label' => $this->trans('Categories', 'Admin.Catalog.Feature'),
-                'required' => true,
+        $builder->add('name', TextType::class, [
+            'label' => $this->trans('Template name', 'Modules.Gcfacetedsearch.Admin'),
+            'required' => true,
+            'constraints' => [
+                new NotBlank([
+                    'message' => $this->trans('The %s field is required.', 'Admin.Notifications.Error'),
+                ]),
+            ],
+            'help' => $this->trans('Only as a reminder', 'Modules.Gcfacetedsearch.Admin'),
+        ]);
+
+        $supportedControllers = $this->resolveSupportedControllers();
+        if ($supportedControllers) {
+            $builder->add('controllers', ChoiceType::class, [
+                'label' => $this->trans('Pages using this template', 'Modules.Gcfacetedsearch.Admin'),
+                'choices' => $supportedControllers,
                 'multiple' => true,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => $this->trans('You must select at least one category.', 'Modules.Gcfacetedsearch.Admin'),
-                    ]),
-                ],
-            ])
-        ;
+                'expanded' => true,
+            ]);
+        }
+
+        $builder->add('categories', CategoryChoiceTreeType::class, [
+            'label' => $this->trans('Categories', 'Admin.Catalog.Feature'),
+            'required' => true,
+            'multiple' => true,
+            'constraints' => [
+                new NotBlank([
+                    'message' => $this->trans('You must select at least one category.', 'Modules.Gcfacetedsearch.Admin'),
+                ]),
+            ],
+        ]);
 
         if ($this->multistoreFeature->isUsed()) {
             $builder->add('shop_association', ShopChoiceTreeType::class, [
@@ -83,16 +92,6 @@ class FilterTemplateType extends TranslatorAwareType
                         'message' => $this->trans('You must select at least one shop.', 'Admin.Notifications.Error'),
                     ]),
                 ],
-            ]);
-        }
-
-        $supportedControllers = $this->resolveSupportedControllers();
-        if ($supportedControllers) {
-            $builder->add('controllers', ChoiceType::class, [
-                'label' => $this->trans('Pages using this template', 'Modules.Gcfacetedsearch.Admin'),
-                'choices' => $supportedControllers,
-                'multiple' => true,
-                'expanded' => true,
             ]);
         }
 
