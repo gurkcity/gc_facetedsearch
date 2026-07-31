@@ -35,6 +35,6 @@ class Design extends AbstractHook
      */
     public function displayLeftColumn(array $params)
     {
-        return $this->module->fetch('module:gc_facetedsearch/gc_facetedsearch.tpl');
+        return $this->module->fetch('module:gc_facetedsearch/views/templates/hook/displayLeftColumn.tpl');
     }
 }

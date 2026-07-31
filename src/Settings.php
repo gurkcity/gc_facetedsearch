@@ -112,14 +112,14 @@ class Settings extends AbstractSettings
             'actionAfterCreateAttributeGroupFormHandler' => new Hook('actionAfterCreateAttributeGroupFormHandler'),
             'actionAfterUpdateAttributeGroupFormHandler' => new Hook('actionAfterUpdateAttributeGroupFormHandler'),
             // // product
-            // 'actionProductSave' => new Hook('actionProductSave'),
+            'actionProductSave' => new Hook('actionProductSave'),
             // // category
             'actionCategoryAdd' => new Hook('actionCategoryAdd'),
             'actionCategoryDelete' => new Hook('actionCategoryDelete'),
             // // configuration
             'actionProductPreferencesPageStockSave' => new Hook('actionProductPreferencesPageStockSave'),
             // // design
-            // 'displayLeftColumn' => new Hook('displayLeftColumn'),
+            'displayLeftColumn' => new Hook('displayLeftColumn'),
             // // feature
             'actionFeatureSave' => new Hook('actionFeatureSave'),
             'actionFeatureDelete' => new Hook('actionFeatureDelete'),
