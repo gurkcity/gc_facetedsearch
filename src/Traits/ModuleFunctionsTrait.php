@@ -362,6 +362,8 @@ trait ModuleFunctionsTrait
             }
         }
 
+        $omitCountries = (bool) $this->getConfig()->get('OMIT_COUNTRIES');
+
         $shopList = Shop::getShops(false, null, true);
 
         foreach ($shopList as $idShop) {
@@ -383,11 +385,23 @@ trait ModuleFunctionsTrait
                 'LEFT JOIN `' . _DB_PREFIX_ . 'tax` t ON (t.id_tax = tr.id_tax AND t.active = 1) ' .
                 'JOIN `' . _DB_PREFIX_ . 'country` c ON (tr.id_country=c.id_country AND c.active = 1) ' .
                 'WHERE id_product = ' . (int) $idProduct . ' ' .
+                ($omitCountries ? 'AND c.id_country = ' . (int) Configuration::get('PS_COUNTRY_DEFAULT') : '') . ' ' .
                 'GROUP BY id_product, tr.id_country'
             );
 
-            if (empty($taxRatesByCountry) || !Configuration::get('GC_FACETEDSEARCH_FILTER_PRICE_USETAX')) {
+            if (empty($taxRatesByCountry) || !$this->getConfig()->get('FILTER_PRICE_USETAX')) {
                 $shopCountries = Country::getCountriesByIdShop($idShop, $this->getContext()->language->id);
+
+                if ($omitCountries) {
+                    $shopCountries = [[
+                        'id_country' => (int) Configuration::get('PS_COUNTRY_DEFAULT'),
+                        'active' => 1,
+                        'iso_code' => Country::getIsoById((int) Configuration::get('PS_COUNTRY_DEFAULT')),
+                    ]];
+                } else {
+                    $shopCountries = Country::getCountriesByIdShop($idShop, $this->getContext()->language->id);
+                }
+
                 $taxCountries = array_filter($shopCountries, function ($country) {
                     return $country['active'];
                 });
@@ -406,7 +420,11 @@ trait ModuleFunctionsTrait
                 WHERE id_product = ' . (int) $idProduct . ' AND id_shop IN (0,' . (int) $idShop . ')'
             );
 
-            $countries = Country::getCountries($this->getContext()->language->id, true, false, false);
+            if ($omitCountries) {
+                $countries = [['id_country' => (int) Configuration::get('PS_COUNTRY_DEFAULT')]];
+            } else {
+                $countries = Country::getCountries($this->getContext()->language->id, true, false, false);
+            }
             foreach ($countries as $country) {
                 $idCountry = $country['id_country'];
 

@@ -31,6 +31,7 @@ class ConfigurationFormDataProvider extends AbstractFormDataProvider implements 
             'FILTER_SHOW_OUT_OF_STOCK_LAST' => $this->configurationAdapter->get('FILTER_SHOW_OUT_OF_STOCK_LAST'),
             'USE_JQUERY_UI_SLIDER' => $this->configurationAdapter->get('USE_JQUERY_UI_SLIDER'),
             'DEFAULT_CATEGORY_TEMPLATE' => $this->configurationAdapter->get('DEFAULT_CATEGORY_TEMPLATE'),
+            'OMIT_COUNTRIES' => $this->configurationAdapter->get('OMIT_COUNTRIES'),
         ];
     }
 
@@ -73,6 +74,9 @@ class ConfigurationFormDataProvider extends AbstractFormDataProvider implements 
         }
         if (isset($data['DEFAULT_CATEGORY_TEMPLATE'])) {
             $this->updateConfiguration('DEFAULT_CATEGORY_TEMPLATE', 'DEFAULT_CATEGORY_TEMPLATE', $data);
+        }
+        if (isset($data['OMIT_COUNTRIES'])) {
+            $this->updateConfiguration('OMIT_COUNTRIES', 'OMIT_COUNTRIES', $data);
         }
 
         return [];

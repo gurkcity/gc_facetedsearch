@@ -41,6 +41,7 @@ class Settings extends AbstractSettings
             'FILTER_SHOW_OUT_OF_STOCK_LAST' => new Config('FILTER_SHOW_OUT_OF_STOCK_LAST', 0),
             'USE_JQUERY_UI_SLIDER' => new Config('USE_JQUERY_UI_SLIDER', 1),
             'DEFAULT_CATEGORY_TEMPLATE' => new Config('DEFAULT_CATEGORY_TEMPLATE', 0),
+            'OMIT_COUNTRIES' => new Config('OMIT_COUNTRIES', 0),
             // 'TEST_CONFIG_ABC' => new Config(
             //     'TEST_CONFIG_ABC',
             //     'value'

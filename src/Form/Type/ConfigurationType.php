@@ -97,6 +97,11 @@ class ConfigurationType extends TranslatorAwareType
                 'choices' => $this->resolveFilterTemplateChoices(),
                 'choice_translation_domain' => false,
             ])
+            ->add('OMIT_COUNTRIES', SwitchType::class, [
+                'label' => $this->trans('Omit country indexation', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'help' => $this->trans('If enabled, the country indexation will be omitted. This results in a smaller index and less storage space consumption in the database.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
         ;
 
         if ($this->module->hasJavascriptFiles()) {
