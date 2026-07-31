@@ -566,4 +566,183 @@ trait ModuleFunctionsTrait
             WHERE id_gc_facetedsearch_filter = ' . (int) $idFilterTemplate
         );
     }
+
+    /**
+     * Full prices index process
+     *
+     * @param int $cursor in order to restart indexing from the last state
+     * @param bool $ajax
+     * @param bool $smart
+     */
+    public function fullPricesIndexProcess($cursor = 0, $ajax = false, $smart = false)
+    {
+        if ($cursor == 0 && !$smart) {
+            $this->rebuildPriceIndexTable();
+        }
+
+        return $this->indexPrices($cursor, true, $ajax, $smart);
+    }
+
+    /**
+     * Prices index process
+     *
+     * @param int $cursor in order to restart indexing from the last state
+     * @param bool $ajax
+     */
+    public function pricesIndexProcess($cursor = 0, $ajax = false)
+    {
+        return $this->indexPrices($cursor, false, $ajax);
+    }
+
+    /**
+     * Index prices
+     *
+     * @param int $cursor last indexed id_product
+     * @param bool $full
+     * @param bool $ajax
+     * @param bool $smart
+     *
+     * @return int|string|bool
+     */
+    private function indexPrices($cursor = 0, $full = false, $ajax = false, $smart = false)
+    {
+        if ($full) {
+            $nbProducts = (int) $this->getDatabase()->getValue(
+                'SELECT count(DISTINCT p.`id_product`) ' .
+                'FROM ' . _DB_PREFIX_ . 'product p ' .
+                'INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps ' .
+                'ON (ps.`id_product` = p.`id_product` AND ps.`active` = 1 AND ps.`visibility` IN ("both", "catalog"))'
+            );
+        } else {
+            $nbProducts = (int) $this->getDatabase()->getValue(
+                'SELECT COUNT(DISTINCT p.`id_product`) ' .
+                'FROM `' . _DB_PREFIX_ . 'product` p ' .
+                'INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps ON (ps.`id_product` = p.`id_product` AND ps.`active` = 1 AND ps.`visibility` IN ("both", "catalog")) ' .
+                'LEFT JOIN  `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` psi ON (psi.id_product = p.id_product) ' .
+                'WHERE psi.id_product IS NULL'
+            );
+        }
+
+        $maxExecutiontime = @ini_get('max_execution_time');
+        if ($maxExecutiontime > 5 || $maxExecutiontime <= 0) {
+            $maxExecutiontime = 5;
+        }
+
+        $startTime = microtime(true);
+
+        $indexedProducts = 0;
+        $length = 100;
+        do {
+            $lastCursor = $cursor;
+            $cursor = (int) $this->indexPricesUnbreakable((int) $cursor, $full, $smart, $length);
+            if ($cursor == 0) {
+                $lastCursor = $cursor;
+                break;
+            }
+            $time_elapsed = microtime(true) - $startTime;
+            $indexedProducts += $length;
+        } while (
+            $cursor < $nbProducts
+            && (Tools::getMemoryLimit() == -1 || Tools::getMemoryLimit() > memory_get_peak_usage())
+            && $time_elapsed < $maxExecutiontime
+        );
+
+        if (($nbProducts > 0 && !$full || $cursor != $lastCursor && $full) && !$ajax) {
+            return $this->indexPrices((int) $cursor, $full, $ajax, $smart);
+        }
+
+        if ($ajax && $nbProducts > 0 && $cursor != $lastCursor && $full) {
+            return json_encode([
+                'total' => $nbProducts,
+                'cursor' => $cursor,
+                'count' => $indexedProducts,
+            ]);
+        }
+
+        if ($ajax && $nbProducts > 0 && !$full) {
+            return json_encode([
+                'total' => $nbProducts,
+                'cursor' => $cursor,
+                'count' => $indexedProducts,
+            ]);
+        }
+
+        if ($ajax) {
+            return json_encode([
+                'result' => 'ok',
+            ]);
+        }
+
+        return $nbProducts;
+    }
+
+    /**
+     * Index prices unbreakable
+     *
+     * @param int $cursor last indexed id_product
+     * @param bool $full All products, otherwise only indexed products
+     * @param bool $smart Delete before reindex
+     * @param int $length nb of products to index
+     *
+     * @return int
+     */
+    private function indexPricesUnbreakable($cursor, $full = false, $smart = false, $length = 100)
+    {
+        if ($full) {
+            $query = 'SELECT p.`id_product` ' .
+                'FROM `' . _DB_PREFIX_ . 'product` p ' .
+                'INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps ' .
+                'ON (ps.`id_product` = p.`id_product` AND ps.`active` = 1 AND ps.`visibility` IN ("both", "catalog")) ' .
+                'WHERE p.id_product > ' . (int) $cursor . ' ' .
+                'GROUP BY p.`id_product` ' .
+                'ORDER BY p.`id_product` LIMIT 0,' . (int) $length;
+        } else {
+            $query = 'SELECT p.`id_product` ' .
+                'FROM `' . _DB_PREFIX_ . 'product` p ' .
+                'INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps ' .
+                'ON (ps.`id_product` = p.`id_product` AND ps.`active` = 1 AND ps.`visibility` IN ("both", "catalog")) ' .
+                'LEFT JOIN  `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` psi ON (psi.id_product = p.id_product) ' .
+                'WHERE psi.id_product IS NULL ' .
+                'GROUP BY p.`id_product` ' .
+                'ORDER BY p.`id_product` LIMIT 0,' . (int) $length;
+        }
+
+        $lastIdProduct = 0;
+        foreach ($this->getDatabase()->executeS($query) as $product) {
+            $this->indexProductPrices((int) $product['id_product'], ($smart && $full));
+            $lastIdProduct = $product['id_product'];
+        }
+
+        return (int) $lastIdProduct;
+    }
+
+    /*
+     * Generate data for product features
+     *
+     * @return boolean
+     */
+    public function indexFeatures()
+    {
+        return $this->getDatabase()->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` ' .
+            'SELECT id_feature, 1 FROM `' . _DB_PREFIX_ . 'feature` ' .
+            'WHERE id_feature NOT IN (SELECT id_feature FROM ' .
+            '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature`)'
+        );
+    }
+
+    /*
+     * Generate data for product attribute group
+     *
+     * @return boolean
+     */
+    public function indexAttributeGroup()
+    {
+        return $this->getDatabase()->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` ' .
+            'SELECT id_attribute_group, 1 FROM `' . _DB_PREFIX_ . 'attribute_group` ' .
+            'WHERE id_attribute_group NOT IN (SELECT id_attribute_group FROM ' .
+            '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`)'
+        );
+    }
 }
