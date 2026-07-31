@@ -321,32 +321,9 @@ $(document).ready(() => {
     });
   }
 
-  $('.filter_list_item .filter-switch').click(function onFilterLickItemCheckboxesClicked() {
-    const currentSelectedFiltersCount = parseInt($('#selected_filters').html(), 10);
-
-    $('#selected_filters').html(
-      $(this).prop('checked') ? currentSelectedFiltersCount + 1 : currentSelectedFiltersCount - 1,
-    );
-  });
-
-  if (typeof window.filters !== 'undefined') {
-    const filters = JSON.parse(window.filters);
-    let container = null;
-    let $el;
-    Object.keys(filters).forEach((filter) => {
-      $el = $(`#${filter}`);
-      $el.prop('checked', true);
-      $('#selected_filters').html(parseInt($('#selected_filters').html(), 10) + 1);
-      $(`select[name="${filter}_filter_type"]`).val(filters[filter].filter_type);
-      $(`select[name="${filter}_filter_show_limit"]`).val(filters[filter].filter_show_limit);
-      if (container === null) {
-        container = $(`#${filter}`).closest('ul');
-        $el.closest('li').detach().prependTo(container);
-      } else {
-        $el.closest('li').detach().insertAfter(container);
-      }
-
-      container = $el.closest('li');
-    });
+  function enableFilter() {
+    $('#selected_filters').html($('.filter_list_item .filter-switch[value="1"]:checked').length);
   }
+  $('.filter_list_item .filter-switch').on('change', enableFilter);
+  enableFilter();
 });
