@@ -152,64 +152,27 @@ $(() => {
   /**
    * Custom javascript here:
    */
+  const layeredDefaultCategory = $('input[name="configuration[FILTER_BY_DEFAULT_CATEGORY]"]');
+  layeredDefaultCategory.on('change', function initializeOptions(event) {
+    let elm = $(this);
 
+    if (!elm.prop('checked')) {
+      return;
+    }
+
+    if (elm.val() === '1') {
+      $('input[name="configuration[FULL_TREE]"][value="0"]').prop('checked', true);
+      $('input[name="configuration[FULL_TREE]"]').prop('disabled', true);
+    } else {
+      $('input[name="configuration[FULL_TREE]"]').prop('disabled', false);
+    }
+  });
+
+  layeredDefaultCategory.filter('[value="1"]').trigger('change');
 });
-
-/* eslint-disable no-unused-vars, no-alert */
-window.checkForm = function checkForm() {
-  let isCategorySelected = false;
-  let isCategoryControllerSelected = false;
-  let isControllerSelected = false;
-  let isFilterSelected = false;
-
-  $('#categories-treeview input[type=checkbox]').each(function checkCategoriesCheckboxes() {
-    if ($(this).prop('checked')) {
-      isCategorySelected = true;
-      return false;
-    }
-    return true;
-  });
-
-  $('input[name="controllers[]"]').each(function checkPagesCheckboxes() {
-    if ($(this).prop('checked')) {
-      isControllerSelected = true;
-      if ($(this).val() === 'category') {
-        isCategoryControllerSelected = true;
-      }
-    }
-  });
-
-  $('.filter_list_item .filter-switch').each(function checkFilterListCheckboxes() {
-    if ($(this).prop('checked')) {
-      isFilterSelected = true;
-      return false;
-    }
-    return true;
-  });
-
-  // If no controller is selected at all
-  if (!isControllerSelected) {
-    alert(translations.no_selected_controllers);
-    return false;
-  }
-
-  // If category controller was checked, but no category is selected
-  if (isCategoryControllerSelected && !isCategorySelected) {
-    alert(translations.no_selected_categories);
-    $('#categories-treeview input[type=checkbox]').first().focus();
-    return false;
-  }
-
-  // If no filter is selected at all
-  if (!isFilterSelected) {
-    alert(translations.no_selected_filters);
-    $('#filter_list_item input[type=checkbox]').first().focus();
-    return false;
-  }
-
-  return true;
-};
-
+/**
+ * Scripts of Faceted search module
+ */
 $(document).ready(() => {
   $('.ajaxcall').click(function onAjaxCall() {
     if (this.legend === undefined) {
@@ -343,11 +306,6 @@ $(document).ready(() => {
     });
   });
 
-  if (typeof GC_LAYERED_INDEXED !== 'undefined' && GC_LAYERED_INDEXED) {
-    $('#url-indexe').click();
-    $('#full-index').click();
-  }
-
   if (typeof Sortable !== 'undefined') {
     const listFilters = document.getElementById('list-filters');
 
@@ -392,24 +350,3 @@ $(document).ready(() => {
     });
   }
 });
-
-$(document).on('ready', () => {
-  const layeredDefaultCategory = $('input[name="gc_layered_filter_by_default_category"]');
-  layeredDefaultCategory.on('change', function initializeOptions(event) {
-    const elm = $(this);
-
-    if (!elm.prop('checked')) {
-      return;
-    }
-
-    if (elm.val() === '1') {
-      $('input[name="gc_layered_full_tree"][value="0"]').prop('checked', true);
-      $('input[name="gc_layered_full_tree"]').prop('disabled', true);
-    } else {
-      $('input[name="gc_layered_full_tree"]').prop('disabled', false);
-    }
-  });
-
-  layeredDefaultCategory.filter('[value="1"]').trigger('change');
-});
-

@@ -19,19 +19,19 @@ class ConfigurationFormDataProvider extends AbstractFormDataProvider implements 
     public function getData()
     {
         return [
-            'js_defer' => $this->configurationAdapter->get('JS_DEFER'),
+            'js_defer' => (int) $this->configurationAdapter->get('JS_DEFER'),
             'theme' => $this->configurationAdapter->get('THEME'),
-            'CACHE_ENABLED' => $this->configurationAdapter->get('CACHE_ENABLED'),
-            'SHOW_QUIES' => $this->configurationAdapter->get('SHOW_QUIES'),
-            'FULL_TREE' => $this->configurationAdapter->get('FULL_TREE'),
-            'FILTER_BY_DEFAULT_CATEGORY' => $this->configurationAdapter->get('FILTER_BY_DEFAULT_CATEGORY'),
+            'CACHE_ENABLED' => (int) $this->configurationAdapter->get('CACHE_ENABLED'),
+            'SHOW_QUIES' => (int) $this->configurationAdapter->get('SHOW_QUIES'),
+            'FULL_TREE' => (int) $this->configurationAdapter->get('FULL_TREE'),
+            'FILTER_BY_DEFAULT_CATEGORY' => (int) $this->configurationAdapter->get('FILTER_BY_DEFAULT_CATEGORY'),
             'FILTER_CATEGORY_DEPTH' => $this->configurationAdapter->get('FILTER_CATEGORY_DEPTH'),
-            'FILTER_PRICE_USETAX' => $this->configurationAdapter->get('FILTER_PRICE_USETAX'),
-            'FILTER_PRICE_ROUNDING' => $this->configurationAdapter->get('FILTER_PRICE_ROUNDING'),
-            'FILTER_SHOW_OUT_OF_STOCK_LAST' => $this->configurationAdapter->get('FILTER_SHOW_OUT_OF_STOCK_LAST'),
-            'USE_JQUERY_UI_SLIDER' => $this->configurationAdapter->get('USE_JQUERY_UI_SLIDER'),
+            'FILTER_PRICE_USETAX' => (int) $this->configurationAdapter->get('FILTER_PRICE_USETAX'),
+            'FILTER_PRICE_ROUNDING' => (int) $this->configurationAdapter->get('FILTER_PRICE_ROUNDING'),
+            'FILTER_SHOW_OUT_OF_STOCK_LAST' => (int) $this->configurationAdapter->get('FILTER_SHOW_OUT_OF_STOCK_LAST'),
+            'USE_JQUERY_UI_SLIDER' => (int) $this->configurationAdapter->get('USE_JQUERY_UI_SLIDER'),
             'DEFAULT_CATEGORY_TEMPLATE' => $this->configurationAdapter->get('DEFAULT_CATEGORY_TEMPLATE'),
-            'OMIT_COUNTRIES' => $this->configurationAdapter->get('OMIT_COUNTRIES'),
+            'OMIT_COUNTRIES' => (int) $this->configurationAdapter->get('OMIT_COUNTRIES'),
         ];
     }
 
