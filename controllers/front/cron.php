@@ -57,6 +57,17 @@ class Gc_FacetedSearchCronModuleFrontController extends ModuleFrontController
                 }
 
                 break;
+            case 'indexBestSales':
+                Shop::setContext(Shop::CONTEXT_ALL);
+
+                $module = new GC_Facetedsearch();
+                $this->ajaxRender(
+                    $module->bestSalesIndexProcess(
+                        (int) Tools::getValue('cursor'),
+                        (bool) Tools::getValue('ajax')
+                    )
+                );
+                break;
             default:
                 header('HTTP/1.1 403 Forbidden');
                 header('Status: 403 Forbidden');

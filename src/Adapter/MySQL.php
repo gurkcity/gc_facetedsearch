@@ -308,11 +308,11 @@ class MySQL extends AbstractAdapter
                 'dependencyField' => 'nleft',
             ],
             'sales' => [
-                'tableName' => 'product_sale',
-                'tableAlias' => 'psales',
-                'fieldName' => 'quantity',
+                'tableName' => 'gc_facetedsearch_salescache',
+                'tableAlias' => 'gcsales',
+                'fieldName' => 'score',
                 'fieldAlias' => 'sales',
-                'joinCondition' => '(psales.id_product = p.id_product)',
+                'joinCondition' => '(gcsales.id_product = p.id_product)',
                 'joinType' => self::LEFT_JOIN,
             ],
             'reduction' => [

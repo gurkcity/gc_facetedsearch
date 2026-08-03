@@ -274,6 +274,11 @@ class Settings extends AbstractSettings
         $table->setPrimaryKey(['id_attribute', 'id_product', 'id_shop']);
         $table->addUniqueIndex(['id_attribute_group', 'id_attribute', 'id_product', 'id_shop'], 'id_attribute_group');
 
+        $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_salescache');
+        $table->addColumn('id_product', 'integer', ['unsigned' => true]);
+        $table->addColumn('score', 'float', ['precision' => 20, 'scale' => 6]);
+        $table->setPrimaryKey(['id_product']);
+
         return new Sql($schema);
     }
 

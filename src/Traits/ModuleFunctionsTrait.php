@@ -810,6 +810,139 @@ trait ModuleFunctionsTrait
     }
 
     /**
+     * Full best sales index process (batched, cursor-based).
+     *
+     * @param int $cursor last indexed id_product
+     * @param bool $ajax
+     *
+     * @return int|string
+     */
+    public function bestSalesIndexProcess($cursor = 0, $ajax = false)
+    {
+        if ((int) $cursor === 0) {
+            $this->getDatabase()->execute(
+                'TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_salescache`'
+            );
+        }
+
+        return $this->indexBestSales((int) $cursor, (bool) $ajax);
+    }
+
+    /**
+     * Index best sales scores in batches.
+     *
+     * @param int $cursor last indexed id_product
+     * @param bool $ajax
+     *
+     * @return int|string
+     */
+    private function indexBestSales($cursor = 0, $ajax = false)
+    {
+        $days = (int) $this->getConfig()->get('BEST_SALES_DAYS');
+        if ($days <= 0) {
+            $days = 60;
+        }
+
+        $nbProducts = (int) $this->getDatabase()->getValue(
+            'SELECT COUNT(DISTINCT p.`id_product`) FROM `' . _DB_PREFIX_ . 'product` p'
+        );
+
+        $maxExecutiontime = @ini_get('max_execution_time');
+        if ($maxExecutiontime > 5 || $maxExecutiontime <= 0) {
+            $maxExecutiontime = 5;
+        }
+
+        $startTime = microtime(true);
+        $indexedProducts = 0;
+        $length = 100;
+
+        do {
+            $lastCursor = $cursor;
+            $cursor = (int) $this->indexBestSalesBatch((int) $cursor, $length, $days);
+            if ($cursor === 0) {
+                $lastCursor = $cursor;
+                break;
+            }
+            $time_elapsed = microtime(true) - $startTime;
+            $indexedProducts += $length;
+        } while (
+            $cursor < $nbProducts
+            && (Tools::getMemoryLimit() == -1 || Tools::getMemoryLimit() > memory_get_peak_usage())
+            && $time_elapsed < $maxExecutiontime
+        );
+
+        if ($cursor != $lastCursor && !$ajax) {
+            return $this->indexBestSales((int) $cursor, $ajax);
+        }
+
+        if ($ajax && $nbProducts > 0 && $cursor != $lastCursor) {
+            return json_encode([
+                'total' => $nbProducts,
+                'cursor' => $cursor,
+                'count' => $indexedProducts,
+            ]);
+        }
+
+        if ($ajax) {
+            return json_encode([
+                'result' => 'ok',
+            ]);
+        }
+
+        return $nbProducts;
+    }
+
+    /**
+     * Index best sales for a product batch.
+     *
+     * @param int $cursor last indexed id_product
+     * @param int $length nb of products to index
+     * @param int $days sales period in days
+     *
+     * @return int last indexed id_product
+     */
+    private function indexBestSalesBatch($cursor, $length, $days)
+    {
+        $products = $this->getDatabase()->executeS(
+            'SELECT p.`id_product`
+            FROM `' . _DB_PREFIX_ . 'product` p
+            WHERE p.`id_product` > ' . (int) $cursor . '
+            ORDER BY p.`id_product`
+            LIMIT ' . (int) $length
+        );
+
+        if (!$products) {
+            return 0;
+        }
+
+        $ids = array_map('intval', array_column($products, 'id_product'));
+        $idList = implode(',', $ids);
+        $lastId = (int) end($ids);
+
+        $this->getDatabase()->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_salescache` (`id_product`, `score`)
+            SELECT
+                p.id_product,
+                (IFNULL(od.score, 0) + (1 / DATEDIFF(CURRENT_DATE(), p.`date_add`))) * 1000 AS score
+            FROM `' . _DB_PREFIX_ . 'product` AS p
+            LEFT JOIN (
+                SELECT
+                    od.product_id AS id_product,
+                    COUNT(od.`id_order_detail`) AS score
+                FROM `' . _DB_PREFIX_ . 'order_detail` AS od
+                INNER JOIN `' . _DB_PREFIX_ . 'orders` AS o ON (o.`id_order` = od.`id_order`)
+                WHERE o.`valid` = 1
+                AND o.`date_add` > DATE_SUB(NOW(), INTERVAL ' . (int) $days . ' DAY)
+                AND od.product_id IN (' . $idList . ')
+                GROUP BY od.`product_id`
+            ) AS od ON (od.`id_product` = p.`id_product`)
+            WHERE p.id_product IN (' . $idList . ')'
+        );
+
+        return $lastId;
+    }
+
+    /**
      * Migrate configuration, filter templates and indexable SEO data from ps_facetedsearch,
      * then uninstall the original module. Price/attribute indexes are rebuilt by install().
      *
