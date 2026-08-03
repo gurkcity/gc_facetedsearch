@@ -169,6 +169,23 @@ $(() => {
   });
 
   layeredDefaultCategory.filter('[value="1"]').trigger('change');
+
+  const bestSalesSorting = $('input[name="configuration[BEST_SALES_SORTING]"]');
+  bestSalesSorting.on('change', function initializeOptions(event) {
+    let elm = $(this);
+
+    if (!elm.prop('checked')) {
+      return;
+    }
+
+    if (elm.val() === '1') {
+      $('#configuration_BEST_SALES_DAYS').closest('.form-group').show();
+    } else {
+      $('#configuration_BEST_SALES_DAYS').closest('.form-group').hide();
+    }
+  });
+
+  bestSalesSorting.trigger('change');
 });
 /**
  * Scripts of Faceted search module

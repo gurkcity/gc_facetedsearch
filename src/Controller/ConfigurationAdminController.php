@@ -64,11 +64,13 @@ class ConfigurationAdminController extends AdminController
                 'full_price_indexer_url_for_cron' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexPrices', 'token' => $cronToken]),
                 'attribute_indexer_url_for_cron' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexAttributes', 'token' => $cronToken]),
                 'clear_cache_url_for_cron' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'clearCache', 'token' => $cronToken]),
+                'best_sales_indexer_url_for_cron' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['action' => 'indexBestSales', 'token' => $cronToken]),
 
                 'price_indexer_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexPrices', 'token' => $cronToken]),
                 'full_price_indexer_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexPrices', 'full' => 1, 'token' => $cronToken]),
                 'attribute_indexer_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexAttributes', 'token' => $cronToken]),
                 'clear_cache_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'clearCache', 'token' => $cronToken]),
+                'best_sales_indexer_url' => $context->link->getModuleLink('gc_facetedsearch', 'cron', ['ajax' => true, 'action' => 'indexBestSales', 'token' => $cronToken]),
 
                 'filtersGrid' => $this->presentGrid($filtersGrid),
             ]

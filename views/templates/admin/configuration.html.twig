@@ -24,6 +24,7 @@
               <a class="ajaxcall-recurcive btn btn-default" href="{{ price_indexer_url }}">{{ 'Index all missing prices'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</a>
               <a class="ajaxcall-recurcive btn btn-default" href="{{ full_price_indexer_url }}">{{ 'Rebuild entire price index'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</a>
               <a class="ajaxcall btn btn-default" href="{{ attribute_indexer_url }}">{{ 'Build attributes and features indexes'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</a>
+              <a class="ajaxcall-recurcive btn btn-default" href="{{ best_sales_indexer_url }}">{{ 'Build best sales index'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</a>
               <a class="ajaxcall btn btn-default" href="{{ clear_cache_url }}">{{ 'Clear cache'|trans({}, 'Modules.Gcfacetedsearch.Admin') }}</a>
             </p>
           </div>
@@ -36,6 +37,8 @@
             {{ 'Rebuild price index:'|trans({}, 'Modules.Gcfacetedsearch.Admin') }} <strong>{{ full_price_indexer_url_for_cron }}</strong>
             <br>
             {{ 'Rebuild attribute index:'|trans({}, 'Modules.Gcfacetedsearch.Admin') }} <strong>{{ attribute_indexer_url_for_cron }}</strong>
+            <br>
+            {{ 'Rebuild bestsales index:'|trans({}, 'Modules.Gcfacetedsearch.Admin') }} <strong>{{ best_sales_indexer_url_for_cron }}</strong>
             <br>
             {{ 'Flush block cache:'|trans({}, 'Modules.Gcfacetedsearch.Admin') }} <strong>{{ clear_cache_url_for_cron }}</strong>
             <br>

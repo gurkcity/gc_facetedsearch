@@ -102,6 +102,23 @@ class ConfigurationType extends TranslatorAwareType
                 'required' => false,
                 'help' => $this->trans('If enabled, the country indexation will be omitted. This results in a smaller index and less storage space consumption in the database.', 'Modules.Gcfacetedsearch.Admin'),
             ])
+            ->add('BEST_SALES_SORTING', SwitchType::class, [
+                'label' => $this->trans('Best sellers sorting', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'default_empty_data' => 0,
+                'help' => $this->trans('If enabled, the best sellers sorting will be used for the products list.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('BEST_SALES_DAYS', NumberType::class, [
+                'label' => $this->trans('Best sales days', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => $this->trans('The %s field is required.', 'Admin.Notifications.Error'),
+                    ]),
+                ],
+                'default_empty_data' => 60,
+                'help' => $this->trans('If set to zero, the complete PrestaShop history should be used (PrestaShops default for the sales cache)', 'Modules.Gcfacetedsearch.Admin'),
+            ])
         ;
 
         if ($this->module->hasJavascriptFiles()) {

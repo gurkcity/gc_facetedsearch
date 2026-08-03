@@ -42,6 +42,8 @@ class Settings extends AbstractSettings
             'USE_JQUERY_UI_SLIDER' => new Config('USE_JQUERY_UI_SLIDER', 1),
             'DEFAULT_CATEGORY_TEMPLATE' => new Config('DEFAULT_CATEGORY_TEMPLATE', 0),
             'OMIT_COUNTRIES' => new Config('OMIT_COUNTRIES', 0),
+            'BEST_SALES_DAYS' => new Config('BEST_SALES_DAYS', 60),
+            'BEST_SALES_SORTING' => new Config('BEST_SALES_SORTING', 0),
             // 'TEST_CONFIG_ABC' => new Config(
             //     'TEST_CONFIG_ABC',
             //     'value'
