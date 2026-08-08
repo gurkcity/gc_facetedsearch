@@ -139,6 +139,22 @@ gc_facetedsearch_maintenance_caching_clear:
     _legacy_link: 'GcFacetedsearchMaintenanceAdminController'
 
 # custom routes here:
+gc_facetedsearch_filtersgrid:
+  path: gc_facetedsearch/templates
+  methods: GET
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\FilterTemplateAdminController::indexAction
+    _legacy_controller: 'GcFacetedsearchFilterTemplateAdminController'
+    _legacy_link: 'GcFacetedsearchFilterTemplateAdminController'
+
+gc_facetedsearch_filtersgrid_search:
+  path: gc_facetedsearch/templates
+  methods: POST
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\FilterTemplateAdminController::searchAction
+    _legacy_controller: 'GcFacetedsearchFilterTemplateAdminController'
+    _legacy_link: 'GcFacetedsearchFilterTemplateAdminController'
+
 gc_facetedsearch_filtersgrid_add:
   path: gc_facetedsearch/templates/add
   methods: [GET, POST]
@@ -166,3 +182,11 @@ gc_facetedsearch_filtersgrid_delete:
     _legacy_link: 'GcFacetedsearchFilterTemplateAdminController'
   requirements:
     idTemplate: '[0-9]+'
+
+gc_facetedsearch_cron:
+  path: gc_facetedsearch/cron
+  methods: [GET, POST]
+  defaults:
+    _controller: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\CronAdminController::cronAction
+    _legacy_controller: 'GcFacetedsearchCronAdminController'
+    _legacy_link: 'GcFacetedsearchCronAdminController'

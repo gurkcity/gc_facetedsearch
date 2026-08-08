@@ -267,3 +267,10 @@ services:
       - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
 
 # custom services here:
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\CronAdminController:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\CronAdminController
+    parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
+    public: true
+    autowire: true
+    autoconfigure: true
+    tags: ['controller.service_arguments']

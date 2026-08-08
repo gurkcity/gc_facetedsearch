@@ -1,0 +1,45 @@
+{#**
+ * GC Facetedsearch
+ * Module for PrestaShop E-Commerce Software
+ *
+ * @author    Markus Engel <info@onlineshop-module.de>
+ * @copyright Copyright (c) 2026, Onlineshop-Module.de
+ * @license   commercial, see licence.txt
+ *#}
+
+{% extends '@Modules/gc_facetedsearch/views/templates/admin/header/moduleheader.html.twig' %}
+
+{% set gridActions = {
+    add_new: {
+      href: path('gc_facetedsearch_filtersgrid_add'),
+      desc: 'Add new template'|trans({}, 'Modules.Gcfacetedsearch.Admin'),
+      icon: 'add_circle_outline',
+    },
+  }
+%}
+
+{% block content %}
+  {% block example_listing %}
+    {% include '@Modules/gc_facetedsearch/views/templates/admin/grid.html.twig' with {'grid': filtersGrid, 'gridActions': gridActions} %}
+  {% endblock %}
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+  $(() => {
+    window.prestashop.component.initComponents(['Grid']);
+
+    const filtersGrid = new window.prestashop.component.Grid('gc_facetedsearch_filtersgrid');
+
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.FiltersResetExtension());
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.SortingExtension());
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.SubmitRowActionExtension());
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.ExportToSqlManagerExtension());
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.FiltersSubmitButtonEnablerExtension());
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.BulkActionCheckboxExtension());
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.AjaxBulkActionExtension());
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.SubmitBulkActionExtension());
+    filtersGrid.addExtension(new window.prestashop.component.GridExtensions.BulkOpenTabsExtension());
+  });
+  </script>
+{% endblock %}

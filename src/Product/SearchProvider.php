@@ -81,53 +81,55 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
      */
     private function getAvailableSortOrders($query)
     {
-        $sortSalesDesc = new SortOrder('product', 'sales', 'desc');
-        // If the query is a search, we want to sort by position in descending order = relevance
-        // If the query is a category, manufacturer or supplier, we want to sort by position in ascending order
-        $sortPosAsc = new SortOrder('product', 'position', ($query->getQueryType() == 'search' ? 'desc' : 'asc'));
-        $sortNameAsc = new SortOrder('product', 'name', 'asc');
-        $sortNameDesc = new SortOrder('product', 'name', 'desc');
-        $sortPriceAsc = new SortOrder('product', 'price', 'asc');
-        $sortPriceDesc = new SortOrder('product', 'price', 'desc');
-        $sortDateAsc = new SortOrder('product', 'date_add', 'asc');
-        $sortDateDesc = new SortOrder('product', 'date_add', 'desc');
-        $sortRefAsc = new SortOrder('product', 'reference', 'asc');
-        $sortRefDesc = new SortOrder('product', 'reference', 'desc');
         $translator = $this->module->getTranslator();
 
-        $sortOrders = [
-            $sortSalesDesc->setLabel(
-                $translator->trans('Best sales', [], 'Shop.Theme.Catalog')
-            ),
-            $sortPosAsc->setLabel(
+        $sortOrders = [];
+        if ($this->module->getConfig()->get('POSITION_SORTING')) {
+            $sortPosAsc = new SortOrder('product', 'position', ($query->getQueryType() == 'search' ? 'desc' : 'asc'));
+            $sortOrders[] = $sortPosAsc->setLabel(
                 $translator->trans('Relevance', [], 'Shop.Theme.Catalog')
-            ),
-            $sortNameAsc->setLabel(
-                $translator->trans('Name, A to Z', [], 'Shop.Theme.Catalog')
-            ),
-            $sortNameDesc->setLabel(
-                $translator->trans('Name, Z to A', [], 'Shop.Theme.Catalog')
-            ),
-            $sortPriceAsc->setLabel(
-                $translator->trans('Price, low to high', [], 'Shop.Theme.Catalog')
-            ),
-            $sortPriceDesc->setLabel(
-                $translator->trans('Price, high to low', [], 'Shop.Theme.Catalog')
-            ),
-            $sortRefAsc->setLabel(
-                $translator->trans('Reference, A to Z', [], 'Shop.Theme.Catalog')
-            ),
-            $sortRefDesc->setLabel(
-                $translator->trans('Reference, Z to A', [], 'Shop.Theme.Catalog')
-            ),
-        ];
-
-        if ($query->getQueryType() == 'new-products') {
-            $sortOrders[] = $sortDateAsc->setLabel(
-                $translator->trans('Date added, oldest to newest', [], 'Shop.Theme.Catalog')
             );
+        }
+        if ($this->module->getConfig()->get('BEST_SALES_SORTING')) {
+            $sortSalesDesc = new SortOrder('product', 'sales', 'desc');
+            $sortOrders[] = $sortSalesDesc->setLabel(
+                $translator->trans('Best Seller', [], 'Shop.Theme.Catalog')
+            );
+        }
+        if ($this->module->getConfig()->get('DATE_ADD_SORTING')) {
+            $sortDateDesc = new SortOrder('product', 'date_add', 'desc');
             $sortOrders[] = $sortDateDesc->setLabel(
-                $translator->trans('Date added, newest to oldest', [], 'Shop.Theme.Catalog')
+                $translator->trans('Newest Arrivals', [], 'Modules.Gcfacetedsearch.Shop')
+            );
+        }
+        if ($this->module->getConfig()->get('PRICE_LOW_TO_HIGH_SORTING')) {
+            $sortPriceAsc = new SortOrder('product', 'price', 'asc');
+            $sortOrders[] = $sortPriceAsc->setLabel(
+                $translator->trans('Price, low to high', [], 'Shop.Theme.Catalog')
+            );
+        }
+        if ($this->module->getConfig()->get('PRICE_HIGH_TO_LOW_SORTING')) {
+            $sortPriceDesc = new SortOrder('product', 'price', 'desc');
+            $sortOrders[] = $sortPriceDesc->setLabel(
+                $translator->trans('Price, high to low', [], 'Shop.Theme.Catalog')
+            );
+        }
+        if ($this->module->getConfig()->get('QUANTITY_SORTING')) {
+            $sortStockDesc = new SortOrder('stock', 'quantity', 'desc');
+            $sortOrders[] = $sortStockDesc->setLabel(
+                $translator->trans('Most QTY Available in Stock', [], 'Modules.Gcfacetedsearch.Shop')
+            );
+        }
+        if ($this->module->getConfig()->get('PRODUCT_REFERENCE_ASC_SORTING')) {
+            $sortRefAsc = new SortOrder('product', 'reference', 'asc');
+            $sortOrders[] = $sortRefAsc->setLabel(
+                $translator->trans('Reference, A to Z', [], 'Shop.Theme.Catalog')
+            );
+        }
+        if ($this->module->getConfig()->get('PRODUCT_REFERENCE_DESC_SORTING')) {
+            $sortRefDesc = new SortOrder('product', 'reference', 'desc');
+            $sortOrders[] = $sortRefDesc->setLabel(
+                $translator->trans('Reference, Z to A', [], 'Shop.Theme.Catalog')
             );
         }
 

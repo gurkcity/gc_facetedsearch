@@ -24,6 +24,13 @@ class Settings extends AbstractSettings
     public function config(): array
     {
         return [
+            // 'TEST_CONFIG' => new Config(
+            //     'TEST_CONFIG',
+            //     [
+            //         'en' => 'Value',
+            //         'de' => 'Wert',
+            //     ]
+            // ),
             'CACHE_ENABLED' => new Config('CACHE_ENABLED', 1),
             'SHOW_QUIES' => new Config('SHOW_QUIES', 1),
             'FULL_TREE' => new Config('FULL_TREE', 1),
@@ -37,6 +44,10 @@ class Settings extends AbstractSettings
             'OMIT_COUNTRIES' => new Config('OMIT_COUNTRIES', 0),
             'BEST_SALES_DAYS' => new Config('BEST_SALES_DAYS', 60),
             'BEST_SALES_SORTING' => new Config('BEST_SALES_SORTING', 0),
+            // 'TEST_CONFIG_ABC' => new Config(
+            //     'TEST_CONFIG_ABC',
+            //     'value'
+            // ),
         ];
     }
 
@@ -54,6 +65,33 @@ class Settings extends AbstractSettings
     public function cron(): array
     {
         return [];
+
+        /*
+        return [
+            'cronMethodName' => [
+                'title' => $this->translator->trans('Name of the cronjob', [], 'Modules.Gcfacetedsearch.Admin'),
+                'description' => $this->translator->trans('This cron job does super cool things in your webshop.', [], 'Modules.Gcfacetedsearch.Admin'),
+                'use_queue' => true,
+                'params' => [
+                    [
+                        'description' => $this->translator->trans('Description for parameter', [], 'Modules.Gcfacetedsearch.Admin'),
+                        'title' => 'Parameter 1',
+                        'name' => 'parameter',
+                        'values' => [
+                            '1' => $this->translator->trans('Parameter 1 value description', [], 'Modules.Gcfacetedsearch.Admin'),
+                            '2' => $this->translator->trans('Parameter 2 value description', [], 'Modules.Gcfacetedsearch.Admin'),
+                        ],
+                    ],
+                ],
+                'command' => [
+                    'arguments' => [
+                        'action' => 'actionName',
+                    ],
+                    'cli_only' => true,
+                ],
+            ],
+        ];
+        */
     }
 
     public function hooks(): array
@@ -117,6 +155,30 @@ class Settings extends AbstractSettings
     public function sql(): Sql
     {
         $schema = new Schema();
+
+        /*
+        $table = $schema->createTable($this->dbPrefix . 'example');
+        $table->addColumn('id_example', 'integer', ['unsigned' => true, 'autoincrement' => true]);
+        $table->addColumn('id_column', 'integer', ['unsigned' => true]);
+        $table->addColumn('date_add', 'datetime');
+        $table->addColumn('date_upd', 'datetime');
+        $table->addColumn('active', 'integer', ['unsigned' => true]);
+        $table->addColumn('deleted', 'integer', ['unsigned' => true]);
+        $table->setPrimaryKey(['id_example']);
+        $table->addIndex(['id_column']);
+
+        $table = $schema->createTable($this->dbPrefix . 'example_lang');
+        $table->addColumn('id_example', 'integer', ['unsigned' => true]);
+        $table->addColumn('id_lang', 'integer', ['unsigned' => true]);
+        $table->addColumn('name', 'string', ['length' => 64]);
+        $table->addUniqueIndex(['id_example', 'id_lang']);
+
+        $table = $schema->createTable($this->dbPrefix . 'example_shop');
+        $table->addColumn('id_example', 'integer', ['unsigned' => true]);
+        $table->addColumn('id_shop', 'integer', ['unsigned' => true]);
+        $table->addColumn('active', 'integer', ['unsigned' => true]);
+        $table->addUniqueIndex(['id_example', 'id_shop']);
+        */
 
         $table = $schema->createTable($this->dbPrefix . 'gc_facetedsearch_category');
         $table->addColumn('id_gc_facetedsearch_category', 'integer', ['unsigned' => true, 'autoincrement' => true]);
@@ -230,11 +292,24 @@ class Settings extends AbstractSettings
                 ],
                 'GcFacetedsearchFilterTemplateAdminController',
                 'GcFacetedsearchConfigurationAdminParentController',
-                'gc_facetedsearch_configuration',
-                '',
+                'gc_facetedsearch_filtersgrid',
+                'list',
                 'Filter templates',
                 'Modules.Gcfacetedsearch.Admin',
-                false
+                true
+            ),
+            new Tab(
+                [
+                    'en' => 'Cron',
+                    'de' => 'Cron',
+                ],
+                'GcFacetedsearchCronAdminController',
+                'GcFacetedsearchConfigurationAdminParentController',
+                'gc_facetedsearch_cron',
+                'alarm',
+                'Cron',
+                'Modules.Gcfacetedsearch.Admin',
+                true
             ),
         ];
     }

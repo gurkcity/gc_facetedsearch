@@ -34,6 +34,13 @@ class ConfigurationFormDataProvider extends AbstractFormDataProvider implements 
             'OMIT_COUNTRIES' => (int) $this->configurationAdapter->get('OMIT_COUNTRIES'),
             'BEST_SALES_SORTING' => (int) $this->configurationAdapter->get('BEST_SALES_SORTING'),
             'BEST_SALES_DAYS' => $this->configurationAdapter->get('BEST_SALES_DAYS'),
+            'POSITION_SORTING' => (int) $this->configurationAdapter->get('POSITION_SORTING'),
+            'DATE_ADD_SORTING' => (int) $this->configurationAdapter->get('DATE_ADD_SORTING'),
+            'PRICE_LOW_TO_HIGH_SORTING' => (int) $this->configurationAdapter->get('PRICE_LOW_TO_HIGH_SORTING'),
+            'PRICE_HIGH_TO_LOW_SORTING' => (int) $this->configurationAdapter->get('PRICE_HIGH_TO_LOW_SORTING'),
+            'QUANTITY_SORTING' => (int) $this->configurationAdapter->get('QUANTITY_SORTING'),
+            'PRODUCT_REFERENCE_ASC_SORTING' => (int) $this->configurationAdapter->get('PRODUCT_REFERENCE_ASC_SORTING'),
+            'PRODUCT_REFERENCE_DESC_SORTING' => (int) $this->configurationAdapter->get('PRODUCT_REFERENCE_DESC_SORTING'),
         ];
     }
 
@@ -85,6 +92,27 @@ class ConfigurationFormDataProvider extends AbstractFormDataProvider implements 
         }
         if (isset($data['BEST_SALES_SORTING'])) {
             $this->updateConfiguration('BEST_SALES_SORTING', 'BEST_SALES_SORTING', $data);
+        }
+        if (isset($data['POSITION_SORTING'])) {
+            $this->updateConfiguration('POSITION_SORTING', 'POSITION_SORTING', $data);
+        }
+        if (isset($data['DATE_ADD_SORTING'])) {
+            $this->updateConfiguration('DATE_ADD_SORTING', 'DATE_ADD_SORTING', $data);
+        }
+        if (isset($data['PRICE_LOW_TO_HIGH_SORTING'])) {
+            $this->updateConfiguration('PRICE_LOW_TO_HIGH_SORTING', 'PRICE_LOW_TO_HIGH_SORTING', $data);
+        }
+        if (isset($data['PRICE_HIGH_TO_LOW_SORTING'])) {
+            $this->updateConfiguration('PRICE_HIGH_TO_LOW_SORTING', 'PRICE_HIGH_TO_LOW_SORTING', $data);
+        }
+        if (isset($data['QUANTITY_SORTING'])) {
+            $this->updateConfiguration('QUANTITY_SORTING', 'QUANTITY_SORTING', $data);
+        }
+        if (isset($data['PRODUCT_REFERENCE_ASC_SORTING'])) {
+            $this->updateConfiguration('PRODUCT_REFERENCE_ASC_SORTING', 'PRODUCT_REFERENCE_ASC_SORTING', $data);
+        }
+        if (isset($data['PRODUCT_REFERENCE_DESC_SORTING'])) {
+            $this->updateConfiguration('PRODUCT_REFERENCE_DESC_SORTING', 'PRODUCT_REFERENCE_DESC_SORTING', $data);
         }
 
         return [];

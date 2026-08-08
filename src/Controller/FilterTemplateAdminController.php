@@ -13,7 +13,9 @@ namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller;
 
 use Exception;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type\FilterTemplateType;
+use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Grid\FacetedSearchFilter\FiltersFilter;
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Model\FacetedSearchFilter;
+use PrestaShop\PrestaShop\Core\Grid\GridFactory;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use PrestaShopBundle\Security\Annotation\ModuleActivated;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilderInterface;
@@ -35,6 +37,21 @@ class FilterTemplateAdminController extends AdminController
      *     message="Access denied."
      * )
      */
+    public function indexAction(
+        Request $request,
+        FiltersFilter $filters,
+        #[Autowire(service: 'onlineshopmodule.module.facetedsearch.grid.factory.filters')]
+        GridFactory $filtersGridFactory
+    ): Response {
+        $this->setLayoutTitle($this->trans('Filter templates', [], 'Modules.Gcfacetedsearch.Admin'));
+
+        $filtersGrid = $filtersGridFactory->getGrid($filters);
+
+        return $this->render('views/templates/admin/filter_template/index.html.twig', [
+            'filtersGrid' => $this->presentGrid($filtersGrid),
+        ]);
+    }
+
     public function addAction(
         Request $request,
         #[Autowire(service: 'onlineshopmodule.module.facetedsearch.form.identifiable_object.handler.filter_template_form_handler')]
@@ -49,13 +66,7 @@ class FilterTemplateAdminController extends AdminController
                     'name' => '',
                     'categories' => [],
                     'shop_association' => [],
-                    'filters' => [
-                        // 'filter_subcategories' => [
-                        //     'enabled' => 1,
-                        //     'filter_type' => 0,
-                        //     'filter_show_limit' => 0,
-                        // ],
-                    ],
+                    'filters' => [],
                 ]
             );
 
@@ -68,7 +79,7 @@ class FilterTemplateAdminController extends AdminController
 
                 $this->addFlash('success', $this->trans('Successful creation', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('gc_facetedsearch_configuration');
+                return $this->redirectToRoute('gc_facetedsearch_filtersgrid');
             }
         } catch (Exception $e) {
             $this->addFlash('error', $e->getMessage());
@@ -113,7 +124,7 @@ class FilterTemplateAdminController extends AdminController
 
                 $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('gc_facetedsearch_configuration');
+                return $this->redirectToRoute('gc_facetedsearch_filtersgrid');
             }
         } catch (Exception $e) {
             $this->addFlash('error', $e->getMessage());
@@ -165,7 +176,7 @@ class FilterTemplateAdminController extends AdminController
             $this->addFlash('error', $e->getMessage());
         }
 
-        return $this->redirectToRoute('gc_facetedsearch_configuration');
+        return $this->redirectToRoute('gc_facetedsearch_filtersgrid');
     }
 
     private function resetDefaultCategoryTemplateIfNeeded(int $idTemplate): void

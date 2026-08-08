@@ -102,11 +102,16 @@ class ConfigurationType extends TranslatorAwareType
                 'required' => false,
                 'help' => $this->trans('If enabled, the country indexation will be omitted. This results in a smaller index and less storage space consumption in the database.', 'Modules.Gcfacetedsearch.Admin'),
             ])
-            ->add('BEST_SALES_SORTING', SwitchType::class, [
-                'label' => $this->trans('Best sellers sorting', 'Modules.Gcfacetedsearch.Admin'),
+
+            ->add('POSITION_SORTING', SwitchType::class, [
+                'label' => $this->trans('Sort by Relevance', 'Modules.Gcfacetedsearch.Admin'),
                 'required' => false,
                 'default_empty_data' => 0,
-                'help' => $this->trans('If enabled, the best sellers sorting will be used for the products list.', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('BEST_SALES_SORTING', SwitchType::class, [
+                'label' => $this->trans('Sort by Best Seller', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'default_empty_data' => 0,
             ])
             ->add('BEST_SALES_DAYS', NumberType::class, [
                 'label' => $this->trans('Best sales days', 'Modules.Gcfacetedsearch.Admin'),
@@ -118,6 +123,36 @@ class ConfigurationType extends TranslatorAwareType
                 ],
                 'default_empty_data' => 60,
                 'help' => $this->trans('If set to zero, the complete PrestaShop history should be used (PrestaShops default for the sales cache)', 'Modules.Gcfacetedsearch.Admin'),
+            ])
+            ->add('DATE_ADD_SORTING', SwitchType::class, [
+                'label' => $this->trans('Sort by Newest Arrivals', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'default_empty_data' => 0,
+            ])
+            ->add('PRICE_LOW_TO_HIGH_SORTING', SwitchType::class, [
+                'label' => $this->trans('Sort by Price, low to high', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'default_empty_data' => 0,
+            ])
+            ->add('PRICE_HIGH_TO_LOW_SORTING', SwitchType::class, [
+                'label' => $this->trans('Sort by Price, high to low', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'default_empty_data' => 0,
+            ])
+            ->add('QUANTITY_SORTING', SwitchType::class, [
+                'label' => $this->trans('Sort by Most QTY Available in Stock', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'default_empty_data' => 0,
+            ])
+            ->add('PRODUCT_REFERENCE_ASC_SORTING', SwitchType::class, [
+                'label' => $this->trans('Sort by Refernce, A to Z', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'default_empty_data' => 0,
+            ])
+            ->add('PRODUCT_REFERENCE_DESC_SORTING', SwitchType::class, [
+                'label' => $this->trans('Sort by Refernce, Z to A', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'default_empty_data' => 0,
             ])
         ;
 
