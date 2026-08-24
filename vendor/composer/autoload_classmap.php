@@ -32,6 +32,7 @@ return array(
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Constraint\\UrlSegmentValidator' => $baseDir . '/src/Constraint/UrlSegmentValidator.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\AdminController' => $baseDir . '/src/Controller/AdminController.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\ConfigurationAdminController' => $baseDir . '/src/Controller/ConfigurationAdminController.php',
+    'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\CronAdminController' => $baseDir . '/src/Controller/CronAdminController.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\FilterTemplateAdminController' => $baseDir . '/src/Controller/FilterTemplateAdminController.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LicenseAdminController' => $baseDir . '/src/Controller/LicenseAdminController.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LogAdminController' => $baseDir . '/src/Controller/LogAdminController.php',

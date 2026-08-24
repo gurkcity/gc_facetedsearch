@@ -60,6 +60,7 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Constraint\\UrlSegmentValidator' => __DIR__ . '/../..' . '/src/Constraint/UrlSegmentValidator.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\AdminController' => __DIR__ . '/../..' . '/src/Controller/AdminController.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\ConfigurationAdminController' => __DIR__ . '/../..' . '/src/Controller/ConfigurationAdminController.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\CronAdminController' => __DIR__ . '/../..' . '/src/Controller/CronAdminController.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\FilterTemplateAdminController' => __DIR__ . '/../..' . '/src/Controller/FilterTemplateAdminController.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LicenseAdminController' => __DIR__ . '/../..' . '/src/Controller/LicenseAdminController.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\LogAdminController' => __DIR__ . '/../..' . '/src/Controller/LogAdminController.php',
