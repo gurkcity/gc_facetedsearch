@@ -11,7 +11,9 @@
 
 <section id="js-active-search-filters" class="{if $activeFilters|count}active_filters{else}hide{/if}">
   {block name='active_filters_title'}
-    <p class="h6 {if $activeFilters|count}active-filter-title{else}hidden-xs-up{/if}">{l s='Active filters' d='Shop.Theme.Global'}</p>
+    {if $activeFilters|count}
+      <p class="h6 active-filter-title">{l s='Active filters' d='Shop.Theme.Global'}</p>
+    {/if}
   {/block}
 
   {if $activeFilters|count}
