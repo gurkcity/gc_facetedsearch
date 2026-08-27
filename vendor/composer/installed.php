@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'onlineshopmodule/gc_facetedsearch',
-        'pretty_version' => 'dev-ps9',
-        'version' => 'dev-ps9',
-        'reference' => '7cce7b444ebd2c1041102f9ee8ea728be97f6c09',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'd3ac9603e972bb20caabded5068abaa231659b5c',
         'type' => 'prestashop-module',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'onlineshopmodule/gc_facetedsearch' => array(
-            'pretty_version' => 'dev-ps9',
-            'version' => 'dev-ps9',
-            'reference' => '7cce7b444ebd2c1041102f9ee8ea728be97f6c09',
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'd3ac9603e972bb20caabded5068abaa231659b5c',
             'type' => 'prestashop-module',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

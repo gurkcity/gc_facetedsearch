@@ -62,14 +62,6 @@ services:
     autoconfigure: true
     tags: ['controller.service_arguments']
 
-  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\FilterTemplateAdminController:
-    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\FilterTemplateAdminController
-    parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
-    public: true
-    autowire: true
-    autoconfigure: true
-    tags: ['controller.service_arguments']
-
   Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController:
     class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\LogAdminController
     parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
@@ -267,6 +259,14 @@ services:
       - '@onlineshopmodule.module.facetedsearch.gc_facetedsearch'
 
 # custom services here:
+  Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\FilterTemplateAdminController:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\FilterTemplateAdminController
+    parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
+    public: true
+    autowire: true
+    autoconfigure: true
+    tags: ['controller.service_arguments']
+
   Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\CronAdminController:
     class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\CronAdminController
     parent: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Controller\AdminController
@@ -274,3 +274,27 @@ services:
     autowire: true
     autoconfigure: true
     tags: ['controller.service_arguments']
+
+  onlineshopmodule.module.facetedsearch.command.prices:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Command\PricesCommand
+    parent: onlineshopmodule.module.facetedsearch.command
+    tags:
+      - { name: 'console.command' }
+
+  onlineshopmodule.module.facetedsearch.command.attributes:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Command\AttributesCommand
+    parent: onlineshopmodule.module.facetedsearch.command
+    tags:
+      - { name: 'console.command' }
+
+  onlineshopmodule.module.facetedsearch.command.bestsales:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Command\BestsalesCommand
+    parent: onlineshopmodule.module.facetedsearch.command
+    tags:
+      - { name: 'console.command' }
+
+  onlineshopmodule.module.facetedsearch.command.clearcache:
+    class: Onlineshopmodule\PrestaShop\Module\Facetedsearch\Command\ClearcacheCommand
+    parent: onlineshopmodule.module.facetedsearch.command
+    tags:
+      - { name: 'console.command' }

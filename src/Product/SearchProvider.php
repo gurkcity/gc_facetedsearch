@@ -153,6 +153,16 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
         $result = new ProductSearchResult();
 
         /**
+         * Checking if a sink sort exists among the allowed list to avoid an SQL syntax error
+         */
+        $availableSortOrders = $this->getAvailableSortOrders($query);
+        $availableSortOrdersName = array_map(function ($item) { return $item->toString(); }, $availableSortOrders);
+
+        if (!in_array($query->getSortOrder()->toString(), $availableSortOrdersName)) {
+            $query->setSortOrder($availableSortOrders[0]);
+        }
+
+        /**
          * Get currently selected filters. In the query, it's passed as encoded URL string,
          * we make it an array. All filters in the URL that are no longer valid are removed.
          */
@@ -187,7 +197,7 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
         $result
             ->setProducts($productsAndCount['products'])
             ->setTotalProductsCount($productsAndCount['count'])
-            ->setAvailableSortOrders($this->getAvailableSortOrders($query));
+            ->setAvailableSortOrders($availableSortOrders);
 
         // Now let's get the filter blocks associated with the current search.
         // This will allow user to further filter this list we found.

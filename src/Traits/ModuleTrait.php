@@ -22,6 +22,8 @@ use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Settings;
 use PrestaShop\PrestaShop\Adapter\Configuration as ConfigurationAdapterPrestaShop;
 use PrestaShop\PrestaShop\Adapter\ContainerBuilder;
 use PrestaShop\PrestaShop\Adapter\ContainerFinder;
+use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
+use PrestaShop\PrestaShop\Core\Addon\Module\ModuleManagerBuilder;
 use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
 use PrestaShop\PrestaShop\Core\Language\LanguageInterface;
 use PrestaShop\PrestaShop\Core\MailTemplate\Layout\Layout;
@@ -89,6 +91,25 @@ trait ModuleTrait
         if (method_exists($this, 'parentInitModule')) {
             $this->parentInitModule();
         }
+    }
+
+    public function isUsingNewTranslationSystem()
+    {
+        return true;
+    }
+
+    public function getContent()
+    {
+        $moduleManagerBuilder = ModuleManagerBuilder::getInstance();
+        $moduleManager = $moduleManagerBuilder->build();
+
+        if (!$moduleManager->isEnabled($this->name)) {
+            return '<div class="alert alert-warning">' . $this->trans('This module is disabled. Please enable it.', [], 'Modules.Gcfacetedsearch.Admin') . '</div>';
+        }
+
+        \Tools::redirectAdmin(
+            SymfonyContainer::getInstance()->get('router')->generate($this->name . '_configuration')
+        );
     }
 
     public function getSettings(): AbstractSettings

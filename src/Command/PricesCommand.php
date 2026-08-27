@@ -13,26 +13,20 @@ namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Command;
 
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Exception\CronException;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class Command extends SymfonyCommand
+class PricesCommand extends Command
 {
-    protected string $action ='execute';
-
-    public function __construct(
-        protected \GC_Facetedsearch $module
-    ) {
-        parent::__construct();
-    }
+    protected string $action ='indexPrices';
 
     protected function configure(): void
     {
-        $this
-            ->setName($this->module->name . ':' . $this->action)
-            ->setDescription(sprintf('Executes command %s for %s', $this->action, $this->module->displayName));
-        ;
+        parent::configure();
+
+        $this->addArgument('full', InputArgument::OPTIONAL, 'Full reindex flag');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -48,7 +42,9 @@ class Command extends SymfonyCommand
         }
 
         try {
-            $this->module->{$methodName}();
+            $full = (bool) $input->getArgument('full');
+
+            $this->module->{$methodName}($full);
         } catch (CronException $e) {
             $io->error(sprintf('An error occurred while executing cron action \'%s\': %s', $this->action, $e->getMessage()));
 

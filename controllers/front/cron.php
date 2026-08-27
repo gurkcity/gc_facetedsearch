@@ -10,13 +10,12 @@
  * @license   commercial, see licence.txt
  */
 
-declare(strict_types=1);
-
 class Gc_FacetedSearchCronModuleFrontController extends ModuleFrontController
 {
     public function __construct()
     {
         parent::__construct();
+
         $this->ajax = true;
     }
 
@@ -25,52 +24,39 @@ class Gc_FacetedSearchCronModuleFrontController extends ModuleFrontController
         if (substr(Tools::hash('gc_facetedsearch/index'), 0, 10) != Tools::getValue('token')) {
             header('HTTP/1.1 403 Forbidden');
             header('Status: 403 Forbidden');
+
             $this->ajaxRender('Bad token');
 
             return;
         }
 
         $action = Tools::getValue('action');
+
         switch ($action) {
             case 'indexAttributes':
-                Shop::setContext(Shop::CONTEXT_ALL);
-
-                $psFacetedsearch = new GC_Facetedsearch();
-                $psFacetedsearch->indexAttributes();
-                $psFacetedsearch->indexFeatures();
-                $psFacetedsearch->indexAttributeGroup();
+                $this->module->cronIndexAttributes();
 
                 $this->ajaxRender('1');
                 break;
             case 'clearCache':
-                $psFacetedsearch = new GC_Facetedsearch();
-                $this->ajaxRender($psFacetedsearch->invalidateLayeredFilterBlockCache());
+                $result = $this->module->cronClearCache();
+
+                $this->ajaxRender($result);
                 break;
             case 'indexPrices':
-                Shop::setContext(Shop::CONTEXT_ALL);
+                $result = $this->module->cronIndexPrices((bool) Tools::getValue('full'));
 
-                $module = new GC_Facetedsearch();
-                if (Tools::getValue('full')) {
-                    $this->ajaxRender($module->fullPricesIndexProcess((int) Tools::getValue('cursor'), (bool) Tools::getValue('ajax'), true));
-                } else {
-                    $this->ajaxRender($module->pricesIndexProcess((int) Tools::getValue('cursor'), (bool) Tools::getValue('ajax')));
-                }
-
+                $this->ajaxRender($result);
                 break;
             case 'indexBestSales':
-                Shop::setContext(Shop::CONTEXT_ALL);
+                $result = $this->module->cronIndexBestsales();
 
-                $module = new GC_Facetedsearch();
-                $this->ajaxRender(
-                    $module->bestSalesIndexProcess(
-                        (int) Tools::getValue('cursor'),
-                        (bool) Tools::getValue('ajax')
-                    )
-                );
+                $this->ajaxRender($result);
                 break;
             default:
                 header('HTTP/1.1 403 Forbidden');
                 header('Status: 403 Forbidden');
+
                 $this->ajaxRender('Unknown action');
         }
     }

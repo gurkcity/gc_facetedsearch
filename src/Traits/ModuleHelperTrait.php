@@ -12,16 +12,9 @@
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits;
 
 use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Module\OverrideTools;
-use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
-use PrestaShop\PrestaShop\Core\Addon\Module\ModuleManagerBuilder;
 
 trait ModuleHelperTrait
 {
-    public function isUsingNewTranslationSystem()
-    {
-        return true;
-    }
-
     public function smartyAssign(
         array $params,
         string $templateName = ''
@@ -84,20 +77,6 @@ trait ModuleHelperTrait
         }
 
         return (int) $this->_clearCache($template, $cacheId);
-    }
-
-    public function getContent()
-    {
-        $moduleManagerBuilder = ModuleManagerBuilder::getInstance();
-        $moduleManager = $moduleManagerBuilder->build();
-
-        if (!$moduleManager->isEnabled($this->name)) {
-            return '<div class="alert alert-warning">' . $this->trans('This module is disabled. Please enable it.', [], 'Modules.Gcfacetedsearch.Admin') . '</div>';
-        }
-
-        \Tools::redirectAdmin(
-            SymfonyContainer::getInstance()->get('router')->generate($this->name . '_configuration')
-        );
     }
 
     public static function isDevMode(): bool
@@ -275,5 +254,23 @@ trait ModuleHelperTrait
         }
 
         return $template;
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) (new \Cookie('psAdmin'))->id_employee;
+    }
+
+    public function isSuperadmin(): bool
+    {
+        $idEmployee = (new \Cookie('psAdmin'))->id_employee;
+
+        if (!$idEmployee) {
+            return false;
+        }
+
+        $employee = new \Employee($idEmployee);
+
+        return $employee->isSuperAdmin();
     }
 }

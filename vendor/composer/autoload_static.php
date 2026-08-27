@@ -7,11 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
 {
     public static $prefixLengthsPsr4 = array (
-        'O' => 
+        'O' =>
         array (
             'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\' => 49,
         ),
-        'D' => 
+        'D' =>
         array (
             'Doctrine\\Deprecations\\' => 22,
             'Doctrine\\Common\\Collections\\' => 28,
@@ -19,15 +19,15 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
     );
 
     public static $prefixDirsPsr4 = array (
-        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\' => 
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
-        'Doctrine\\Deprecations\\' => 
+        'Doctrine\\Deprecations\\' =>
         array (
             0 => __DIR__ . '/..' . '/doctrine/deprecations/src',
         ),
-        'Doctrine\\Common\\Collections\\' => 
+        'Doctrine\\Common\\Collections\\' =>
         array (
             0 => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections',
         ),
@@ -54,8 +54,11 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\AbstractAdapter' => __DIR__ . '/../..' . '/src/Adapter/AbstractAdapter.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\InterfaceAdapter' => __DIR__ . '/../..' . '/src/Adapter/InterfaceAdapter.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\MySQL' => __DIR__ . '/../..' . '/src/Adapter/MySQL.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\AttributesCommand' => __DIR__ . '/../..' . '/src/Command/AttributesCommand.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\BestsalesCommand' => __DIR__ . '/../..' . '/src/Command/BestsalesCommand.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\ClearcacheCommand' => __DIR__ . '/../..' . '/src/Command/ClearcacheCommand.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\Command' => __DIR__ . '/../..' . '/src/Command/Command.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\CronCommand' => __DIR__ . '/../..' . '/src/Command/CronCommand.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\PricesCommand' => __DIR__ . '/../..' . '/src/Command/PricesCommand.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Constraint\\UrlSegment' => __DIR__ . '/../..' . '/src/Constraint/UrlSegment.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Constraint\\UrlSegmentValidator' => __DIR__ . '/../..' . '/src/Constraint/UrlSegmentValidator.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Controller\\AdminController' => __DIR__ . '/../..' . '/src/Controller/AdminController.php',
@@ -148,7 +151,6 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\SettingsInterface' => __DIR__ . '/../..' . '/src/Settings/SettingsInterface.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Sql' => __DIR__ . '/../..' . '/src/Settings/Sql.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Settings\\Tab' => __DIR__ . '/../..' . '/src/Settings/Tab.php',
-        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleFunctionsTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleFunctionsTrait.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleHelperTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleHelperTrait.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleLicenseTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleLicenseTrait.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Traits\\ModuleTrait' => __DIR__ . '/../..' . '/src/Traits/ModuleTrait.php',
