@@ -121,6 +121,14 @@ class Search
         // Adds filters that specific for this controller
         $this->addControllerSpecificFilters();
 
+        Hook::exec(
+            'actionFacetedSearchFilters',
+            [
+                'search' => $this,
+                'query' => $this->query,
+            ]
+        );
+
         // Add group by to remove duplicate values
         $this->getSearchAdapter()->addGroupBy('id_product');
 
@@ -143,8 +151,22 @@ class Search
 
             switch ($key) {
                 case 'id_feature':
-                    $operationsFilter = [];
                     foreach ($filterValues as $featureId => $filterValue) {
+                        if (isset($selectedFilters['id_feature_operator'][$featureId])
+                            && $selectedFilters['id_feature_operator'][$featureId] === 'and'
+                        ) {
+                            $operations = [];
+                            foreach (array_unique($filterValue) as $idFeatureValue) {
+                                $operations[] = ['id_feature_value', [(int) $idFeatureValue]];
+                            }
+
+                            $this->getSearchAdapter()->addOperationsFilter(
+                                'with_features_' . $featureId,
+                                [$operations]
+                            );
+                            continue;
+                        }
+
                         $this->getSearchAdapter()->addOperationsFilter(
                             'with_features_' . $featureId,
                             [[['id_feature_value', $filterValue]]]
@@ -445,14 +467,6 @@ class Search
                 empty($productPool) ? ['NULL'] : $productPool
             );
         }
-
-        Hook::exec(
-            'actionFacetedSearchFilters',
-            [
-                'search' => $this,
-                'query' => $this->query,
-            ]
-        );
     }
 
     /**
@@ -487,7 +501,7 @@ class Search
      */
     private function addPriceFilter($minPrice, $maxPrice)
     {
-        $this->getSearchAdapter()->addFilter('price_min', [$maxPrice], '<=');
-        $this->getSearchAdapter()->addFilter('price_max', [$minPrice], '>=');
+        $this->getSearchAdapter()->addFilter('price_min', [floor($maxPrice) + 1], '<');
+        $this->getSearchAdapter()->addFilter('price_max', [ceil($minPrice) - 1], '>');
     }
 }

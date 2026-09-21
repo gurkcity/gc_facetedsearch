@@ -11,6 +11,7 @@
 
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Form\Type;
 
+use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Filters\DataAccessor;
 use PrestaShopBundle\Form\Admin\Type\MultistoreConfigurationType;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
@@ -102,7 +103,17 @@ class ConfigurationType extends TranslatorAwareType
                 'required' => false,
                 'help' => $this->trans('If enabled, the country indexation will be omitted. This results in a smaller index and less storage space consumption in the database.', 'Modules.Gcfacetedsearch.Admin'),
             ])
+        ;
 
+        if (DataAccessor::isFeatureValuePositionSupported()) {
+            $builder->add('FILTER_FEATURE_VALUES_USE_POSITION', SwitchType::class, [
+                'label' => $this->trans('Use position for feature values ordering', 'Modules.Gcfacetedsearch.Admin'),
+                'required' => false,
+                'help' => $this->trans('Order feature values in the filters the way they are arranged in Catalog > Features, instead of alphabetically.', 'Modules.Gcfacetedsearch.Admin'),
+            ]);
+        }
+
+        $builder
             ->add('POSITION_SORTING', SwitchType::class, [
                 'label' => $this->trans('Sort by Relevance', 'Modules.Gcfacetedsearch.Admin'),
                 'required' => false,

@@ -9,112 +9,278 @@
  * @license   commercial, see licence.txt
  */
 
-use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleHelperTrait;
-use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleLicenseTrait;
-use Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits\ModuleTrait;
-use Onlineshopmodule\PrestaShop\Module\Facetedsearch\HookDispatcher;
+namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Traits;
 
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
+use Configuration;
+use Context;
+use Country;
+use Currency;
+use Db;
+use Exception;
+use Module;
+use Product;
+use Shop;
+use Tools;
 
-require_once __DIR__ . '/vendor/autoload.php';
-
-class GC_Facetedsearch extends Module
+trait ModuleFunctionsTrait
 {
-    use ModuleTrait;
-    use ModuleHelperTrait;
-    use ModuleLicenseTrait;
-
     /**
-     * @var string Name of the module running on PS 1.6.x. Used for data migration.
+     * @var array|null List of controllers supported by this module
      */
-    const PS_16_EQUIVALENT_MODULE = 'blocklayered';
+    protected $supportedControllers;
 
-    /**
-     * @var string Official PrestaShop faceted search module to migrate from.
-     */
-    const PS_FACETEDSEARCH_MODULE = 'ps_facetedsearch';
-
-    /**
-     * Lock indexation if too many products
-     *
-     * @var int
-     */
-    const LOCK_TOO_MANY_PRODUCTS = 5000;
-
-    /**
-     * Lock template filter creation if too many products
-     *
-     * @var int
-     */
-    const LOCK_TEMPLATE_CREATION = 20000;
-
-    /**
-     * US iso code, used to prevent taxes usage while computing prices
-     *
-     * @var array
-     */
-    const ISO_CODE_TAX_FREE = [
-        'US',
-    ];
-
-    /**
-     * Number of digits for MySQL DECIMAL
-     *
-     * @var int
-     */
-    const DECIMAL_DIGITS = 6;
-
-    /**
-     * @var array List of controllers supported by this module
-     */
-    protected $supportedControllers = [];
-
-    /**
-     * @var bool
-     */
-    private $ajax;
-
-    /**
-     * @var int
-     */
-    private $gcLayeredFullTree;
-
-    /**
-     * @var Db
-     */
-    private $database;
-
-    /**
-     * @var HookDispatcher
-     */
-    private $hookDispatcher;
-
-    public function __construct()
+    public function installPost(): bool
     {
-        $this->version = '9.0.1';
+        try {
+            $this->getDatabase()->execute(
+                'TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature`'
+            );
 
-        $this->name = 'gc_facetedsearch';
+            $this->getDatabase()->execute(
+                'TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`'
+            );
 
-        $this->author = 'Gurkcity';
+            $this->getDatabase()->execute(
+                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` (id_feature)
+                SELECT id_feature FROM `' . _DB_PREFIX_ . 'feature`'
+            );
 
-        $this->ps_versions_compliancy = [
-            'min' => '9.0.0',
-            'max' => _PS_VERSION_,
+            $this->getDatabase()->execute(
+                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` (id_attribute_group)
+                SELECT id_attribute_group FROM `' . _DB_PREFIX_ . 'attribute_group`'
+            );
+
+            $this->migrateFromPsFacetedSearch();
+
+            $this->rebuildPriceIndexTable();
+        } catch (\Exception $e) {
+        }
+        return true;
+    }
+
+    /**
+     * This method gets serialized data of filter templates from gc_facetedsearch_filter table and builds detailed
+     * information, one category = one line.
+     */
+    public function buildLayeredCategories()
+    {
+        // Get data for all filter templates in the database
+        $templates = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter ORDER BY date_add DESC');
+
+        // We will keep track of pages categories where filter was already set, so we don't have multiple
+        // filters for the same category and shop.
+        $alreadyAssigned = [];
+
+        // Clear cache
+        $this->invalidateLayeredFilterBlockCache();
+
+        // Remove all previous data from gc_facetedsearch_category
+        Db::getInstance()->execute('TRUNCATE ' . _DB_PREFIX_ . 'gc_facetedsearch_category');
+
+        // If no filter templates are defined, nothing else to do here
+        if (!count($templates)) {
+            return true;
+        }
+
+        // We will insert our queries by batches of hundred queries
+        $sqlInsertPrefix = 'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_category (id_category, controller, id_shop, id_value, type, position, filter_show_limit, filter_type) VALUES ';
+        $sqlInsert = '';
+        $nbSqlValuesToInsert = 0;
+
+        // Now we will loop through each filter template
+        foreach ($templates as $filterTemplate) {
+            // We will get it's data and convert it into array
+            $data = \Tools::unSerialize($filterTemplate['filters']);
+
+            foreach ($data['shop_list'] as $idShop) {
+                if (!isset($alreadyAssigned[$idShop])) {
+                    $alreadyAssigned[$idShop] = [];
+                }
+
+                // Now let's generate data for each controller in the template
+                foreach ($data['controllers'] as $controller) {
+                    // If it's a category controller, we will do it for each category
+                    // Otherwise, we will use just one line with zero
+                    $categories = ($controller == 'category' ? $data['categories'] : [0]);
+
+                    foreach ($categories as $idCategory) {
+                        $n = 0;
+
+                        // Make unique job name and check if already generated something for this scenario
+                        // If yes, skip it, otherwise note this info for next time
+                        $jobName = $controller . '-' . $idCategory;
+                        if (in_array($jobName, $alreadyAssigned[$idShop])) {
+                            continue;
+                        }
+                        $alreadyAssigned[$idShop][] = $jobName;
+
+                        foreach ($this->resolveTemplateFilterKeys($data) as $key) {
+                            $value = $data[$key] ?? null;
+                            if (!is_array($value) || !isset($value['filter_type'])) {
+                                continue;
+                            }
+
+                            $type = $value['filter_type'];
+                            $limit = $value['filter_show_limit'];
+                            $rowSql = '';
+
+                            if ($key == 'filter_stock') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'availability\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            } elseif ($key == 'filter_subcategories') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'category\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            } elseif ($key == 'filter_condition') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'condition\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            } elseif ($key == 'filter_weight_slider') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'weight\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            } elseif ($key == 'filter_price_slider') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'price\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            } elseif ($key == 'filter_manufacturer') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'manufacturer\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            } elseif (substr($key, 0, 23) == 'filter_attribute_group_') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('filter_attribute_group_', '', $key) . ',
+    \'id_attribute_group\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            } elseif (substr($key, 0, 15) == 'filter_feature_') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('filter_feature_', '', $key) . ',
+    \'id_feature\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            } elseif ($key == 'filter_extras') {
+                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'extras\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
+                            }
+
+                            if ($rowSql === '') {
+                                continue;
+                            }
+
+                            ++$n;
+                            $sqlInsert .= $rowSql;
+                            ++$nbSqlValuesToInsert;
+
+                            // If we reached the limit, we will execute it and flush our "cache"
+                            if ($nbSqlValuesToInsert >= 100) {
+                                Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
+                                $sqlInsert = '';
+                                $nbSqlValuesToInsert = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // We will execute remaining queries because we almost certainly didn't reach 100 in the batch
+        if ($nbSqlValuesToInsert) {
+            Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
+        }
+    }
+
+    /**
+     * Ordered filter keys for a template (includes disabled slots from filters_order).
+     */
+    private function resolveTemplateFilterKeys(array $data): array
+    {
+        $reserved = ['categories', 'shop_list', 'controllers', 'filters_order'];
+        $order = [];
+
+        if (!empty($data['filters_order']) && is_array($data['filters_order'])) {
+            foreach ($data['filters_order'] as $key) {
+                if (is_string($key) && $key !== '' && !in_array($key, $reserved, true)) {
+                    $order[] = $key;
+                }
+            }
+        }
+
+        foreach ($data as $key => $value) {
+            if (in_array($key, $reserved, true) || !is_array($value)) {
+                continue;
+            }
+            if (!in_array($key, $order, true)) {
+                $order[] = $key;
+            }
+        }
+
+        return $order;
+    }
+
+    /**
+     * Invalid filter block cache
+     */
+    public function invalidateLayeredFilterBlockCache()
+    {
+        return Db::getInstance()->execute('TRUNCATE TABLE ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block');
+    }
+
+    /**
+     * Returns array with all controllers supported by this module
+     */
+    public function getSupportedControllers(): array
+    {
+        if ($this->supportedControllers === null) {
+            $this->initializeSupportedControllers();
+        }
+        return $this->supportedControllers;
+    }
+
+    public function setSupportedControllers(array $supportedControllers): void
+    {
+        $this->supportedControllers = $supportedControllers;
+    }
+
+    public function initializeSupportedControllers(): void
+    {
+        $supportedControllers = [
+            'category' => [
+                'name' => $this->trans('Category', [], 'Modules.Gcfacetedsearch.Admin'),
+                'cacheable' => true,
+            ],
+            'manufacturer' => [
+                'name' => $this->trans('Manufacturer', [], 'Modules.Gcfacetedsearch.Admin'),
+                'cacheable' => true,
+            ],
+            'supplier' => [
+                'name' => $this->trans('Supplier', [], 'Modules.Gcfacetedsearch.Admin'),
+                'cacheable' => true,
+            ],
+            'new-products' => [
+                'name' => $this->trans('New products', [], 'Modules.Gcfacetedsearch.Admin'),
+                'cacheable' => false,
+            ],
+            'best-sales' => [
+                'name' => $this->trans('Best sales', [], 'Modules.Gcfacetedsearch.Admin'),
+                'cacheable' => false,
+            ],
+            'prices-drop' => [
+                'name' => $this->trans('Prices drop', [], 'Modules.Gcfacetedsearch.Admin'),
+                'cacheable' => false,
+            ],
+            'search' => [
+                'name' => $this->trans('Search', [], 'Modules.Gcfacetedsearch.Admin'),
+                'cacheable' => false,
+            ],
         ];
 
-        $this->tab = 'front_office_features';
+        \Hook::exec(
+            'actionFacetedSearchSetSupportedControllers',
+            [
+                'supportedControllers' => &$supportedControllers,
+            ]
+        );
 
-        $this->displayName = $this->trans('GC Facetedsearch', [], 'Modules.Gcfacetedsearch.Admin');
-        $this->displayNamePre = $this->trans('Faceted', [], 'Modules.Gcfacetedsearch.Admin');
-        $this->displayNamePost = $this->trans('Search', [], 'Modules.Gcfacetedsearch.Admin');
-        $this->description = $this->trans('Filter your catalog to help visitors picture the category tree and browse your store easily.', [], 'Modules.Gcfacetedsearch.Admin');
-        $this->description_full = $this->trans('Filter your catalog to help visitors picture the category tree and browse your store easily.', [], 'Modules.Gcfacetedsearch.Admin');
+        $this->setSupportedControllers($supportedControllers);
+    }
 
-        parent::__construct();
+    /**
+     * Returns array with all controllers supported by this module
+     */
+    public function isControllerSupported($controller)
+    {
+        return isset($this->supportedControllers[$controller]);
+    }
 
-        $this->initModule();
+    /**
+     * Should this controller filter blocks be cached?
+     */
+    public function shouldCacheController(string $controller)
+    {
+        return $this->supportedControllers[$controller]['cacheable'];
     }
 
     /**
@@ -126,6 +292,16 @@ class GC_Facetedsearch extends Module
     public function isAjax()
     {
         return (bool) $this->ajax;
+    }
+
+    /**
+     * Return current context
+     *
+     * @return Context
+     */
+    public function getContext()
+    {
+        return $this->context;
     }
 
     /**
@@ -143,30 +319,26 @@ class GC_Facetedsearch extends Module
     }
 
     /**
-     * Return current context
-     *
-     * @return Context
+     * Install price indexes table
      */
-    public function getContext()
+    public function rebuildPriceIndexTable()
     {
-        return $this->context;
-    }
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index`');
 
-    private function uninstallPsFacetedSearchModule()
-    {
-        /** @var Module|bool $oldModule */
-        $oldModule = Module::getInstanceByName(self::PS_FACETEDSEARCH_MODULE);
-        if ($oldModule) {
-            $oldModule->uninstall();
-        }
-    }
-
-    /**
-     * @return HookDispatcher
-     */
-    public function getHookDispatcher()
-    {
-        return $this->hookDispatcher;
+        $this->getDatabase()->execute(
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` (
+            `id_product` INT  NOT NULL,
+            `id_currency` INT NOT NULL,
+            `id_shop` INT NOT NULL,
+            `price_min` DECIMAL(20, 6) NOT NULL,
+            `price_max` DECIMAL(20, 6) NOT NULL,
+            `id_country` INT NOT NULL,
+            PRIMARY KEY (`id_product`, `id_currency`, `id_shop`, `id_country`),
+            INDEX `id_currency` (`id_currency`),
+            INDEX `price_min` (`price_min`),
+            INDEX `price_max` (`price_max`)
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
+        );
     }
 
     /*
@@ -176,7 +348,7 @@ class GC_Facetedsearch extends Module
      *
      * @return boolean
      */
-    public function indexAttributes(int $idProduct = null)
+    public function indexProductAttributes(int $idProduct = null)
     {
         if (null === $idProduct) {
             $this->getDatabase()->execute('TRUNCATE ' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute');
@@ -200,61 +372,22 @@ class GC_Facetedsearch extends Module
         );
     }
 
-    /*
-     * Generate data for product features
-     *
-     * @return boolean
-     */
-    public function indexFeatures()
-    {
-        return $this->getDatabase()->execute(
-            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` ' .
-            'SELECT id_feature, 1 FROM `' . _DB_PREFIX_ . 'feature` ' .
-            'WHERE id_feature NOT IN (SELECT id_feature FROM ' .
-            '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature`)'
-        );
-    }
-
-    /*
-     * Generate data for product attribute group
-     *
-     * @return boolean
-     */
-    public function indexAttributeGroup()
-    {
-        return $this->getDatabase()->execute(
-            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` ' .
-            'SELECT id_attribute_group, 1 FROM `' . _DB_PREFIX_ . 'attribute_group` ' .
-            'WHERE id_attribute_group NOT IN (SELECT id_attribute_group FROM ' .
-            '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`)'
-        );
-    }
-
     /**
-     * Full prices index process
-     *
-     * @param int $cursor in order to restart indexing from the last state
-     * @param bool $ajax
-     * @param bool $smart
+     * create table product attribute.
      */
-    public function fullPricesIndexProcess($cursor = 0, $ajax = false, $smart = false)
+    private function installProductAttributeTable()
     {
-        if ($cursor == 0 && !$smart) {
-            $this->rebuildPriceIndexTable();
-        }
-
-        return $this->indexPricesRecursive($cursor, true, $ajax, $smart);
-    }
-
-    /**
-     * Prices index process
-     *
-     * @param int $cursor in order to restart indexing from the last state
-     * @param bool $ajax
-     */
-    public function pricesIndexProcess($cursor = 0, $ajax = false)
-    {
-        return $this->indexPricesRecursive($cursor, false, $ajax);
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute`');
+        $this->getDatabase()->execute(
+            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_product_attribute` (
+            `id_attribute` int(10) unsigned NOT NULL,
+            `id_product` int(10) unsigned NOT NULL,
+            `id_attribute_group` int(10) unsigned NOT NULL DEFAULT "0",
+            `id_shop` int(10) unsigned NOT NULL DEFAULT "1",
+            PRIMARY KEY (`id_attribute`, `id_product`, `id_shop`),
+            UNIQUE KEY `id_attribute_group` (`id_attribute_group`,`id_attribute`,`id_product`, `id_shop`)
+            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
+        );
     }
 
     /**
@@ -484,166 +617,46 @@ class GC_Facetedsearch extends Module
     }
 
     /**
-     * This method gets serialized data of filter templates from gc_facetedsearch_filter table and builds detailed
-     * information, one category = one line.
-     */
-    public function buildLayeredCategories()
-    {
-        // Get data for all filter templates in the database
-        $templates = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'gc_facetedsearch_filter ORDER BY date_add DESC');
-
-        // We will keep track of pages categories where filter was already set, so we don't have multiple
-        // filters for the same category and shop.
-        $alreadyAssigned = [];
-
-        // Clear cache
-        $this->invalidateLayeredFilterBlockCache();
-
-        // Remove all previous data from gc_facetedsearch_category
-        Db::getInstance()->execute('TRUNCATE ' . _DB_PREFIX_ . 'gc_facetedsearch_category');
-
-        // If no filter templates are defined, nothing else to do here
-        if (!count($templates)) {
-            return true;
-        }
-
-        // We will insert our queries by batches of hundred queries
-        $sqlInsertPrefix = 'INSERT INTO ' . _DB_PREFIX_ . 'gc_facetedsearch_category (id_category, controller, id_shop, id_value, type, position, filter_show_limit, filter_type) VALUES ';
-        $sqlInsert = '';
-        $nbSqlValuesToInsert = 0;
-
-        // Now we will loop through each filter template
-        foreach ($templates as $filterTemplate) {
-            // We will get it's data and convert it into array
-            $data = \Tools::unSerialize($filterTemplate['filters']);
-
-            foreach ($data['shop_list'] as $idShop) {
-                if (!isset($alreadyAssigned[$idShop])) {
-                    $alreadyAssigned[$idShop] = [];
-                }
-
-                // Now let's generate data for each controller in the template
-                foreach ($data['controllers'] as $controller) {
-                    // If it's a category controller, we will do it for each category
-                    // Otherwise, we will use just one line with zero
-                    $categories = ($controller == 'category' ? $data['categories'] : [0]);
-
-                    foreach ($categories as $idCategory) {
-                        $n = 0;
-
-                        // Make unique job name and check if already generated something for this scenario
-                        // If yes, skip it, otherwise note this info for next time
-                        $jobName = $controller . '-' . $idCategory;
-                        if (in_array($jobName, $alreadyAssigned[$idShop])) {
-                            continue;
-                        }
-                        $alreadyAssigned[$idShop][] = $jobName;
-
-                        foreach ($this->resolveTemplateFilterKeys($data) as $key) {
-                            $value = $data[$key] ?? null;
-                            if (!is_array($value) || !isset($value['filter_type'])) {
-                                continue;
-                            }
-
-                            $type = $value['filter_type'];
-                            $limit = $value['filter_show_limit'];
-                            $rowSql = '';
-
-                            if ($key == 'filter_stock') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'availability\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'filter_subcategories') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'category\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'filter_condition') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'condition\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'filter_weight_slider') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'weight\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'filter_price_slider') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'price\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'filter_manufacturer') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'manufacturer\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif (substr($key, 0, 23) == 'filter_attribute_group_') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('filter_attribute_group_', '', $key) . ',
-    \'id_attribute_group\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif (substr($key, 0, 15) == 'filter_feature_') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', ' . (int) str_replace('filter_feature_', '', $key) . ',
-    \'id_feature\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            } elseif ($key == 'filter_extras') {
-                                $rowSql = '(' . (int) $idCategory . ', \'' . $controller . '\', ' . (int) $idShop . ', NULL,\'extras\',' . (int) ($n + 1) . ', ' . (int) $limit . ', ' . (int) $type . '),';
-                            }
-
-                            if ($rowSql === '') {
-                                continue;
-                            }
-
-                            ++$n;
-                            $sqlInsert .= $rowSql;
-                            ++$nbSqlValuesToInsert;
-
-                            // If we reached the limit, we will execute it and flush our "cache"
-                            if ($nbSqlValuesToInsert >= 100) {
-                                Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
-                                $sqlInsert = '';
-                                $nbSqlValuesToInsert = 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // We will execute remaining queries because we almost certainly didn't reach 100 in the batch
-        if ($nbSqlValuesToInsert) {
-            Db::getInstance()->execute($sqlInsertPrefix . rtrim($sqlInsert, ','));
-        }
-    }
-
-    /**
-     * Dispatch hooks
+     * Provides data about single filter template.
      *
-     * @param string $methodName
-     * @param array $arguments
+     * @param int $idFilterTemplate ID of filter template
+     *
+     * @return array Filter data
      */
-    public function __call($methodName, array $arguments)
+    public function getFilterTemplate($idFilterTemplate)
     {
-        if (strpos($methodName, 'hook') === false) {
-            throw new Exception('Call missing method ::' . $methodName);
+        return $this->getDatabase()->getRow(
+            'SELECT *
+            FROM `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
+            WHERE id_gc_facetedsearch_filter = ' . (int) $idFilterTemplate
+        );
+    }
+
+    /**
+     * Full prices index process
+     *
+     * @param int $cursor in order to restart indexing from the last state
+     * @param bool $ajax
+     * @param bool $smart
+     */
+    public function fullPricesIndexProcess($cursor = 0, $ajax = false, $smart = false)
+    {
+        if ($cursor == 0 && !$smart) {
+            $this->rebuildPriceIndexTable();
         }
 
-        return $this->getHookDispatcher()->dispatch(
-            $methodName,
-            !empty($arguments[0]) ? $arguments[0] : []
-        );
+        return $this->indexPricesRecursive($cursor, true, $ajax, $smart);
     }
 
     /**
-     * Invalid filter block cache
+     * Prices index process
+     *
+     * @param int $cursor in order to restart indexing from the last state
+     * @param bool $ajax
      */
-    public function invalidateLayeredFilterBlockCache()
+    public function pricesIndexProcess($cursor = 0, $ajax = false)
     {
-        return Db::getInstance()->execute('TRUNCATE TABLE ' . _DB_PREFIX_ . 'gc_facetedsearch_filter_block');
-    }
-
-    /**
-     * Install price indexes table
-     */
-    public function rebuildPriceIndexTable()
-    {
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index`');
-
-        $this->getDatabase()->execute(
-            'CREATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_price_index` (
-            `id_product` INT  NOT NULL,
-            `id_currency` INT NOT NULL,
-            `id_shop` INT NOT NULL,
-            `price_min` DECIMAL(20, 6) NOT NULL,
-            `price_max` DECIMAL(20, 6) NOT NULL,
-            `id_country` INT NOT NULL,
-            PRIMARY KEY (`id_product`, `id_currency`, `id_shop`, `id_country`),
-            INDEX `id_currency` (`id_currency`),
-            INDEX `price_min` (`price_min`),
-            INDEX `price_max` (`price_max`)
-            ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;'
-        );
+        return $this->indexPricesRecursive($cursor, false, $ajax);
     }
 
     /**
@@ -768,197 +781,35 @@ class GC_Facetedsearch extends Module
         return (int) $lastIdProduct;
     }
 
-    /**
-     * Provides data about single filter template.
+    /*
+     * Generate data for product features
      *
-     * @param int $idFilterTemplate ID of filter template
+     * @return boolean
+     */
+    public function indexFeatures()
+    {
+        return $this->getDatabase()->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` ' .
+            'SELECT id_feature, 1 FROM `' . _DB_PREFIX_ . 'feature` ' .
+            'WHERE id_feature NOT IN (SELECT id_feature FROM ' .
+            '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature`)'
+        );
+    }
+
+    /*
+     * Generate data for product attribute group
      *
-     * @return array Filter data
+     * @return boolean
      */
-    public function getFilterTemplate($idFilterTemplate)
+    public function indexAttributeGroup()
     {
-        return $this->getDatabase()->getRow(
-            'SELECT *
-            FROM `' . _DB_PREFIX_ . 'gc_facetedsearch_filter`
-            WHERE id_gc_facetedsearch_filter = ' . (int) $idFilterTemplate
+        return $this->getDatabase()->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` ' .
+            'SELECT id_attribute_group, 1 FROM `' . _DB_PREFIX_ . 'attribute_group` ' .
+            'WHERE id_attribute_group NOT IN (SELECT id_attribute_group FROM ' .
+            '`' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`)'
         );
     }
-
-    /**
-     * Returns array with all controllers supported by this module
-     */
-    public function getSupportedControllers(): array
-    {
-        if ($this->supportedControllers === null) {
-            $this->initializeSupportedControllers();
-        }
-        return $this->supportedControllers;
-    }
-
-    public function setSupportedControllers(array $supportedControllers): void
-    {
-        $this->supportedControllers = $supportedControllers;
-    }
-
-    /**
-     * Returns array with all controllers supported by this module
-     */
-    public function isControllerSupported($controller)
-    {
-        return isset($this->supportedControllers[$controller]);
-    }
-
-    /**
-     * Should this controller filter blocks be cached?
-     */
-    public function shouldCacheController(string $controller)
-    {
-        return $this->supportedControllers[$controller]['cacheable'];
-    }
-
-    public function initializeSupportedControllers(): void
-    {
-        $supportedControllers = [
-            'category' => [
-                'name' => $this->trans('Category', [], 'Modules.Gcfacetedsearch.Admin'),
-                'cacheable' => true,
-            ],
-            'manufacturer' => [
-                'name' => $this->trans('Manufacturer', [], 'Modules.Gcfacetedsearch.Admin'),
-                'cacheable' => true,
-            ],
-            'supplier' => [
-                'name' => $this->trans('Supplier', [], 'Modules.Gcfacetedsearch.Admin'),
-                'cacheable' => true,
-            ],
-            'new-products' => [
-                'name' => $this->trans('New products', [], 'Modules.Gcfacetedsearch.Admin'),
-                'cacheable' => false,
-            ],
-            'best-sales' => [
-                'name' => $this->trans('Best sales', [], 'Modules.Gcfacetedsearch.Admin'),
-                'cacheable' => false,
-            ],
-            'prices-drop' => [
-                'name' => $this->trans('Prices drop', [], 'Modules.Gcfacetedsearch.Admin'),
-                'cacheable' => false,
-            ],
-            'search' => [
-                'name' => $this->trans('Search', [], 'Modules.Gcfacetedsearch.Admin'),
-                'cacheable' => false,
-            ],
-        ];
-
-        \Hook::exec(
-            'actionFacetedSearchSetSupportedControllers',
-            [
-                'supportedControllers' => &$supportedControllers,
-            ]
-        );
-
-        $this->setSupportedControllers($supportedControllers);
-    }
-
-    /**
-     * Ordered filter keys for a template (includes disabled slots from filters_order).
-     */
-    private function resolveTemplateFilterKeys(array $data): array
-    {
-        $reserved = ['categories', 'shop_list', 'controllers', 'filters_order'];
-        $order = [];
-
-        if (!empty($data['filters_order']) && is_array($data['filters_order'])) {
-            foreach ($data['filters_order'] as $key) {
-                if (is_string($key) && $key !== '' && !in_array($key, $reserved, true)) {
-                    $order[] = $key;
-                }
-            }
-        }
-
-        foreach ($data as $key => $value) {
-            if (in_array($key, $reserved, true) || !is_array($value)) {
-                continue;
-            }
-            if (!in_array($key, $order, true)) {
-                $order[] = $key;
-            }
-        }
-
-        return $order;
-    }
-
-    public function parentInitModule()
-    {
-        $this->hookDispatcher = new HookDispatcher($this);
-        $this->initializeSupportedControllers();
-        $this->ajax = (bool) Tools::getValue('ajax');
-    }
-
-    public function cronIndexAttributes()
-    {
-        Shop::setContext(Shop::CONTEXT_ALL);
-
-        $this->indexAttributes();
-        $this->indexFeatures();
-        $this->indexAttributeGroup();
-    }
-
-    public function cronClearCache()
-    {
-        return $this->invalidateLayeredFilterBlockCache();
-    }
-
-    public function cronIndexPrices(bool $full = false)
-    {
-        Shop::setContext(Shop::CONTEXT_ALL);
-
-        if ($full) {
-            return $this->fullPricesIndexProcess((int) Tools::getValue('cursor'), (bool) Tools::getValue('ajax'), true);
-        } else {
-            return $this->pricesIndexProcess((int) Tools::getValue('cursor'), (bool) Tools::getValue('ajax'));
-        }
-    }
-
-    public function cronIndexBestsales()
-    {
-        Shop::setContext(Shop::CONTEXT_ALL);
-
-        return $this->bestSalesIndexProcess(
-            (int) Tools::getValue('cursor'),
-            (bool) Tools::getValue('ajax')
-        );
-    }
-
-    public function installPost(): bool
-    {
-        try {
-            $this->getDatabase()->execute(
-                'TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature`'
-            );
-
-            $this->getDatabase()->execute(
-                'TRUNCATE TABLE `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group`'
-            );
-
-            $this->getDatabase()->execute(
-                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature` (id_feature)
-                SELECT id_feature FROM `' . _DB_PREFIX_ . 'feature`'
-            );
-
-            $this->getDatabase()->execute(
-                'INSERT INTO `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` (id_attribute_group)
-                SELECT id_attribute_group FROM `' . _DB_PREFIX_ . 'attribute_group`'
-            );
-
-            $this->migrateFromPsFacetedSearch();
-
-            $this->rebuildPriceIndexTable();
-        } catch (\Exception $e) {
-        }
-        return true;
-    }
-
-
 
     /**
      * Full best sales index process (batched, cursor-based).
@@ -1135,7 +986,14 @@ class GC_Facetedsearch extends Module
         return !empty($result);
     }
 
-
+    private function uninstallPsFacetedSearchModule()
+    {
+        /** @var Module|bool $oldModule */
+        $oldModule = Module::getInstanceByName(self::PS_FACETEDSEARCH_MODULE);
+        if ($oldModule) {
+            $oldModule->uninstall();
+        }
+    }
 
     private function migratePsConfiguration()
     {

@@ -114,6 +114,7 @@ class FiltersType extends TranslatorAwareType
             $builder->add('filter_feature_' . $feature['id_feature'], FilterItemType::class, [
                 'label' => $label,
                 'slider' => false,
+                'allow_and' => true,
             ]);
         }
 

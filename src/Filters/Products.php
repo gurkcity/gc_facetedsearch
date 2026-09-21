@@ -62,6 +62,12 @@ class Products
         $orderWay = Validate::isOrderWay($orderWay) ? $orderWay : 'ASC';
         $orderBy = Validate::isOrderBy($orderBy) ? $orderBy : 'position';
 
+        if ($orderBy === 'position' && $query->getIdCategory()) {
+            $positionInCategory = 'MIN(IF(cp.id_category = ' . (int) $query->getIdCategory() . ', cp.position, NULL))';
+            $this->searchAdapter->addSelectField('position');
+            $orderBy = 'ISNULL(' . $positionInCategory . ') ASC, ' . $positionInCategory;
+        }
+
         // Apply it to the filter
         $this->searchAdapter->setOrderField($orderBy);
         $this->searchAdapter->setOrderDirection($orderWay);

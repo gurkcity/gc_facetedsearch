@@ -32,6 +32,7 @@ class ConfigurationFormDataProvider extends AbstractFormDataProvider implements 
             'USE_JQUERY_UI_SLIDER' => (int) $this->configurationAdapter->get('USE_JQUERY_UI_SLIDER'),
             'DEFAULT_CATEGORY_TEMPLATE' => $this->configurationAdapter->get('DEFAULT_CATEGORY_TEMPLATE'),
             'OMIT_COUNTRIES' => (int) $this->configurationAdapter->get('OMIT_COUNTRIES'),
+            'FILTER_FEATURE_VALUES_USE_POSITION' => (int) $this->configurationAdapter->get('FILTER_FEATURE_VALUES_USE_POSITION'),
             'BEST_SALES_SORTING' => (int) $this->configurationAdapter->get('BEST_SALES_SORTING'),
             'BEST_SALES_DAYS' => $this->configurationAdapter->get('BEST_SALES_DAYS'),
             'POSITION_SORTING' => (int) $this->configurationAdapter->get('POSITION_SORTING'),
@@ -86,6 +87,9 @@ class ConfigurationFormDataProvider extends AbstractFormDataProvider implements 
         }
         if (isset($data['OMIT_COUNTRIES'])) {
             $this->updateConfiguration('OMIT_COUNTRIES', 'OMIT_COUNTRIES', $data);
+        }
+        if (isset($data['FILTER_FEATURE_VALUES_USE_POSITION'])) {
+            $this->updateConfiguration('FILTER_FEATURE_VALUES_USE_POSITION', 'FILTER_FEATURE_VALUES_USE_POSITION', $data);
         }
         if (isset($data['BEST_SALES_DAYS'])) {
             $this->updateConfiguration('BEST_SALES_DAYS', 'BEST_SALES_DAYS', $data);

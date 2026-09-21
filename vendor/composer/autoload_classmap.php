@@ -26,6 +26,7 @@ return array(
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\AbstractAdapter' => $baseDir . '/src/Adapter/AbstractAdapter.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\InterfaceAdapter' => $baseDir . '/src/Adapter/InterfaceAdapter.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\MySQL' => $baseDir . '/src/Adapter/MySQL.php',
+    'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\CombinationFeature' => $baseDir . '/src/CombinationFeature.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\AttributesCommand' => $baseDir . '/src/Command/AttributesCommand.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\BestsalesCommand' => $baseDir . '/src/Command/BestsalesCommand.php',
     'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\ClearcacheCommand' => $baseDir . '/src/Command/ClearcacheCommand.php',

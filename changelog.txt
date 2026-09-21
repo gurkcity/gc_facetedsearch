@@ -1,5 +1,6 @@
 Changelog PrestaShop GC Facetedsearch
 
 Version	Datum     	Bemerkung
+9.0.1	18.09.2026	Integrate relevant ps_facetedsearch 5.1.0 changes
 9.0.0	24.08.2026	Module Release
 

@@ -32,6 +32,9 @@
               {{ form_row(form.USE_JQUERY_UI_SLIDER) }}
               {{ form_row(form.DEFAULT_CATEGORY_TEMPLATE) }}
               {{ form_row(form.OMIT_COUNTRIES) }}
+              {% if form.FILTER_FEATURE_VALUES_USE_POSITION is defined %}
+                {{ form_row(form.FILTER_FEATURE_VALUES_USE_POSITION) }}
+              {% endif %}
             </div>
           </div>
 

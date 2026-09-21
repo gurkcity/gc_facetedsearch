@@ -29,6 +29,7 @@ class Converter
     const WIDGET_TYPE_RADIO = 1;
     const WIDGET_TYPE_DROPDOWN = 2;
     const WIDGET_TYPE_SLIDER = 3;
+    const WIDGET_TYPE_CHECKBOX_AND = 4;
 
     const TYPE_ATTRIBUTE_GROUP = 'id_attribute_group';
     const TYPE_AVAILABILITY = 'availability';
@@ -43,6 +44,7 @@ class Converter
     const PROPERTY_URL_NAME = 'url_name';
     const PROPERTY_COLOR = 'color';
     const PROPERTY_TEXTURE = 'texture';
+    const PROPERTY_POSITION = 'position';
 
     /**
      * @var array
@@ -137,6 +139,10 @@ class Converter
                             ->setMagnitude($filterArray['nbr'])
                             ->setValue($id);
 
+                        if (isset($filterArray['position'])) {
+                            $filter->setProperty(self::PROPERTY_POSITION, (int) $filterArray['position']);
+                        }
+
                         if (isset($filterArray['url_name'])) {
                             $filter->setProperty(self::PROPERTY_URL_NAME, $filterArray['url_name']);
                         }
@@ -165,7 +171,14 @@ class Converter
                     if ((int) $filterBlock['filter_show_limit'] !== 0 ||
                         ($filterBlock['type'] !== self::TYPE_ATTRIBUTE_GROUP && $filterBlock['type'] !== self::TYPE_AVAILABILITY)
                     ) {
-                        usort($filters, [$this, 'sortFiltersByLabel']);
+                        if ($filterBlock['type'] === self::TYPE_FEATURE
+                            && DataAccessor::isFeatureValuePositionSupported()
+                            && (bool) Configuration::get('GC_FACETEDSEARCH_FILTER_FEATURE_VALUES_USE_POSITION')
+                        ) {
+                            usort($filters, [$this, 'sortFiltersByPosition']);
+                        } else {
+                            usort($filters, [$this, 'sortFiltersByLabel']);
+                        }
                     }
 
                     // No method available to add all filters
@@ -199,6 +212,10 @@ class Converter
 
             switch ((int) $filterBlock['filter_type']) {
                 case self::WIDGET_TYPE_CHECKBOX:
+                    $facet->setMultipleSelectionAllowed(true);
+                    $facet->setWidgetType('checkbox');
+                    break;
+                case self::WIDGET_TYPE_CHECKBOX_AND:
                     $facet->setMultipleSelectionAllowed(true);
                     $facet->setWidgetType('checkbox');
                     break;
@@ -398,6 +415,12 @@ class Converter
                                 $searchFilters['id_feature'][$feature['id_feature']][] = $featureValue['id_feature_value'];
                             }
                         }
+
+                        if ((int) $filter['filter_type'] === self::WIDGET_TYPE_CHECKBOX_AND
+                            && !empty($searchFilters['id_feature'][$feature['id_feature']])
+                        ) {
+                            $searchFilters['id_feature_operator'][$feature['id_feature']] = 'and';
+                        }
                     }
                     break;
                 case self::TYPE_ATTRIBUTE_GROUP:
@@ -565,6 +588,64 @@ class Converter
      */
     private function sortFiltersByLabel(Filter $a, Filter $b)
     {
+        $collator = $this->getLabelCollator();
+        if ($collator !== null) {
+            $comparison = $collator->compare($a->getLabel(), $b->getLabel());
+            if ($comparison !== false) {
+                return $comparison;
+            }
+        }
+
         return strnatcasecmp($a->getLabel(), $b->getLabel());
+    }
+
+    /**
+     * Collator for the language currently in context, or null when one cannot be built.
+     *
+     * @return \Collator|null
+     */
+    private function getLabelCollator()
+    {
+        static $collators = [];
+
+        if (!class_exists('Collator')) {
+            return null;
+        }
+
+        $locale = isset($this->context->language->locale) ? $this->context->language->locale : '';
+        if ($locale === '') {
+            return null;
+        }
+
+        if (!array_key_exists($locale, $collators)) {
+            $collator = collator_create($locale);
+            if ($collator !== null) {
+                $collator->setStrength(\Collator::SECONDARY);
+                $collator->setAttribute(\Collator::NUMERIC_COLLATION, \Collator::ON);
+            }
+            $collators[$locale] = $collator;
+        }
+
+        return $collators[$locale];
+    }
+
+    /**
+     * Sort filters by the position the merchant gave them, falling back to the label.
+     *
+     * @param Filter $a
+     * @param Filter $b
+     *
+     * @return int
+     */
+    private function sortFiltersByPosition(Filter $a, Filter $b)
+    {
+        $positionA = (int) $a->getProperty(self::PROPERTY_POSITION);
+        $positionB = (int) $b->getProperty(self::PROPERTY_POSITION);
+
+        if ($positionA === $positionB) {
+            return $this->sortFiltersByLabel($a, $b);
+        }
+
+        return $positionA <=> $positionB;
     }
 }

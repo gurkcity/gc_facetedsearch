@@ -15,6 +15,7 @@ use Configuration;
 use Context;
 use Db;
 use Doctrine\Common\Collections\ArrayCollection;
+use Onlineshopmodule\PrestaShop\Module\Facetedsearch\CombinationFeature;
 use Product;
 use StockAvailable;
 
@@ -86,6 +87,8 @@ class MySQL extends AbstractAdapter
         // Prepare mapping for joined tables
         $filterToTableMapping = $this->getFieldMapping();
 
+        $this->addRequiredInitialPopulationFields($filterToTableMapping);
+
         // Process and generate all fields for the SQL query below
         $orderField = $this->computeOrderByField($filterToTableMapping);
         $selectFields = $this->computeSelectFields($filterToTableMapping);
@@ -108,7 +111,10 @@ class MySQL extends AbstractAdapter
         // Add join conditions if any
         foreach ($joinConditions as $joinAliasInfos) {
             foreach ($joinAliasInfos as $tableAlias => $joinInfos) {
-                $query .= ' ' . $joinInfos['joinType'] . ' ' . _DB_PREFIX_ . $joinInfos['tableName'] . ' ' .
+                $tableName = !empty($joinInfos['rawTable'])
+                    ? $joinInfos['tableName']
+                    : _DB_PREFIX_ . $joinInfos['tableName'];
+                $query .= ' ' . $joinInfos['joinType'] . ' ' . $tableName . ' ' .
                        $tableAlias . ' ON ' . $joinInfos['joinCondition'];
             }
         }
@@ -160,6 +166,23 @@ class MySQL extends AbstractAdapter
             $countryCondition = ' AND psi.id_country = ' . (int) Configuration::get('PS_COUNTRY_DEFAULT');
         }
 
+        $featureProductTable = 'feature_product';
+        $featureProductRawTable = false;
+        $featureJoinCondition = '(p.id_product = fp.id_product)';
+        $featureJoinExtra = [];
+        if ($this->isCombinationFeatureFilteringEnabled()) {
+            $featureProductTable = '(SELECT id_product, NULL AS id_product_attribute, id_feature, id_feature_value'
+                . ' FROM ' . _DB_PREFIX_ . 'feature_product'
+                . ' UNION'
+                . ' SELECT pa.id_product, pa.id_product_attribute, fpa.id_feature, fpa.id_feature_value'
+                . ' FROM ' . _DB_PREFIX_ . 'feature_product_attribute fpa'
+                . ' INNER JOIN ' . _DB_PREFIX_ . 'product_attribute pa ON pa.id_product_attribute = fpa.id_product_attribute)';
+            $featureProductRawTable = true;
+            $featureJoinCondition = '(p.id_product = fp.id_product'
+                . ' AND (fp.id_product_attribute IS NULL OR fp.id_product_attribute = pa.id_product_attribute))';
+            $featureJoinExtra = ['dependencyField' => 'id_product_attribute'];
+        }
+
         $filterToTableMapping = [
             'id_product_attribute' => [
                 'tableName' => 'product_attribute',
@@ -181,12 +204,13 @@ class MySQL extends AbstractAdapter
                 'joinType' => self::INNER_JOIN,
                 'dependencyField' => 'id_attribute',
             ],
-            'id_feature' => [
-                'tableName' => 'feature_product',
+            'id_feature' => array_merge([
+                'tableName' => $featureProductTable,
                 'tableAlias' => 'fp',
-                'joinCondition' => '(p.id_product = fp.id_product)',
+                'joinCondition' => $featureJoinCondition,
                 'joinType' => self::INNER_JOIN,
-            ],
+                'rawTable' => $featureProductRawTable,
+            ], $featureJoinExtra),
             'id_shop' => [
                 'tableName' => 'product_shop',
                 'tableAlias' => 'ps',
@@ -201,12 +225,13 @@ class MySQL extends AbstractAdapter
                     $this->getContext()->shop->id . ' AND ps.active = TRUE)',
                 'joinType' => self::INNER_JOIN,
             ],
-            'id_feature_value' => [
-                'tableName' => 'feature_product',
+            'id_feature_value' => array_merge([
+                'tableName' => $featureProductTable,
                 'tableAlias' => 'fp',
-                'joinCondition' => '(p.id_product = fp.id_product)',
+                'joinCondition' => $featureJoinCondition,
                 'joinType' => self::LEFT_JOIN,
-            ],
+                'rawTable' => $featureProductRawTable,
+            ], $featureJoinExtra),
             'id_category' => [
                 'tableName' => 'category_product',
                 'tableAlias' => 'cp',
@@ -219,12 +244,19 @@ class MySQL extends AbstractAdapter
                 'joinCondition' => '(p.id_product = cp.id_product)',
                 'joinType' => self::INNER_JOIN,
             ],
+            'id_supplier' => [
+                'tableName' => 'product_supplier',
+                'tableAlias' => 'psup',
+                'joinCondition' => '(p.id_product = psup.id_product)',
+                'joinType' => self::INNER_JOIN,
+            ],
             'manufacturer_name' => [
                 'tableName' => 'manufacturer',
                 'tableAlias' => 'm',
                 'fieldName' => 'name',
                 'joinCondition' => '(p.id_manufacturer = m.id_manufacturer)',
                 'joinType' => self::LEFT_JOIN,
+                'requiredProductFields' => ['id_manufacturer'],
             ],
             'name' => [
                 'tableName' => 'product_lang',
@@ -339,6 +371,16 @@ class MySQL extends AbstractAdapter
     }
 
     /**
+     * Whether feature filters must also take combination feature values into account.
+     *
+     * @return bool
+     */
+    protected function isCombinationFeatureFilteringEnabled()
+    {
+        return CombinationFeature::isFilteringEnabled();
+    }
+
+    /**
      * Get the joined and escaped value from an multi-dimensional array
      *
      * @param string $separator
@@ -379,8 +421,14 @@ class MySQL extends AbstractAdapter
             return $orderField;
         }
 
-        // If we have an initial population, add the field into initial population selects, so we can use it in the outer query for sorting
-        if ($this->getInitialPopulation() !== null) {
+        if ($this->getInitialPopulation() !== null
+            && $orderField !== 'price'
+            && strpos($orderField, '(') === false
+            && (
+                !isset($filterToTableMapping[$orderField]['fieldName'])
+                || isset($filterToTableMapping[$orderField]['fieldAlias'])
+            )
+        ) {
             $this->getInitialPopulation()->addSelectField($orderField);
         }
 
@@ -434,6 +482,8 @@ class MySQL extends AbstractAdapter
             return $orderField;
         }
 
+        $this->getInitialPopulation()->addSelectField('quantity');
+
         $this->addSelectField('out_of_stock');
 
         // order by out-of-stock last
@@ -457,7 +507,7 @@ class MySQL extends AbstractAdapter
         // query: products with zero or less quantity and not available to order go to the end
         $byOOPS = str_replace(
             [':byOutOfStockLast', ':field', ':value', ':direction'],
-            [$byOutOfStockLast, $computedField, $computedValue, $computedDirection],
+            [$byOutOfStockLast, $computedField, (string) $computedValue, $computedDirection],
             ':byOutOfStockLast AND FIELD(:field, :value) :direction'
         );
 
@@ -466,6 +516,88 @@ class MySQL extends AbstractAdapter
             . $orderField;
 
         return $orderField;
+    }
+
+    /**
+     * Add base product fields referenced by the outer query to its derived product table.
+     *
+     * @param array $filterToTableMapping
+     */
+    private function addRequiredInitialPopulationFields(array $filterToTableMapping)
+    {
+        if ($this->getInitialPopulation() === null) {
+            return;
+        }
+
+        $requiredFields = array_merge(
+            $this->getSelectFields()->toArray(),
+            $this->getGroupFields()->toArray(),
+            $this->getFilters()->getKeys()
+        );
+        if ($this->getOrderField() !== '' && $this->getOrderField() !== 'price') {
+            $requiredFields[] = $this->getOrderField();
+        }
+
+        foreach ($this->getOperationsFilters() as $filterOperations) {
+            foreach ($filterOperations as $operations) {
+                foreach ($operations as $operation) {
+                    $requiredFields[] = $operation[0];
+                }
+            }
+        }
+
+        foreach (array_unique($requiredFields) as $fieldName) {
+            if (!ctype_alnum(str_replace('_', '', $fieldName))) {
+                continue;
+            }
+
+            if (!array_key_exists($fieldName, $filterToTableMapping)) {
+                $this->getInitialPopulation()->addSelectField($fieldName);
+                continue;
+            }
+
+            if (isset($filterToTableMapping[$fieldName]['requiredProductFields'])) {
+                foreach ($filterToTableMapping[$fieldName]['requiredProductFields'] as $requiredProductField) {
+                    $this->getInitialPopulation()->addSelectField($requiredProductField);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check whether a field must be read from its mapped table instead of the initial population.
+     *
+     * @param string $fieldName
+     * @param array $filterToTableMapping
+     *
+     * @return bool
+     */
+    private function requiresMappedTable($fieldName, array $filterToTableMapping)
+    {
+        if (!array_key_exists($fieldName, $filterToTableMapping)) {
+            return false;
+        }
+
+        return $this->getInitialPopulation() === null
+            || !$this->getInitialPopulation()->getSelectFields()->contains($fieldName)
+            || (isset($filterToTableMapping[$fieldName]['fieldName']) && !isset($filterToTableMapping[$fieldName]['fieldAlias']));
+    }
+
+    /**
+     * Check whether a field must be read from its mapped table when used in a filter condition.
+     *
+     * @param string $fieldName
+     * @param array $filterToTableMapping
+     *
+     * @return bool
+     */
+    private function requiresMappedTableForFilter($fieldName, array $filterToTableMapping)
+    {
+        if (isset($filterToTableMapping[$fieldName]['aggregateFunction'])) {
+            return true;
+        }
+
+        return $this->requiresMappedTable($fieldName, $filterToTableMapping);
     }
 
     /**
@@ -478,15 +610,7 @@ class MySQL extends AbstractAdapter
      */
     protected function computeFieldName($fieldName, $filterToTableMapping, $sortByField = false)
     {
-        if (array_key_exists($fieldName, $filterToTableMapping)
-            && (
-                // If the requested order field is in the result, no need to change tableAlias
-                // unless a fieldName key exists
-                isset($filterToTableMapping[$fieldName]['fieldName'])
-                || $this->getInitialPopulation() === null
-                || !$this->getInitialPopulation()->getSelectFields()->contains($fieldName)
-            )
-        ) {
+        if ($this->requiresMappedTable($fieldName, $filterToTableMapping)) {
             $joinMapping = $filterToTableMapping[$fieldName];
             $fieldName = $joinMapping['tableAlias'] . '.' . (isset($joinMapping['fieldName']) ? $joinMapping['fieldName'] : $fieldName);
             if ($sortByField === false) {
@@ -541,7 +665,7 @@ class MySQL extends AbstractAdapter
                 foreach ($operations as $idx => $operation) {
                     $selectAlias = 'p';
                     $values = $operation[1];
-                    if (array_key_exists($operation[0], $filterToTableMapping)) {
+                    if ($this->requiresMappedTableForFilter($operation[0], $filterToTableMapping)) {
                         $joinMapping = $filterToTableMapping[$operation[0]];
                         // If index is not the first, append to the table alias for
                         // multi join
@@ -570,7 +694,7 @@ class MySQL extends AbstractAdapter
 
         foreach ($this->getFilters() as $filterName => $filterContent) {
             $selectAlias = 'p';
-            if (array_key_exists($filterName, $filterToTableMapping)) {
+            if ($this->requiresMappedTableForFilter($filterName, $filterToTableMapping)) {
                 $joinMapping = $filterToTableMapping[$filterName];
                 $selectAlias = $joinMapping['tableAlias'];
                 $filterName = isset($joinMapping['fieldName']) ? $joinMapping['fieldName'] : $filterName;
@@ -649,13 +773,13 @@ class MySQL extends AbstractAdapter
         $joinList = new ArrayCollection();
 
         $this->addJoinList($joinList, $this->getSelectFields(), $filterToTableMapping);
-        $this->addJoinList($joinList, $this->getFilters()->getKeys(), $filterToTableMapping);
+        $this->addJoinList($joinList, $this->getFilters()->getKeys(), $filterToTableMapping, true);
 
         $operationIdx = 0;
         foreach ($this->getOperationsFilters() as $filterOperations) {
             foreach ($filterOperations as $operations) {
                 foreach ($operations as $idx => $operation) {
-                    if (array_key_exists($operation[0], $filterToTableMapping)) {
+                    if ($this->requiresMappedTableForFilter($operation[0], $filterToTableMapping)) {
                         $joinMapping = $filterToTableMapping[$operation[0]];
                         if ($idx !== 0 || $operationIdx !== 0) {
                             // Index is not the first, append index to tableAlias on joinCondition
@@ -680,7 +804,7 @@ class MySQL extends AbstractAdapter
 
         $this->addJoinList($joinList, $this->getGroupFields()->getKeys(), $filterToTableMapping);
 
-        if (array_key_exists($this->getOrderField(), $filterToTableMapping)) {
+        if ($this->requiresMappedTable($this->getOrderField(), $filterToTableMapping)) {
             $joinMapping = $filterToTableMapping[$this->getOrderField()];
             $this->addJoinConditions($joinList, $joinMapping, $filterToTableMapping);
         }
@@ -694,11 +818,14 @@ class MySQL extends AbstractAdapter
      * @param ArrayCollection $joinList
      * @param array|ArrayCollection $list
      * @param array $filterToTableMapping
+     * @param bool $forFilter
      */
-    private function addJoinList(ArrayCollection $joinList, $list, array $filterToTableMapping)
+    private function addJoinList(ArrayCollection $joinList, $list, array $filterToTableMapping, $forFilter = false)
     {
         foreach ($list as $field) {
-            if (array_key_exists($field, $filterToTableMapping)) {
+            if ($forFilter
+                ? $this->requiresMappedTableForFilter($field, $filterToTableMapping)
+                : $this->requiresMappedTable($field, $filterToTableMapping)) {
                 $joinMapping = $filterToTableMapping[$field];
                 $this->addJoinConditions($joinList, $joinMapping, $filterToTableMapping);
             }
@@ -722,6 +849,7 @@ class MySQL extends AbstractAdapter
             'tableName' => $joinMapping['tableName'],
             'joinCondition' => $joinMapping['joinCondition'],
             'joinType' => $joinMapping['joinType'],
+            'rawTable' => !empty($joinMapping['rawTable']),
         ];
 
         $joinList->set($joinMapping['tableAlias'] . '_' . $joinMapping['tableName'], $joinInfos);
@@ -748,7 +876,7 @@ class MySQL extends AbstractAdapter
                 continue;
             }
 
-            if (array_key_exists($values, $filterToTableMapping)) {
+            if ($this->requiresMappedTable($values, $filterToTableMapping)) {
                 $joinMapping = $filterToTableMapping[$values];
                 $groupFields[$key] = $joinMapping['tableAlias'] . '.' . $values;
             } else {
@@ -814,20 +942,7 @@ class MySQL extends AbstractAdapter
         // Initial population has no ORDER BY
         $this->setOrderField('');
 
-        // We add basic select fields we will need to matter what
-        $this->setSelectFields(
-            [
-                'id_product',
-                'id_manufacturer',
-                'quantity',
-                'condition',
-                'weight',
-                'price',
-                'sales',
-                'on_sale',
-                'date_add',
-            ]
-        );
+        $this->setSelectFields(['id_product']);
 
         // Clone it, add it to initial population
         $this->initialPopulation = clone $this;

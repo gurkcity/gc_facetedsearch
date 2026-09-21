@@ -12,6 +12,7 @@
 namespace Onlineshopmodule\PrestaShop\Module\Facetedsearch\Filters;
 
 use Combination;
+use Configuration;
 use Db;
 use Shop;
 
@@ -64,7 +65,7 @@ class DataAccessor
         }
 
         if (!isset($this->attributes[$idLang][$idAttributeGroup])) {
-            $this->attributes[$idLang] = [$idAttributeGroup => []];
+            $this->attributes[$idLang][$idAttributeGroup] = [];
             $tempAttributes = $this->database->executeS(
                 'SELECT DISTINCT a.`id_attribute`, ' .
                 'a.`color`, ' .
@@ -124,7 +125,7 @@ class DataAccessor
                 'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group` liag ' .
                 'ON (ag.`id_attribute_group` = liag.`id_attribute_group`) ' .
                 'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_attribute_group_lang_value` AS liaglv ' .
-                'ON (ag.`id_attribute_group` = liaglv.`id_attribute_group` AND agl.`id_lang` = ' . (int) $idLang . ') ' .
+                'ON (ag.`id_attribute_group` = liaglv.`id_attribute_group` AND liaglv.`id_lang` = ' . (int) $idLang . ') ' .
                 'GROUP BY ag.id_attribute_group ORDER BY ag.`position` ASC'
             );
 
@@ -171,6 +172,16 @@ class DataAccessor
     }
 
     /**
+     * Whether the core exposes a position on feature values.
+     *
+     * @return bool
+     */
+    public static function isFeatureValuePositionSupported()
+    {
+        return version_compare(_PS_VERSION_, '9.0.0', '>=');
+    }
+
+    /**
      * Get feature values for given feature, with their associated layered information.
      *
      * @param int $idFeature
@@ -181,7 +192,16 @@ class DataAccessor
     public function getFeatureValues($idFeature, $idLang)
     {
         if (!isset($this->featureValues[$idLang][$idFeature])) {
-            $this->featureValues[$idLang] = [$idFeature => []];
+            $this->featureValues[$idLang][$idFeature] = [];
+
+            if (self::isFeatureValuePositionSupported()
+                && (bool) Configuration::get('GC_FACETEDSEARCH_FILTER_FEATURE_VALUES_USE_POSITION')
+            ) {
+                $order = 'ORDER BY v.`position` ASC';
+            } else {
+                $order = 'ORDER BY vl.`value` ASC';
+            }
+
             $tempFeatureValues = $this->database->executeS(
                 'SELECT v.*, vl.*, ' .
                 'IF(lifvlv.`url_name` IS NULL OR lifvlv.`url_name` = "", NULL, lifvlv.`url_name`) AS url_name, ' .
@@ -192,7 +212,7 @@ class DataAccessor
                 'LEFT JOIN `' . _DB_PREFIX_ . 'gc_facetedsearch_indexable_feature_value_lang_value` lifvlv ' .
                 'ON (v.`id_feature_value` = lifvlv.`id_feature_value` AND lifvlv.`id_lang` = ' . (int) $idLang . ') ' .
                 'WHERE v.`id_feature` = ' . (int) $idFeature . ' ' .
-                'ORDER BY vl.`value` ASC'
+                $order
             );
 
             foreach ($tempFeatureValues as $feature) {

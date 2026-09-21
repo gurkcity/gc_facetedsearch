@@ -54,11 +54,7 @@ class FilterItemType extends TranslatorAwareType
             ->add('filter_type', ChoiceType::class, [
                 'label' => $this->trans('Style:', 'Modules.Gcfacetedsearch.Admin'),
                 'required' => false,
-                'choices' => [
-                    $this->trans('Checkbox', 'Modules.Gcfacetedsearch.Admin') => 0,
-                    $this->trans('Radio button', 'Modules.Gcfacetedsearch.Admin') => 1,
-                    $this->trans('Drop-down list', 'Modules.Gcfacetedsearch.Admin') => 2,
-                ],
+                'choices' => $this->resolveTypeChoices($options),
                 'choice_translation_domain' => false,
                 'attr' => [
                     'class' => 'custom-select',
@@ -76,6 +72,7 @@ class FilterItemType extends TranslatorAwareType
             'required' => false,
             'error_bubbling' => false,
             'slider' => false,
+            'allow_and' => false,
             'default_empty_data' => [
                 'enabled' => false,
                 'filter_show_limit' => 0,
@@ -103,6 +100,22 @@ class FilterItemType extends TranslatorAwareType
         for ($index = 2; $index <= 20; ++$index) {
             $choices[$index] = $index;
         }
+
+        return $choices;
+    }
+
+    private function resolveTypeChoices(array $options): array
+    {
+        $choices = [
+            $this->trans('Checkbox', 'Modules.Gcfacetedsearch.Admin') => 0,
+        ];
+
+        if (!empty($options['allow_and'])) {
+            $choices[$this->trans('Checkbox (AND)', 'Modules.Gcfacetedsearch.Admin')] = 4;
+        }
+
+        $choices[$this->trans('Radio button', 'Modules.Gcfacetedsearch.Admin')] = 1;
+        $choices[$this->trans('Drop-down list', 'Modules.Gcfacetedsearch.Admin')] = 2;
 
         return $choices;
     }

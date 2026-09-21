@@ -380,7 +380,7 @@ class CoreSearchBackport
         }
 
         $sqlScore = '';
-        if (!empty($scoreArray) && is_array($scoreArray)) {
+        if (!empty($scoreArray)) {
             $sqlScore = ',( ' .
                 'SELECT SUM(weight) ' .
                 'FROM ' . _DB_PREFIX_ . 'search_word sw ' .

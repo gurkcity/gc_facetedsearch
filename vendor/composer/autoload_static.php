@@ -54,6 +54,7 @@ class ComposerStaticInit68c763eff0f275067bca28d21a9c27e4
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\AbstractAdapter' => __DIR__ . '/../..' . '/src/Adapter/AbstractAdapter.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\InterfaceAdapter' => __DIR__ . '/../..' . '/src/Adapter/InterfaceAdapter.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Adapter\\MySQL' => __DIR__ . '/../..' . '/src/Adapter/MySQL.php',
+        'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\CombinationFeature' => __DIR__ . '/../..' . '/src/CombinationFeature.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\AttributesCommand' => __DIR__ . '/../..' . '/src/Command/AttributesCommand.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\BestsalesCommand' => __DIR__ . '/../..' . '/src/Command/BestsalesCommand.php',
         'Onlineshopmodule\\PrestaShop\\Module\\Facetedsearch\\Command\\ClearcacheCommand' => __DIR__ . '/../..' . '/src/Command/ClearcacheCommand.php',
